@@ -1,8 +1,8 @@
 # Table of contents
-1. [complexity](#Compexcity)
-2. [Queue](#paragraph1)
-    1. [Priority Queue
-3. [Stack
+1. Complexity
+2. Queue
+    1. Priority Queue
+3. Stack
 4. [Deque
 5. Heap
 6. Tree
