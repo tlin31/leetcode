@@ -1,4 +1,30 @@
-## Summary of compexities
+# Table of contents
+1. [complexity](#Compexcity)
+2. [Queue](#paragraph1)
+    1. [Priority Queue
+3. [Stack
+4. [Deque
+5. Heap
+6. Tree
+7. Trie
+8. Graph
+9. Treemap
+10. Hashmap
+
+## This is the introduction <a name="introduction"></a>
+Some introduction text, formatted in heading 2 style
+
+## Some paragraph <a name="paragraph1"></a>
+The first paragraph text
+
+### Sub paragraph <a name="subparagraph1"></a>
+This is a sub paragraph, formatted in heading 3 style
+
+## Another paragraph <a name="paragraph2"></a>
+The second paragraph text
+
+
+## Summary of complexity
 
 List                 | Add  | Remove | Get  | Contains | Next | Data Structure
 ---------------------|------|--------|------|----------|------|---------------
@@ -912,6 +938,8 @@ thaw --- Not present in trie
 
 
 ## Graph
+[a relative link](graph.md)
+
 
 ### putIfAbsent
 
@@ -1000,25 +1028,27 @@ input:{1, -1, 0, 2,-2};
 
 ## Hashmap
 
+### Hashtable & Hashmap
+Hashtable is **synchronized** by default. This means that two or more threads may modify the data structure and will each wait their turn to do so
+race condition could easily occur here between the containsKey() and put() method calls. This problem, and many similar issues, are solved in the ConcurrentHashMap implementation, which is a more modern and recommended alternative to the Hashtable.
+- HashMap: no built-in synchronization and is therefore not safe to use in multithreaded applications. For example, iterating over a HashMap is fail-fast, which means that an exception will be thrown as soon as modification by another thread is detected. This lack of synchronization does, however, give a significant performance boost over synchronized alternatives in single-threaded implementations.
+- Hashtable does not allow keys or values to be set to null. HashMap,allows any of its values to be null, as well as one of its keys. Keys still have to be unique, so this is why only one can be null.
+- Why HashTable doesn’t allow null and HashMap do?: to store and retrieve objects from a HashTable, the objects used as keys must implement the hashCode method and the equals method. Since null is not an object, it can’t implement these methods
+
+
+### Collision Handelling
 What is Collision?
 Since a hash function gets us a small number for a key which is a big integer or string, there is a possibility that two keys result in the same value. The situation where a newly inserted key maps to an already occupied slot in the hash table is called collision and must be handled using some collision handling technique.
-
 
 
 What are the chances of collisions with large table?
 Collisions are very likely even if we have big table to store keys. An important observation is Birthday Paradox. With only 23 persons, the probability that two people have the same birthday is 50%.
 
 
-
-
-
 How to handle Collisions?
 There are mainly two methods to handle collision:
 1) Separate Chaining
 2) Open Addressing
-In this article, only separate chaining is discussed. We will be discussing Open addressing in the next post.
-
-
 
 Separate Chaining:
 The idea is to make each cell of hash table point to a linked list of records that have same hash function value.
@@ -1059,7 +1089,7 @@ Performance of hashing can be evaluated under the assumption that each key is eq
  ----
  https://www.geeksforgeeks.org/hashing-set-3-open-addressing/
  
- Open Addressing
+Open Addressing
 Like separate chaining, open addressing is a method for handling collisions. In Open Addressing, all elements are stored in the hash table itself. So at any point, size of the table must be greater than or equal to the total number of keys (Note that we can increase table size by copying old data if needed).
 
 Insert(k): Keep probing until an empty slot is found. Once an empty slot is found, insert k.
