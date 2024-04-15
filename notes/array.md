@@ -10,7 +10,11 @@
     	intArray = new int[20]
     2.  List < String > r = (ArrayList < String > ) currLst.clone()
     3.  List < String > r = new ArrayList<>(tempList)					--> initialize with templist
-
+    4. ArrayList<String> str = new ArrayList<String>();
+    5. ArrayList<String> words = new ArrayList<String>(
+            Arrays.asList("A",
+                          "B",
+                          "C"));
 ```
 
 ### comparator

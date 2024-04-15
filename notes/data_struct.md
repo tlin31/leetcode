@@ -11,18 +11,6 @@
 9. Treemap
 10. Hashmap
 
-## This is the introduction <a name="introduction"></a>
-Some introduction text, formatted in heading 2 style
-
-## Some paragraph <a name="paragraph1"></a>
-The first paragraph text
-
-### Sub paragraph <a name="subparagraph1"></a>
-This is a sub paragraph, formatted in heading 3 style
-
-## Another paragraph <a name="paragraph2"></a>
-The second paragraph text
-
 
 ## Summary of complexity
 
@@ -130,6 +118,23 @@ take        移除并返回队列头部的元素    
 - First-In-First-Out algorithm
 - PriorityQueue is based on the priority heap.
 - elements are ordered according to the natural ordering, or by a Comparator provided at queue construction time, depending on which constructor is used.
+
+
+### PQ implementations
+
+1. Arrays: enq O(1), deq O(n), peek O(n). Check if array/PQ is full, check whether there are any items in there (count or use front index, rear index)
+2. Linked list: push O(n), pop O(1), peek O(1)
+3. Heap data structure: 
+- better performance 
+- take time O(log n) to restore the heap property for the remaining keys. However if another entry is to be inserted immediately, then some of this time may be combined with the O(log n) time needed to insert the new entry. 
+- Good for large n, efficiently in contiguous storage and is guaranteed to require only logarithmic time for both insertions and deletions. 
+- insert O(log n), delete O(log n), peek O(1)
+
+
+4. Binary search tree
+
+[code of implementation](https://www.geeksforgeeks.org/priority-queue-set-1-introduction/)
+
 
 ### Few points on Priority Queue are:
 

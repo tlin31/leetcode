@@ -53,7 +53,22 @@ key:
 ******************************************************
 
 
+将当前快指针遍历的数字和慢指针指向的数字的前一个数字比较（也就是满足条件的倒数第 2 个数），如果相等，因为有序，
+所有倒数第 1 个数字和倒数第 2 个数字都等于当前数字，再添加就超过 2 个了，所有不添加，如果不相等，那么就添加
 
+public int removeDuplicates2(int[] nums) {
+    int slow = 1;
+    int fast = 2;
+    int max = 2;
+    for (; fast < nums.length; fast++) {
+        //不相等的话就添加
+        if (nums[fast] != nums[slow - max + 1]) {
+            slow++;
+            nums[slow] = nums[fast];
+        }
+    }
+    return slow + 1;
+}
 =======================================================================================================
 Method 1:
 
@@ -84,10 +99,6 @@ Method:
 		If we encounter that the current element is not the same as the previous element i.e. nums[i] 
 		!= nums[i - 1], then it means we have a new element at hand and so accordingly, we update count 
 		= 1 and also move this element to index j.
-
-
-
-
 
 
 
@@ -153,54 +164,5 @@ class Solution(object):
                 j += 1
                 
         return j
-=======================================================================================================
-method 2:
 
-Stats:
-
-	- 
-	- 
-
-
-Method:
-
-	-	
-
-
-
-
-
-
-
-
-
-
-~~~~~~~~~~~~~~~~~~~~~~~     python      ~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-=======================================================================================================
-method 3:
-
-Stats:
-
-	- 
-	- 
-
-
-Method:
-
-	-	
-
-
-
-
-
-
-
-
-
-
-
-
-~~~~~~~~~~~~~~~~~~~~~~~     python      ~~~~~~~~~~~~~~~~~~~~~~~~
 

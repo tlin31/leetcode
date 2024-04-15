@@ -16,7 +16,10 @@ key:
     - HashMap
     - edge case:
         1) empty string, return empty
-        2)
+        2) is it an array?
+        3) are there duplicate element 
+        4) is the array sorted?
+        5)
 
 ******************************************************
 

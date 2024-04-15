@@ -1,5 +1,8 @@
 # Graph & Algorithms
 
+- isomorphic graph: 2 graph’s nodes & edges are bijection
+- use dictionary of edges (hashtable) of adj list to quickly answer edge queries problem O(e) 
+
 ## Representation of graph
 
 1. Matrix
@@ -175,6 +178,9 @@ class Test {
 - unlike trees, graphs may contain cycles, --> use a boolean visited array. 
 
 - Time Complexity: O(V+E) where V is number of vertices in the graph and E is number of edges in the graph.
+
+- Auxiliary Space: O(V)
+
 
 
 

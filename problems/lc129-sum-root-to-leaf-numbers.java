@@ -39,10 +39,12 @@ Therefore, sum = 495 + 491 + 40 = 1026.
 
 ******************************************************
 key:
-	- 
-	- edge case:
-		1) empty string, return empty
-		2)
+- 
+- edge case:
+	1) empty string, return empty
+	2) empty node?
+	3) only 1 element
+	4) no element
 
 ******************************************************
 
