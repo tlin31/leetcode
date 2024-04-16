@@ -24,7 +24,8 @@ key:
       of a triplet. 
 	- For each possible first element we make a standard bidirectional 2Sum sweep of the remaining 
       part of the array. 
-	- !!! we want to skip equal elements to avoid duplicates in the answer without making a set or smth like that.
+	- !!! we want to skip equal elements to avoid duplicates in the answer without making a set or 
+    smth like that.
 
 public List < List < Integer >> threeSum(int[] num) {
     

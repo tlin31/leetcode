@@ -20,8 +20,12 @@ note:
 3. when change order, always set x.next = y, then change the node before x
 4. always check, head != null
 
+5. Two pointers: 
+
+        while(leftPointer< RightPointer) 
+
 -------------
-5. Sliding Windows:
+6. Sliding Windows:
 	
 	problem: [lc3 - Longest Substring Without Repeating Characters](problems/lc3_longest_substring_without_repeating_char.java)
 			 [lc 76 - Minimum Window Substring](problems/lc76-min-window-substr.java)

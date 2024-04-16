@@ -256,6 +256,9 @@ output:
 		import java.util.*; 
 		Stack<Integer> stack = new Stack<Integer>(); 
 
+		Deque<TreeNode> stack = new ArrayDeque<>(); //deque
+
+
 2. push to the stack:
 
 		stack.push(i); 

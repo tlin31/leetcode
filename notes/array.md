@@ -25,10 +25,11 @@
 
 
 ### sort
+
 ```java
 
 ----Method 1:
-        Arrays.sort(nums);
+        Arrays.sort(nums); //time: O(n*logn)
 
 ----Method 2:
 
@@ -44,7 +45,7 @@
         Arrays.sort(arr, new Sortbyroll()); 
   
 ----Method 3:
-            Arrays.sort(intervals, (a, b) -> a[1] - b[1]);
+        Arrays.sort(intervals, (a, b) -> a[1] - b[1]);
 
     
 ```
@@ -53,15 +54,18 @@
 - Arrays.sort works for arrays which can be of primitive data type also. 
 - Collections.sort() works for objects Collections like ArrayList, LinkedList, etc.
 
+
 ### length
 ```java
 	a.length
 ```
 
+
 ### change from string to int
 ```java
  int m = str.charAt(i) - '0';
  ```
+
 
 ### change from list to array
 ```java
@@ -69,6 +73,18 @@
         return res.toArray(new int[res.size()][]); // pass in number of elements in the list.
 
  ```
+
+cast arraylist to list of list
+
+        public List<List<Integer>> threeSum(int[] nums) {
+        Set<List<Integer>> res  = new HashSet<>();
+        if(nums.length==0) return new ArrayList<>(res);
+
+
+to return 1 element of List
+
+        Arrays.asList(nums[i],nums[j],nums[k]);
+
 
 ### static way to copy an array --> System.arraycopy(Object src,int srcPos,
 									Object dest,int destPos,int length)
