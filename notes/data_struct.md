@@ -1036,6 +1036,42 @@ input:{1, -1, 0, 2,-2};
 
 ## Hashmap
 
+Syntax:
+
+	import java.util.HashMap; // import the HashMap class
+	HashMap<String, String> map = new HashMap<String, String>();
+
+	map.put("key", "value");
+	map.get("England"); //use key to get value
+	map.remove("key");
+	map.clear() //delete all items
+	map.size;
+
+	Hash_Map.clone(); //clone a hashmap
+
+	// Print keys
+	for (String i : map.keySet()) {
+	  System.out.println(i);
+	}
+
+	// Print values
+	for (String i : map.values()) {
+	  System.out.println(i);
+	}
+
+	// Print keys and values
+	for (String i : capitalCities.keySet()) {
+	  System.out.println("key: " + i + " value: " + capitalCities.get(i));
+	}
+
+	containsKey(), containsValue()
+
+	String value = map.toString(); //output as key=value, 0=135
+
+;Note:
+1.  LinkedHashMap is a variation of HashMap that preserves the insertion order.
+
+
 ### Hashtable & Hashmap
 Hashtable is **synchronized** by default. This means that two or more threads may modify the data structure and will each wait their turn to do so
 race condition could easily occur here between the containsKey() and put() method calls. This problem, and many similar issues, are solved in the ConcurrentHashMap implementation, which is a more modern and recommended alternative to the Hashtable.

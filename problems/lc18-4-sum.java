@@ -18,6 +18,17 @@ A solution set is:
   [-2, -1, 1, 2],
   [-2,  0, 0, 2]
 ]
+
+Key：
+- edge case: less than 4 numbers
+- early fail: if smallest one *4>target or largest *4<target, return empty 
+
+
+
+
+
+
+
 =========================================================================================================================================================
 method 1:
 
@@ -28,6 +39,7 @@ Memory Usage: 36.8 MB, less than 100.00%
 
 public class Solution {
     public List < List < Integer >> fourSum(int[] num, int target) {
+
         ArrayList < List < Integer >> ans = new ArrayList < > ();
         if (num.length < 4) return ans;
 
@@ -36,17 +48,24 @@ public class Solution {
         for (int i = 0; i < num.length - 3; i++) {
 
         	//ignore duplicates
-            if (i > 0 && num[i] == num[i - 1]) continue;
+            if (i > 0 && num[i] == num[i - 1]) 
+            	continue;
 
             for (int j = i + 1; j < num.length - 2; j++) {
-                if (j > i + 1 && num[j] == num[j - 1]) continue;
+                if (j > i + 1 && num[j] == num[j - 1]) 
+                	continue;
+
                 int low = j + 1, high = num.length - 1;
+
                 while (low < high) {
                     int sum = num[i] + num[j] + num[low] + num[high];
                     if (sum == target) {
                         ans.add(Arrays.asList(num[i], num[j], num[low], num[high]));
+
+                        //ignore duplicates
                         while (low < high && num[low] == num[low + 1]) low++;
                         while (low < high && num[high] == num[high - 1]) high--;
+
                         low++;
                         high--;
                     } else if (sum < target) low++;

@@ -39,8 +39,12 @@ Best solution:
 Traverse root 1 from smallest value to node to largest.
 Traverse root 2 from largest value node to smallest.
 Sum up the corresponding node’s value : If sum == target return true
+
 If target > sum,
-then move to the inorder successor of the current node of root1,
+then move to the inorder successor of the current node of root1, because sum is already smaller,
+the element above the root node(it's left child) is also smaller than sum, so pop left children
+push in root.right node.
+
 else
 move to the inorder predecessor of the current node of root2.
 
