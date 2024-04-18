@@ -253,11 +253,11 @@ output:
 ### java
 1. initialize + import:
 
-		import java.util.*; 
+'''
+	import java.util.*; 
 		Stack<Integer> stack = new Stack<Integer>(); 
-
 		Deque<TreeNode> stack = new ArrayDeque<>(); //deque
-
+'''
 
 2. push to the stack:
 
@@ -1209,3 +1209,4 @@ Like Chaining, the performance of hashing can be evaluated under the assumption 
  So Search, Insert and Delete take (1/(1 - α)) time
 
 
+## Linked List

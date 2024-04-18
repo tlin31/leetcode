@@ -18,13 +18,14 @@ get new method signature.
 
 ******************************************************
 key:
+    - are arrays sorted? if not, sort based on first element
+
 	- method 1: two pointers, keep start and end
 	- method 2: use graph
-	- ask whether the interval is sorted, if not, sort based on first element
 	- edge case:
-		1) empty array
-		2) negative or zero --> doesnt matter
-		3) 
+	1) empty array
+	2) negative or zero --> doesnt matter
+	3) 
 
 ******************************************************
 
@@ -69,7 +70,7 @@ stats:
 	            merged.add(interval);
 	        }
 
-	        //对于情况 2 ，set the nex end
+	        //对于情况 2 ，set the next end
 	        else {
 
 	            merged.getLast().end = Math.max(merged.getLast().end, interval.end);

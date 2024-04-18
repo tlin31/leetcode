@@ -13,7 +13,7 @@ The range of numbers in the array is [-1000, 1000] and the range of the integer 
 
 ******************************************************
 key:
-	- 
+	- sorted?
 	- edge case:
 		1) empty string, return empty
 		2)
@@ -29,8 +29,8 @@ method:
 
 	- we know the key to solve this problem is SUM[i, j]. 
 	- So if we know SUM[0, i - 1] and SUM[0, j], then we can easily get SUM[i, j]. 
-	- To achieve this, we just need to go through the array, calculate the current sum and save number of 
-	  all seen PreSum to a HashMap. 
+	- To achieve this, we just need to go through the array, calculate the current sum and 
+      save number of all seen PreSum to a HashMap. 
 
 	- map<sum, number of possibilities>
 
@@ -114,13 +114,13 @@ method 3:
 method:
 
 	-  Without space
-	- Instead of considering all the startstart and endend points and then finding the sum for 
+	- Instead of considering all the start and end points and then finding the sum for 
       each subarray corresponding to those points, we can directly find the sum on the go while 
       considering different endend points. 
       i.e. We can choose a particular startstart point and while iterating over the endend points, 
       we can add the element corresponding to the endend point to the sum formed till now. 
 
-      Whenver the sumsum equals the required k value, we can update the count value. We do so 
+      Whenver the sum equals the required k value, we can update the count value. We do so 
       while iterating over all the endend indices possible for every startstart index. Whenver, 
       we update the startstart index, we need to reset the sumsum value to 0.
 

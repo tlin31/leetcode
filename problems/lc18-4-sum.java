@@ -218,14 +218,17 @@ List<List<Integer>> kSum_Trim(int[] a, int target, int k) {
     return result;
 }
 
+
 void kSum_Trim(int[] a, int target, int k, int start, List<List<Integer>> result, List<Integer> path) {
     int max = a[a.length - 1];
+
     if (a[start] * k > target || max * k < target) return;
     
     if (k == 2) {                        // 2 Sum
         int left = start;
         int right = a.length - 1;
         while (left < right) {
+        	
             if      (a[left] + a[right] < target) left++;
             else if (a[left] + a[right] > target) right--;
             else {
@@ -241,12 +244,16 @@ void kSum_Trim(int[] a, int target, int k, int start, List<List<Integer>> result
         for (int i = start; i < a.length - k + 1; i++) {
             if (i > start && a[i] == a[i - 1]) continue;
             if (a[i] + max * (k - 1) < target) continue;
+
             if (a[i] * k > target) break;
+
             if (a[i] * k == target) {
                 if (a[i + k - 1] == a[i]) {
                     result.add(new ArrayList<>(path));
                     List<Integer> temp = new ArrayList<>();
-                    for (int x = 0; x < k; x++) temp.add(a[i]);
+                    for (int x = 0; x < k; x++) 
+                    	temp.add(a[i]);
+
                     result.get(result.size() - 1).addAll(temp);    // Add result immediately.
                 }
                 break;
@@ -257,3 +264,5 @@ void kSum_Trim(int[] a, int target, int k, int start, List<List<Integer>> result
         }
     }
 }
+
+

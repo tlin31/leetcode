@@ -234,9 +234,17 @@ Redo:
     lc 430: flatten multilevel double linked list
     lc 234: palindrome linked list
 
+
 #### skip next node
 
     prev.next = current.next;
+
+#### Tips
+
+1. Always check if node == null
+2. use 1 at the begining for any recursive/traversal problems
+
+
 
 ### Leetcode
 |# |    Title   |Solution|Complexity|Note|Difficulty|

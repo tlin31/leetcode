@@ -45,10 +45,32 @@
         Arrays.sort(arr, new Sortbyroll()); 
   
 ----Method 3:
-        Arrays.sort(intervals, (a, b) -> a[1] - b[1]);
+        Arrays.sort(intervals, (a, b) -> a[1] - b[1]); //last element of interval
+        Arrays.sort(intervals, (i1, i2) -> Integer.compare(i1[0], i2[0])); //first elem of interval
 
-    
+        //sort (interval data type -> using the standard of )
+
+---Method 4:   
+
+        // Sort intervals
+        Arrays.sort(intervals, new Comparator<int[]>() {
+            @Override
+            public int compare(int[] a, int[] b) {
+                return Integer.compare(a[0], b[0]);
+            }
+        });
+
+--- Method 5
+        private class IntervalComparator implements Comparator<Interval> {
+            @Override
+            public int compare(Interval a, Interval b) {
+                return a.start < b.start ? -1 : a.start == b.start ? 0 : 1;
+            }
+        }
+        Collections.sort(intervals, new IntervalComparator());
+
 ```
+
 
 #### Arrays.sort() vs Collections.sort()
 - Arrays.sort works for arrays which can be of primitive data type also. 
@@ -107,6 +129,15 @@ dest:目的数组；	destPos:目的数组放置的起始位置；		length:复制
             Arrays.fill(memoRow, -1);
 
 ### 2d array 
+
+### declare
+
+
+    data_type[][] array_Name = new data_type[no_of_rows][no_of_columns];
+
+
+
+
 
 #### length
 

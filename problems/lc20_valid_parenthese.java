@@ -57,10 +57,13 @@ public class Solution {
             // Check stack for corresponding closing parentheses, false if not valid
             else if (s.charAt(i) == ')' && !stack.empty() && stack.peek() == '(')
                 stack.pop();
+
             else if (s.charAt(i) == ']' && !stack.empty() && stack.peek() == '[')
                 stack.pop();
+
             else if (s.charAt(i) == '}' && !stack.empty() && stack.peek() == '{')
                 stack.pop();
+
             else
                 return false;
         }
@@ -98,6 +101,7 @@ public class Solution {
                 case '[':
                     stack[head++] = ']';
                     break;
+                    
                 default:
                     if (head == 0 || stack[--head] != c) 
                         return false;
