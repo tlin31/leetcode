@@ -1,5 +1,4 @@
-3. Longest Substring Without Repeating Characters
-Medium
+3. Longest Substring Without Repeating Characters - Medium
 
 Given a string, find the length of the longest substring without repeating characters.
 
@@ -77,9 +76,6 @@ method:
         have no duplicate characters. We only need to check if s[j] is already in the 
         substring s_{ij}
     
-    - To check if a character is already in the substring, we can scan the substring, which leads 
-        to an O(n^2)
-
     - By using HashSet as a sliding window, checking if a character in the current can be done in O(1)
     - A sliding window is an abstract concept commonly used in array/string problems. A window is a range 
         of elements in the array/string which usually defined by the start and end indices, 
@@ -130,6 +126,18 @@ public class Solution {
     }
 }
 
+input: pwwkew
+
+output:
+cur i is 0 cur j is 1 cur set contains[p]
+cur i is 0 cur j is 2 cur set contains[p, w]
+cur i is 1 cur j is 2 cur set contains[w]
+cur i is 2 cur j is 2 cur set contains[]
+cur i is 2 cur j is 3 cur set contains[w]
+cur i is 2 cur j is 4 cur set contains[w, k]
+cur i is 2 cur j is 5 cur set contains[e, w, k]
+cur i is 3 cur j is 5 cur set contains[e, k]
+cur i is 3 cur j is 6 cur set contains[e, w, k]
 
 
 

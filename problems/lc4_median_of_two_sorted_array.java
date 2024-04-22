@@ -41,6 +41,7 @@ class Solution
         
         while (i <= nums1.length - 1 ||  j <= nums2.length - 1)
         {
+            //finish merging array 1
             if (i == nums1.length)
                 array[k++] = nums2[j++];
             

@@ -46,6 +46,7 @@ public int romanToInt(String s) {
     //：Ⅰ（1）Ⅴ（5）Ⅹ（10）L（50）C（100）D（500）M（1000）
     // rules:位于⼤数的后⾯时就作为加数；位于⼤数的前⾯就作为减数
     //eg：Ⅲ=3,Ⅳ=4,Ⅵ=6,ⅩⅨ=19,ⅩⅩ=20,ⅩLⅤ=45,MCMⅩⅩC=1980
+
     if (s == null || s.length() == 0) return 0;
     int len = s.length();
     HashMap < Character, Integer > map = new HashMap < Character, Integer > ();
@@ -56,6 +57,7 @@ public int romanToInt(String s) {
     map.put('C', 100);
     map.put('D', 500);
     map.put('M', 1000);
+    
     //the last char
     int result = map.get(s.charAt(len - 1));
     int pivot = result;
@@ -120,7 +122,9 @@ public int romanToInt(String s) {
     return sum;
 }
 
-The logic here is that, if a current character value is greater than that of the previous, we have to subtract it. We subtract twice, because previously iteration had blindly added it. :) Hope this helps.
+The logic here is that, if a current character value is greater than that of the previous, 
+we have to subtract it. We subtract twice, because previously iteration had blindly added it. 
+
 
 =========================================================================================================================================================
 method 3:
