@@ -137,21 +137,22 @@ Steps:
 
 ```
 Output:
-Thread: pool-1-thread-1 Counter: 1 Task: task 1
-Thread: pool-1-thread-2 Counter: 1 Task: task 2
-Thread: pool-1-thread-2 Counter: 2 Task: task 2
-Thread: pool-1-thread-1 Counter: 1 Task: task 3
-Thread: pool-1-thread-2 Counter: 1 Task: task 4
-Thread: pool-1-thread-1 Counter: 2 Task: task 3
-Thread: pool-1-thread-1 Counter: 3 Task: task 3
-Thread: pool-1-thread-1 Counter: 1 Task: task 5
-Thread: pool-1-thread-2 Counter: 2 Task: task 4
-Thread: pool-1-thread-2 Counter: 3 Task: task 4
-Thread: pool-1-thread-1 Counter: 2 Task: task 5
-Thread: pool-1-thread-2 Counter: 4 Task: task 4
-Thread: pool-1-thread-1 Counter: 3 Task: task 5
-Thread: pool-1-thread-1 Counter: 4 Task: task 5
-Thread: pool-1-thread-1 Counter: 5 Task: task 5
+
+    Thread: pool-1-thread-1 Counter: 1 Task: task 1
+    Thread: pool-1-thread-2 Counter: 1 Task: task 2
+    Thread: pool-1-thread-2 Counter: 2 Task: task 2
+    Thread: pool-1-thread-1 Counter: 1 Task: task 3
+    Thread: pool-1-thread-2 Counter: 1 Task: task 4
+    Thread: pool-1-thread-1 Counter: 2 Task: task 3
+    Thread: pool-1-thread-1 Counter: 3 Task: task 3
+    Thread: pool-1-thread-1 Counter: 1 Task: task 5
+    Thread: pool-1-thread-2 Counter: 2 Task: task 4
+    Thread: pool-1-thread-2 Counter: 3 Task: task 4
+    Thread: pool-1-thread-1 Counter: 2 Task: task 5
+    Thread: pool-1-thread-2 Counter: 4 Task: task 4
+    Thread: pool-1-thread-1 Counter: 3 Task: task 5
+    Thread: pool-1-thread-1 Counter: 4 Task: task 5
+    Thread: pool-1-thread-1 Counter: 5 Task: task 5
 
 
 
@@ -247,10 +248,10 @@ public class MainAppRunnable implements Runnable {
 
 Output:
 
-pool-1-thread-1 Counter: 0
-pool-1-thread-2 Counter: 0
-pool-1-thread-1 Counter: 1
-pool-1-thread-1 Counter: 2   
+    pool-1-thread-1 Counter: 0
+    pool-1-thread-2 Counter: 0
+    pool-1-thread-1 Counter: 1
+    pool-1-thread-1 Counter: 2   
 
 ### Method 3: Inner Class And Anonymous Inner Class that Implements Runnable 
 
@@ -336,21 +337,21 @@ public class OuterClass {
 Output:
 
 
-pool-1-thread-1 Counter: 0
-pool-1-thread-2 Counter: 0
-pool-1-thread-1 Counter: 0
-pool-1-thread-2 Counter: 1
-pool-1-thread-1 Counter: 1
-pool-1-thread-2 Counter: 0
-pool-1-thread-2 Counter: 1
-pool-1-thread-1 Counter: 2
-pool-1-thread-1 Counter: 0
-pool-1-thread-2 Counter: 2
-pool-1-thread-1 Counter: 1
-pool-1-thread-2 Counter: 3
-pool-1-thread-1 Counter: 2
-pool-1-thread-1 Counter: 3
-pool-1-thread-1 Counter: 4
+    pool-1-thread-1 Counter: 0
+    pool-1-thread-2 Counter: 0
+    pool-1-thread-1 Counter: 0
+    pool-1-thread-2 Counter: 1
+    pool-1-thread-1 Counter: 1
+    pool-1-thread-2 Counter: 0
+    pool-1-thread-2 Counter: 1
+    pool-1-thread-1 Counter: 2
+    pool-1-thread-1 Counter: 0
+    pool-1-thread-2 Counter: 2
+    pool-1-thread-1 Counter: 1
+    pool-1-thread-2 Counter: 3
+    pool-1-thread-1 Counter: 2
+    pool-1-thread-1 Counter: 3
+    pool-1-thread-1 Counter: 4
 
 
 
@@ -418,21 +419,21 @@ public class MyClass {
 
 Output:
 
-pool-1-thread-1 Counter:0
-pool-1-thread-2 Counter:0
-pool-1-thread-2 Counter:1
-pool-1-thread-1 Counter:0
-pool-1-thread-2 Counter:0
-pool-1-thread-1 Counter:1
-pool-1-thread-2 Counter:1
-pool-1-thread-1 Counter:2
-pool-1-thread-2 Counter:2
-pool-1-thread-2 Counter:3
-pool-1-thread-1 Counter:0
-pool-1-thread-1 Counter:1
-pool-1-thread-1 Counter:2
-pool-1-thread-1 Counter:3
-pool-1-thread-1 Counter:4
+    pool-1-thread-1 Counter:0
+    pool-1-thread-2 Counter:0
+    pool-1-thread-2 Counter:1
+    pool-1-thread-1 Counter:0
+    pool-1-thread-2 Counter:0
+    pool-1-thread-1 Counter:1
+    pool-1-thread-2 Counter:1
+    pool-1-thread-1 Counter:2
+    pool-1-thread-2 Counter:2
+    pool-1-thread-2 Counter:3
+    pool-1-thread-1 Counter:0
+    pool-1-thread-1 Counter:1
+    pool-1-thread-1 Counter:2
+    pool-1-thread-1 Counter:3
+    pool-1-thread-1 Counter:4
 
 
 
@@ -468,7 +469,7 @@ Lambda Expression:
 
     Thread anotherThread = new Thread(() -> System.out.println(“Printed inside Lambda!”));
 
-```
+```java
 import java.util.concurrent.ExecutorService; 
 import java.util.concurrent.Executors; 
   
@@ -528,21 +529,21 @@ public class MyClass {
 Output:
 
 
-pool-1-thread-1 Counter:0
-pool-1-thread-2 Counter:0
-pool-1-thread-2 Counter:1
-pool-1-thread-2 Counter:0
-pool-1-thread-1 Counter:0
-pool-1-thread-2 Counter:1
-pool-1-thread-1 Counter:1
-pool-1-thread-2 Counter:2
-pool-1-thread-1 Counter:2
-pool-1-thread-2 Counter:0
-pool-1-thread-1 Counter:3
-pool-1-thread-2 Counter:1
-pool-1-thread-2 Counter:2
-pool-1-thread-2 Counter:3
-pool-1-thread-2 Counter:4
+    pool-1-thread-1 Counter:0
+    pool-1-thread-2 Counter:0
+    pool-1-thread-2 Counter:1
+    pool-1-thread-2 Counter:0
+    pool-1-thread-1 Counter:0
+    pool-1-thread-2 Counter:1
+    pool-1-thread-1 Counter:1
+    pool-1-thread-2 Counter:2
+    pool-1-thread-1 Counter:2
+    pool-1-thread-2 Counter:0
+    pool-1-thread-1 Counter:3
+    pool-1-thread-2 Counter:1
+    pool-1-thread-2 Counter:2
+    pool-1-thread-2 Counter:3
+    pool-1-thread-2 Counter:4
 
 
 ## Race Condition
