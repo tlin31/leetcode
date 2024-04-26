@@ -77,7 +77,7 @@ method 2:
 
 method:
 
-	- go from back to front, now the max reach = farthest elem, not the max anymore.
+	- go from back to front, now the max reach = furthest element, not the max anymore.
 	- end when reach position 0
 	- why this is easier --> take [2,3,1,1,4]
 		从左到右跳的话，2 -> 3 -> 4 -> 1。
@@ -119,7 +119,7 @@ Output: 2
 position = 4, steps = 0
 
 i = 0 --> skip if loop, i++
-i = 1 --> (nums[1] = 3 >= 4-1), go into for loop, positino = 1, steps ++ = 1, break ?????
+i = 1 --> (nums[1] = 3 >= 4-1), go into for loop, positino = 1, steps ++ = 1, //then break
 
 =======================================================================================================
 method 3:
@@ -131,16 +131,18 @@ method:
 
 stats:
 
-	- 
-	- 
+	- Time complexity : O(n)
+	- Space complexity: O(1)
+
 
 	queue.add(0)
 	int count = 0
-	while (q != empty) {
+	while (queue != empty) {
 		int reach = input[queue.head]
 		for (int i = 0; i < reach; i++) {
 			queue.add(queue.head + i);
-			if (queue.last = input.length-1) return count;
+			if (queue.last = input.length-1) 
+				return count;
 		}
 		count++;
 

@@ -308,13 +308,7 @@ Redo:
 ## Dynamic programming / Greedy
 [dp-problem summary](https://note.youdao.com/web/#/file/WEB1ab106e98e0921f5cb8ffd57eb18a6f9/note/WEB022fd5285d2ecd51ad98b002e0102c23/)
 
-Time schdule:
 
-5.23    All leetcode tag is completed
-        start everyday review 2 problems
-
-
-        
 Notes:
 1. when want to optimize space --> from m * n reduce to O(m), declare 2 rows only, prev & current, 
    then use i % 2 to determine which row it is current
@@ -325,7 +319,6 @@ Notes:
 
 2. good practise/optimize question
 
-		53.
 
 3. whenever we do sum, subtract, multiply or divide of integers, check overflow!
 
@@ -613,9 +606,6 @@ Notes:
 |66|[112. Path Sum](https://leetcode.com/problems/path-sum/)|[Java](problems/lc112-path-sum.java)| | dfs or bfs | Easy
 |67|[129. Sum Root to Leaf Numbers](https://leetcode.com/problems/sum-root-to-leaf-numbers/)|[Java](problems/lc129-sum-root-to-leaf-numbers.java)| | recursion or use stack, preorder | Medium
 |68|[666. Path Sum IV](https://leetcode.com/problems/path-sum-iv/)|[Java](problems/lc666-path-sum-iv.java)| | recursion or use stack, preorder | Medium
-
- 
-
 
  
 

@@ -31,6 +31,27 @@ key:
 
 
 =======================================================================================================
+
+Simplest O(N) solution with constant space
+
+Idea is to work backwards from the last index. Keep track of the smallest index that can 
+"jump" to the last index. Check whether the current index can jump to this smallest index.
+
+For every index, I'm checking the max reach I can have till that element, if that reach is less 
+than the value of my index, that means I can never reach this particular index and my answer should 
+be false.
+
+
+bool canJump(int A[], int n) {
+    int last=n-1,i,j;
+    for(i=n-2;i>=0;i--){
+        if(i+A[i]>=last)
+        	last=i;
+    }
+    return last<=0;
+}
+
+=======================================================================================================
 method 1:
 
 method:
@@ -40,10 +61,22 @@ method:
 
 stats:
 
-	- 时间复杂度：O（n）。
-	- 空间复杂度：O（1）。
-	- Runtime: 1 ms, faster than 99.26% of Java online submissions for Jump Game.
-	- Memory Usage: 39.9 MB, less than 97.44%
+	- 时间复杂度：O（n）
+	- 空间复杂度：O（1）
+
+
+class Solution {
+    public boolean canJump(int[] nums) {
+       int reachable = 0;
+       for(int i = 0; i < nums.length; i ++) {
+           if(i > reachable) 
+           		return false;
+           reachable = Math.max(reachable, i + nums[i]);
+       } 
+       return true;
+    }
+}
+
 
 	public boolean canJump(int[] nums) { 
 	    int end = 0;

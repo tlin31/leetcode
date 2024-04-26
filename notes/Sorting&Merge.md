@@ -79,6 +79,7 @@ Tips:
 	- divides an array's elements into several buckets. The buckets are then sorted one at a time, either using a different sorting algorithm or by recursively applying the bucket sorting algorithm. 
 	- good for double/float
 	- use linked list for multiple elements in an bucket
+	- when restored sorted array: use input[i]'s value to get to buckets, see how many elements are in front of it, then it corresponds to the output array's location-1
 
 ### 1. Complexity
 
@@ -122,8 +123,7 @@ Space Complexity: O(n+k).
 
 
 
-
-```
+```java
 import java.util.ArrayList;
 import java.util.List;
 

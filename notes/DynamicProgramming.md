@@ -1,14 +1,66 @@
-Dynamic Programming - cheatsheet
+# Dynamic Programming 
 
-1. Steps: 
-	
-	1. Find recursive relation
-	2. Recursive (top-down)
-	3. Recursive + memo (top-down)
-	4. Iterative + memo (bottom-up)
-	5. Iterative + N variables (bottom-up)
+## When to use DP
+1. when recursion goes beyond O(n^2)
+2. Counting ways using n different resources
+3. optimization 
 
-2. Examples (house robber lc 198)
+## Impementations
+    
+    1. Find recursive relation
+    2. Recursive (top-down)
+    3. Recursive + memo (top-down)
+    4. Iterative + memo (bottom-up)
+    5. Iterative + N variables (bottom-up)
+
+## Typical problems
+
+### 1. Min(max) path to reach a target
+
+    routes[i]=min(routes[i-1],routes[i-2],routes[i-3],...,routes[i-k])+cost[i]
+
+Leetcode 322. Coin change
+
+
+Leetcode 55 Jump Game - Medium *Reachable*/Greedy
+
+- Each element in the array represents your maximum jump length at that position. Determine if you are able to reach the last index.
+- The basic idea is this: at each step, we keep track of the furthest reachable index. The nature of the problem (eg. maximal jumps where you can hit a range of targets instead of singular jumps where you can only hit one target) is that for an index to be reachable, each of the previous indices have to be reachable.
+
+```java
+       for(int i = 0; i < nums.length; i ++) {
+           if(i > reachable) 
+                return false;
+           reachable = Math.max(reachable, i + nums[i]);
+       } 
+```
+
+
+### 2. Distinct ways
+
+    routes[i]=routes[i-1]+routes[i-2]+routes[i-3]+...routes[i-k]
+
+Leetcode 70. climb stiars
+
+
+### 3. Merging intervals
+    //from i to j
+    dp[i][j]=dp[i][k]+result[k]+dp[k+1][j]
+
+Leetcode 96. Unique Binary Search Tree
+
+### 4. DP on Strings
+
+Leetcode 1143. Longest Common Subseequence
+
+
+### 5. Decision Making
+
+
+
+
+
+## 2. Examples (house robber lc 198)
 
 Step 1. Figure out recursive relation.
 

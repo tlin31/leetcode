@@ -8,7 +8,7 @@
 - Goal: enable multitasking
 
 - Problems caused by concurrency -- multiple processes/threads share some resources:
-	1. race conditions: the program ends with an undesired output, resulting from the sequence of execution among the processes.
+	1. race conditions: a race condition is a condition of a program where its behavior depends on relative timing or interleaving of multiple threads or processes. occurs when two or more threads can access shared data and they try to change it at the same time
 	2. deadlocks: the concurrent processes wait for some necessary resources from each other. As a result, none of them can make progress.
 	3. resource starvation: a process is perpetually denied necessary resources to progress its works.
     4. visibility problem occurs if thread A reads shared data which is later changed by thread B and thread A is unaware of this change. Leads to Liveness failure: The program does not react anymore due to problems in the concurrent access of data, e.g. deadlocks.
@@ -36,7 +36,7 @@ https://www.geeksforgeeks.org/different-approaches-to-concurrent-programming-in-
 - The resources of the process, e.g. memory and CPU time, are allocated to it via the operating system.
 - The process can have the following states new, ready, running, waiting, terminated, and suspended. 
 
-**thread:achieve parallel processing or asynchronous behavior.** 
+**thread: achieve parallel processing or asynchronous behavior.** 
 - lightweight process
 - is the segment of a process which means a process can have multiple threads and these multiple threads are contained within a process. 
 - A thread has three states: Running, Ready, and Blocked. 
@@ -89,14 +89,12 @@ Sceanrio: user need to download files from 2 different servers, each server has 
 - if the task is really small, one never get paid back for the overhead.
 - when the users are waiting. For instance, while one is waiting for one server, the other can be reading from another server.
 
-<em>Pros</em>em>
+<em>Pros</em>
 1. Improved Performance
 2. Better Resource Utilization
 3. Improved Responsiveness
 4. Simplified Modeling
 5. Robust Concurrency API: includes thread pools, concurrent collections, and atomic variables to ensure robustness. These concurrency tools streamline the development of concurrent code and mitigate prevalent concurrency problems.
-
-## Implement concurrent programming
 
 ## Steps for Concurrent Programming
 
@@ -111,6 +109,8 @@ Sceanrio: user need to download files from 2 different servers, each server has 
 ```
 
 3. Execute method is a little bit of misnomer because when a task is added to the task in the queue that is created above with Executors.newFixedThreadPool, it doesn’t necessarily start executing it right away. It starts executing when one of those executing simultaneously(pool size) finishes execution.
+
+## Implement concurrent programming
 
 ### Method extends Thread
 
@@ -883,7 +883,7 @@ public class CrawledSites {
 
 }
 ```
-<em>Volatile</em>>
+<em>Volatile</em>
 
 if declared with the volatile keyword then it is guaranteed that any thread that reads the field will see the most recently written value. The volatile keyword will not perform any mutual exclusive lock on the variable.
 
@@ -951,6 +951,37 @@ Here, threadA will never acquire lockB as it is held by threadB. Similarly, thre
 ## Problems
 - ex. leetcode 1114. Print in order 
 
+Suppose we have a class:
+
+    public class Foo {
+      public void first() { print("first"); }
+      public void second() { print("second"); }
+      public void third() { print("third"); }
+    }
+
+The same instance of Foo will be passed to three different threads. Thread A will call first(), 
+thread B will call second(), and thread C will call third(). 
+
+Design a mechanism and modify the program to ensure that second() is executed after first(), 
+and third() is executed after second().
+
+first --> second --> third
+
+Example 1:
+
+Input: [1,2,3]
+Output: "firstsecondthird"
+Explanation: There are three threads being fired asynchronously. The input [1,2,3] means thread A calls first(), thread B calls second(), and thread C calls third(). "firstsecondthird" is the correct output.
+Example 2:
+
+Input: [1,3,2]
+Output: "firstsecondthird"
+Explanation: The input [1,3,2] means thread A calls first(), thread B calls third(), and thread C calls second(). "firstsecondthird" is the correct output.
+ 
+
+Note:
+
+We do not know how the threads will be scheduled in the operating system, even though the numbers in the input seems to imply the ordering. The input format you see is mainly to ensure our tests' comprehensiveness.
 
 ### Method 1:  Pair Synchronization
 
@@ -1107,3 +1138,22 @@ class Foo {
     }
 }
 ```
+
+1242. Web Crawler Multithreaded: Medium
+1279. Traffic Light Controlled Intersection: easy
+1188. Design Bounded Blocking Queue: Medium
+2370. Longest Ideal Subsequence
+Medium
+1114. Print in Order
+Easy
+1115. Print FooBar Alternately
+65.6%
+Medium
+1116. Print Zero Even Odd
+61.0%
+Medium
+1117. Building H2O
+56.1%
+Medium
+
+
