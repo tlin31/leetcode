@@ -1,7 +1,9 @@
 # Concurrency
 
 ## Summary:
-- By simultaneousness, the processes or threads are not necessarily running independently in different physical CPUs, but more often they interleave in the same physical 
+- Concurrency is the ability to run several programs or several parts of a program in parallel. If a time consuming task can be performed asynchronously or in parallel, this improves the throughput and the interactivity of the program.
+
+- A modern computer has several CPU’s or several cores within one CPU. The ability to leverage these multi-cores can be the key for a successful high-volume application.
 
 - Goal: enable multitasking
 
@@ -9,6 +11,47 @@
 	1. race conditions: the program ends with an undesired output, resulting from the sequence of execution among the processes.
 	2. deadlocks: the concurrent processes wait for some necessary resources from each other. As a result, none of them can make progress.
 	3. resource starvation: a process is perpetually denied necessary resources to progress its works.
+
+## Process vs. threads
+
+A process runs independently and isolated of other processes. It cannot directly access shared data in other processes. The resources of the process, e.g. memory and CPU time, are allocated to it via the operating system.
+
+A thread is a so called lightweight process. It has its own call stack, but can access shared data of other threads in the same process. Every thread has its own memory cache. If a thread reads shared data, it stores this data in its own memory cache.
+
+A thread can re-read the shared data.
+
+Process: Processes are basically the programs that are dispatched from the ready state and are scheduled in the CPU for execution. PCB(Process Control Block) holds the concept of process. A process can create other processes which are known as Child Processes. The process takes more time to terminate and it is isolated means it does not share the memory with any other process. 
+
+The process can have the following states new, ready, running, waiting, terminated, and suspended. 
+
+Thread: Thread is the segment of a process which means a process can have multiple threads and these multiple threads are contained within a process. A thread has three states: Running, Ready, and Blocked. 
+
+The thread takes less time to terminate as compared to the process but unlike the process, threads do not isolate. 
+
+
+![fig 2](/Users/lintianyi/Desktop/leetcode/pics/diff of process and thread.png)
+
+
+Thread: 
+A Java application runs by default in one process. Within a Java application you work with several threads to achieve parallel processing or asynchronous behavior.
+
+A thread in Java is the direction or path that is taken while a program is being executed. Generally, all the programs have at least one thread, known as the main thread, that is provided by the JVM or Java Virtual Machine at the starting of the program’s execution. At this point, when the main thread is provided, the main() method is invoked by the main thread.
+
+A thread is an execution thread in a program. Multiple threads of execution can be run concurrently by an application running on the Java Virtual Machine. The priority of each thread varies. Higher priority threads are executed before lower priority threads.
+
+Thread is critical in the program because it enables multiple operations to take place within a single method. Each thread in the program often has its own program counter, stack, and local variable.
+
+Thread in Java enables concurrent execution, dividing tasks for improved performance. It's essential for handling operations like I/O and network communication efficiently. Understanding threads is crucial for responsive Java applications. Enroll in a Java Course to master threading and create efficient multithreaded programs.
+
+- Extending java.lang.Thread class
+- Implementing Runnable interface
+There are basically 4 stages in the lifecycle of a thread, as given below:
+
+New
+Runnable
+Running
+Blocked (Non-runnable state)
+Dead
 
 
 ## Concurrent Programming on Single Processor Machine:
