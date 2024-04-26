@@ -29,7 +29,7 @@ Thread: Thread is the segment of a process which means a process can have multip
 The thread takes less time to terminate as compared to the process but unlike the process, threads do not isolate. 
 
 
-![fig 2](/Users/lintianyi/Desktop/leetcode/pics/diff of process and thread.png)
+![fig 2](/Users/lintianyi/Desktop/leetcode/pics/diff_ofProcessNThread.png)
 
 
 Thread: 
