@@ -11,47 +11,63 @@
 	1. race conditions: the program ends with an undesired output, resulting from the sequence of execution among the processes.
 	2. deadlocks: the concurrent processes wait for some necessary resources from each other. As a result, none of them can make progress.
 	3. resource starvation: a process is perpetually denied necessary resources to progress its works.
+    4. visibility problem occurs if thread A reads shared data which is later changed by thread B and thread A is unaware of this change. Leads to Liveness failure: The program does not react anymore due to problems in the concurrent access of data, e.g. deadlocks.
+    5. access problem can occur if several threads access and change the same shared data at the same time. Safety failure: The program creates incorrect data.
+
+## Reference
+
+1. Java concurrency (multi-threading) - Tutorial
+https://www.vogella.com/tutorials/JavaConcurrency/article.html#fork-join-in-java-7
+
+
+2. Geeks for geeks Different Approaches to Concurrent Programming in Java
+https://www.geeksforgeeks.org/different-approaches-to-concurrent-programming-in-java/
+
 
 ## Process vs. threads
 
-A process runs independently and isolated of other processes. It cannot directly access shared data in other processes. The resources of the process, e.g. memory and CPU time, are allocated to it via the operating system.
+**process:** 
+- Processes are programs that are dispatched from the ready state and are scheduled in the CPU for execution. 
+- PCB(Process Control Block) holds the concept of process. 
+- A process can create other processes which are known as Child Processes. 
+- The process takes more time to terminate and it is isolated means it does not share the memory with any other process. 
+- runs independently and isolated of other processes. 
+- It cannot directly access shared data in other processes. 
+- The resources of the process, e.g. memory and CPU time, are allocated to it via the operating system.
+- The process can have the following states new, ready, running, waiting, terminated, and suspended. 
 
-A thread is a so called lightweight process. It has its own call stack, but can access shared data of other threads in the same process. Every thread has its own memory cache. If a thread reads shared data, it stores this data in its own memory cache.
+**thread:achieve parallel processing or asynchronous behavior.** 
+- lightweight process
+- is the segment of a process which means a process can have multiple threads and these multiple threads are contained within a process. 
+- A thread has three states: Running, Ready, and Blocked. 
+- It has its own **call stack**, but can access shared data of other threads in the same process.
+- Every thread has its own memory cache. 
+- If a thread reads shared data, it stores this data in its own memory cache.
+- A thread can re-read the shared data.
 
-A thread can re-read the shared data.
-
-Process: Processes are basically the programs that are dispatched from the ready state and are scheduled in the CPU for execution. PCB(Process Control Block) holds the concept of process. A process can create other processes which are known as Child Processes. The process takes more time to terminate and it is isolated means it does not share the memory with any other process. 
-
-The process can have the following states new, ready, running, waiting, terminated, and suspended. 
-
-Thread: Thread is the segment of a process which means a process can have multiple threads and these multiple threads are contained within a process. A thread has three states: Running, Ready, and Blocked. 
-
-The thread takes less time to terminate as compared to the process but unlike the process, threads do not isolate. 
-
-
-![fig 2](/leetcode/pics/diff_ofProcessNThread.png)
-
-
-Thread: 
-A Java application runs by default in one process. Within a Java application you work with several threads to achieve parallel processing or asynchronous behavior.
-
-A thread in Java is the direction or path that is taken while a program is being executed. Generally, all the programs have at least one thread, known as the main thread, that is provided by the JVM or Java Virtual Machine at the starting of the program’s execution. At this point, when the main thread is provided, the main() method is invoked by the main thread.
-
-A thread is an execution thread in a program. Multiple threads of execution can be run concurrently by an application running on the Java Virtual Machine. The priority of each thread varies. Higher priority threads are executed before lower priority threads.
-
-Thread is critical in the program because it enables multiple operations to take place within a single method. Each thread in the program often has its own program counter, stack, and local variable.
-
-Thread in Java enables concurrent execution, dividing tasks for improved performance. It's essential for handling operations like I/O and network communication efficiently. Understanding threads is crucial for responsive Java applications. Enroll in a Java Course to master threading and create efficient multithreaded programs.
+- A thread in Java is the direction or path that is taken while a program is being executed. Generally, all the programs have at least one thread, known as the main thread, that is provided by the JVM or Java Virtual Machine at the starting of the program’s execution. At this point, when the main thread is provided, the main() method is invoked by the main thread.
+- Thread is critical in the program because it enables multiple operations to take place within a single method. Each thread in the program often has its own **program counter, stack, and local variable**
+- Thread in Java enables concurrent execution, dividing tasks for improved performance. It's essential for handling operations like I/O and network communication efficiently. Understanding threads is crucial for responsive Java applications. 
 
 - Extending java.lang.Thread class
 - Implementing Runnable interface
-There are basically 4 stages in the lifecycle of a thread, as given below:
 
-New
-Runnable
-Running
-Blocked (Non-runnable state)
-Dead
+
+| Process | Thread |
+| --- | --- |
+| any program is in execution| a segment of a process |
+| takes more time for creation| takes less time |
+| more time for context switching | less time for context switching |
+|The process is less efficient in terms of communication. |Thread is more efficient in terms of communication.|
+|Multiprogramming holds the concepts of multi-process. |We don’t need multi programs in action for multiple threads because a single process consists of multiple threads.|
+|The process is isolated|Threads share memory.|
+|heavyweight process|Thread is lightweight as each thread in a process shares code, data, and resources.|
+|Process switching uses an interface in an operating system.|Thread switching does not require calling an operating system and causes an interrupt to the kernel.|
+|If one process is blocked then it will not affect the execution of other processes |If a user-level thread is blocked, then all other user-level threads are blocked. |
+|The process has its own Process Control Block, Stack, and Address Space. |Thread has Parents’ PCB, its own Thread Control Block, and Stack and common Address space.|
+| Changes to the parent process do not affect child processes |changes to the main thread may affect the behavior of the other threads of the process|
+|system call is involved|No system call， it's created using APIs.|
+
 
 
 ## Concurrent Programming on Single Processor Machine:
@@ -59,46 +75,91 @@ Dead
 Sceanrio: user need to download files from 2 different servers, each server has 5 images and each image takes 5s. It is faster to download a little bit of image one, then a little bit of image two, three, four, five and then come back and a little bit of image one and so forth. 
 
 - because when the image from the first server is called and it takes 5 seconds, not because incoming bandwidth is maxed out, but because it takes a while for the server to send it to the user. Basically, the user sits around waiting most of the time. So, while the user is waiting for the first image, he might as well be starting to download the second image. If the server is slow, by doing it in multiple threads concurrently, one can download additional images without much extra time.
+
 - Pros: faster speed & decreased latency(Doing a little bit at a time decreases latency, so the user can see some feedback as things go along)
 
 
 ### Need of Concurrent Programming
 
+<em>Implement through</em>:
+- Multithreading, multiprocessing, asynchronous programming, or event-driven programming.
+
 <em>Threads</em> are useful when:
 - the task is relatively large and self contained. When the user needs to perform only a small amount of combination after a large amount of separate processing, there’s some overhead to starting and using threads. 
+- if the task is really small, one never get paid back for the overhead.
 - when the users are waiting. For instance, while one is waiting for one server, the other can be reading from another server.
 
+<em>Pros</em>em>
+1. Improved Performance
+2. Better Resource Utilization
+3. Improved Responsiveness
+4. Simplified Modeling
+5. Robust Concurrency API: includes thread pools, concurrent collections, and atomic variables to ensure robustness. These concurrency tools streamline the development of concurrent code and mitigate prevalent concurrency problems.
+
+## Implement concurrent programming
 
 ## Steps for Concurrent Programming
 
-1. queue a task. The Executors.newFixedThreadPool and gives it a size. This size indicates the maximum number of simultaneous tasks. For instance, if one add a thousand things to the queue but the pool size is 50, then only 50 of them will be running at any one time. Only when one of the first fifty finishes executing will 51st be taken up for execution. A number like 100 as pool size won’t overload the system.
-
+1. queue a task. The **Executors.newFixedThreadPool** and gives it a size. This size indicates the maximum number of simultaneous tasks. For instance, if one add a thousand things to the queue but the pool size is 50, then only 50 of them will be running at any one time. Only when one of the first fifty finishes executing will 51st be taken up for execution. A number like 100 as pool size won’t overload the system.
+```
     ExecutorService taskList = Executors.newFixedThreadPool(poolSize);
-    
-2. put some tasks of a runnable type to the tasks queue. Runnable is just a single interface that has one method called the run. System calls the run method at the appropriate time when it switches back and forth among the tasks by starting a separate thread.
+```    
 
+2. put some tasks of a runnable type to the tasks queue. Runnable is just a single interface that has one method called the run. System calls the run method at the appropriate time when it switches back and forth among the tasks by starting a separate thread.
+```
     taskList.execute(someRunnable)
+```
 
 3. Execute method is a little bit of misnomer because when a task is added to the task in the queue that is created above with Executors.newFixedThreadPool, it doesn’t necessarily start executing it right away. It starts executing when one of those executing simultaneously(pool size) finishes execution.
 
-## Implement concurrent programming
+### Method extends Thread
+
+--> just override the thread object’s run() method. The run() method will be invoked when the thread is started.
+
+```java
+public class ExampleThread extends Thread {
+    @Override
+    public void run() {
+        // contains all the code you want to execute when the thread starts
+
+        // prints out the name of the thread which is running the process
+        System.out.println(Thread.currentThread().getName());
+    }
+}
+```
+To start a new thread, we create an instance of the above class and call the start() method on it.
+
+```java
+public class ThreadExamples {
+    public static void main(String[] args) {
+        ExampleThread thread = new ExampleThread();
+        thread.start();
+    }
+}
+```
+Note:
+
+- calling the run() method ***does not*** start a new thread. Instead, it executes the code of the thread inside the parent thread. We use the start() method to execute a new thread.
+
+
 
 ### Method 1. Separate Class that implements Runnable
 
 - Pro:
-    - Loose Coupling: Since a separate class can be reused, it promotes loose coupling.
+    - Loose Coupling: Since a separate class can be reused
     - Constructors: Arguments can be passed to constructors for different cases. For example, describing different loop limits for threads.
-    - Race Conditions: If the data has been shared, it is unlikely that a separate class would be used as an approach and if it does not have a shared data, then no need to worry about the race conditions.
+    - **Race Conditions**: If the data has been shared, it is unlikely that a separate class would be used as an approach and if it does not have a shared data, then no need to worry about the race conditions.
 
 - Cons:
     - bit inconvenient to call back to the main application. A reference had to be passed along the constructor, and even if there is access to reference, only public methods(pause method in the given example) in the main application can be called.
 
 Steps: 
 1. create an entirely separate class that implements the runnable interface.
-
+```
     public class MyRunnable implements Runnable {
-             public void run() { ... }  
+        public void run() { ... }  
     }
+```
 
 2. make some instances of the main class and pass them to execute. Let’s apply this first approach to making threads that just count. So, each thread will print the thread name, task number and counter value.
 
@@ -108,7 +169,30 @@ Steps:
 
 5. Calling the shutdown method means shutting down the thread that’s watching to see if any new tasks have been added or not.
 
-```java 
+Executors and Thread Pools
+
+1. reuse existing threads while also limiting the number of threads you can create 
+2. The ExecutorService class allows us to create a certain number of threads and distribute tasks among the threads. Since you are creating a fixed number of threads, you have a lot of control over the performance of your application.
+
+```java
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class Main {
+    public static void main(String[] args) {
+        ExecutorService executor = Executors.newFixedThreadPool(2);
+
+        for (int i = 0; i < 20; i++) {
+            int finalI = i;
+            executor.submit(() -> System.out.println(Thread.currentThread().getName() + " is executing task " + finalI));
+        }
+        executor.shutdown();
+    }
+}
+```
+
+More example:
+```java
     import java.util.concurrent.ExecutorService; 
     import java.util.concurrent.Executors; 
       
@@ -198,6 +282,9 @@ Output:
     Thread: pool-1-thread-1 Counter: 5 Task: task 5
 
 
+<details>
+
+<summary>Other methods that'll get race conditions</summary>
 
 ### Method 2: Main App Implements Runnable
 
@@ -211,11 +298,12 @@ Output:
 
 Steps:
 1. The user has the main class that implements runnable which is a promise to the compiler that the class will have a run method.
-
+```java
     public class MyClass implements Runnable{
         public void run(){
         }
     }
+```
 
 2. The user then passes a reference to the main application to the execute method using the this keyword.
 
@@ -296,7 +384,7 @@ Output:
     pool-1-thread-1 Counter: 1
     pool-1-thread-1 Counter: 2   
 
-### Method 3: Inner Class And Anonymous Inner Class that Implements Runnable 
+### Method 3.1: Inner Class And Anonymous Inner Class that Implements Runnable 
 
 - Pro:
     - easy to access the main application because methods in inner classes can access any public or private methods or instance variables of the outer class.
@@ -304,19 +392,19 @@ Output:
 
 - Con:
     - tight coupling as the run method is closely tied to this application. The run method cannot be reused elsewhere.
-    - severe danger of race conditions. Inner classes are specifically used when the user wants to access the shared data (data in the main application).
+    - severe danger of **race conditions**. Inner classes are specifically used when the user wants to access the shared data (data in the main application).
 
 Steps:
 
 1. the user physically puts the class definition of the class that implements Runnable inside the class definition of the main class.
-
+```
     public class OuterClass{
         private class InnerClass implements Runnable{
             public void run(){
             }
         }
     }
-
+```
 2. The run() method is then put inside the inner class and passed to execute method. Execute does not really mean execute. It means available for execution. 
 
     taskList.execute(new InnerClass());
@@ -484,6 +572,7 @@ Output:
 
 Lambda expressions are very similar in behaviour to anonymous inner classes. 
 They have complete access to code from surrounding classes including the private data. 
+
 !!! lambda expressions cannot have instance variables, so they do not maintain a state.
 
 - Pro:
@@ -501,13 +590,14 @@ We can replace Anonymous Inner Class with Lambda Expression as follows:
 
 Anonymous Inner Class:
 
+```java
     Thread thread = new Thread(new Runnable() {
       @Override
       public void run() {
         System.out.println("Printed inside Anonymous Inner Class!");
       }
     });
-
+```
 Lambda Expression:
 
     Thread anotherThread = new Thread(() -> System.out.println(“Printed inside Lambda!”));
@@ -588,6 +678,7 @@ Output:
     pool-1-thread-2 Counter:3
     pool-1-thread-2 Counter:4
 
+</details>
 
 ## Race Condition
 
@@ -605,14 +696,12 @@ int withdraw(int amount) {
 
 ```
 
-As we can see, in the normal case, we expect that the balance would never become negative after the execution of the function, which is also the desired behavior of the function.
-
 However, unfortunately we could run into a race condition where the balance becomes negative. Here is how it could happen:
-	Imagine we have 2 threads invoking the function at the same time with different input parameters, e.g. for thread #1, withdraw(amount=400) and for thread #2, withdraw(amount=200). The execution of the two threads is scheduled as the graph below, where at each time instance, we run exclusively only a statement from either threads.
+
+Imagine we have 2 threads invoking the function at the same time with different input parameters, e.g. for thread #1, withdraw(amount=400) and for thread #2, withdraw(amount=200). The execution of the two threads is scheduled as the graph below, where at each time instance, we run exclusively only a statement from either threads.
 
 ![fig 1](https://leetcode.com/problems/print-in-order/Figures/1114/1114_race_condition.png)
 
-As one can see, at the end of the above execution flow, we would end up with a negative balance, which is not a desired output.
 
 
 ### Race-free Concurrency
@@ -624,16 +713,244 @@ As one can see, at the end of the above execution flow, we would end up with a n
 	- ex. <strong> LOCK </strong> that restricts the access of the critical section. Following the previous example, we apply the lock on the critical section, i.e. the statements of balance check and balance deduction. We then rerun the two threads, which could lead to the following flow:
 
 ![fig 12](https://leetcode.com/problems/print-in-order/Figures/1114/1114_lock.png)
-	- Now, once a thread enters the critical section, it would prevent other threads from entering the same critical section. 
-	- at the timestamp #3, the thread #2 enters the critical section. Then at the next timestamp #4, the thread #1 could have sneaked into the dangerous critical section if the statement was not protected by the lock. At the end, the two threads run concurrently, while the consistency of the system is maintained, i.e. the balance remains positive.
+
+- Now, once a thread enters the critical section, it would prevent other threads from entering the same critical section. 
+
+- at the timestamp #3, the thread #2 enters the critical section. Then at the next timestamp #4, the thread #1 could have sneaked into the dangerous critical section if the statement was not protected by the lock. At the end, the two threads run concurrently, while the consistency of the system is maintained, i.e. the balance remains positive.
 
 - If the thread is not granted with the access of the critical section --> thread is blocked or put into sleep, e.g. the thread #1 is blocked at the timestamp #4.
 
 - Need to notify the waiting threads once the critical section is released. For instance, as soon as the thread #2 releases the critical section at the timestamp #5, the thread #1 got notified to take over the critical section.
 
 
+## Locks and thread synchronization
+
+### Locks
+Java provides **locks** to protect certain parts of the code to be executed by several threads at the same time: 
+    - only a single thread can execute a block of code at the same time
+    - each thread entering a synchronized block of code sees the effects of all previous modifications that were guarded by the same lock
+
+```java
+import java.util.concurrent.locks.ReentrantLock;
+
+public class LockExample {
+    private final ReentrantLock lock = new ReentrantLock();
+    private int count = 0;
+
+    public int increment() {
+        lock.lock();
+        try {
+            return this.count++;
+        } finally {
+            lock.unlock();
+        }
+    }
+}
+```
+
+When we call the lock() method in a thread, it tries to acquire the lock. If it’s successful, it executes the task. However, if it’s unsuccessful, the thread is blocked until the lock is released.
+
+The isLocked() returns a boolean value depending on whether lock can be acquired or not.
+
+The tryLock() method tries to acquire the lock in a nonblocking way. It returns true if it’s successful and false otherwise.
+
+The unlock() method releases the lock.
+
+### ReadWriteLock
+When working with shared data and resources, usually, you’d want two things:
+1) Multiple threads should be able to *read* the resource at a time if it’s not being written.
+2) Only one thread can *write* the shared resource at a time if no other thread is reading or writing it.
+
+**ReadWriteLock Interface** achieves this by using two locks instead of one. The read lock can be acquired by multiple threads at a time if no thread has acquired the write lock. The write lock can be acquired only if both read and write lock have not been acquired.
+
+
+```java
+public class SharedCache {
+    // map stores key value pair
+    private Map<String, String> cache = new HashMap<>();
+
+    public String readData(String key) {
+        return cache.get(key);
+    }
+
+    public void writeData(String key, String value) {
+        cache.put(key, value);
+    }
+}
+```
+
+We want multiple threads to read our cache at the same time (while it’s not being written). But only one thread can write our cache at a time. To achieve this, we will use the ReentrantReadWriteLock which is an implementation of the ReadWriteLock interface.
+
+```java
+public class SharedCache {
+    private Map<String, String> cache = new HashMap<>();
+    private ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    
+    public String readData(String key) {
+        lock.readLock().lock();
+        try {
+            return cache.get(key);
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+    
+
+    public void writeData(String key, String value) {
+        lock.writeLock().lock();
+        try {
+            cache.put(key, value);
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+}
+```
+
+### Synchronized Blocks And Methods
+Synchronized blocks are pieces of Java code that can be executed by only one thread at a time. 
+
+    // SYNTAX
+    synchronized (Object reference_object) {
+     // code you want to be synchronized
+    }
+
+When you create a synchronized block, you need to pass a **reference object**. In the above example ”this” or the current object is the reference object, which means if multiple instances of the are created, they won’t be synchronized.
+
+You can also make a method synchronized by using the synchronized keyword.
+
+    public synchronized int increment();
+
+
+Synchronization： 
+    - necessary for mutually exclusive access to blocks of and for reliable communication between threads.This would ensure that only one thread can enter this method at the same time. 
+    - Another thread which is calling this method would wait until the first thread leaves this method.
+
+```java
+public synchronized void critial() {
+    // some thread critical stuff
+}
+```
+
+All code which is protected by the same lock can only be executed by one thread at the same time.
+
+For example the following data structure will ensure that only one thread can access the inner block of the add() and next() methods.
+
+
+```java
+package de.vogella.pagerank.crawler;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * Data structure for a web crawler. Keeps track of the visited sites and keeps
+ * a list of sites which needs still to be crawled.
+ *
+ * @author Lars Vogel
+ *
+ */
+public class CrawledSites {
+    private List<String> crawledSites = new ArrayList<String>();
+    private List<String> linkedSites = new ArrayList<String>();
+
+    public void add(String site) {
+        synchronized (this) {
+            if (!crawledSites.contains(site)) {
+                linkedSites.add(site);
+            }
+        }
+    }
+
+    /**
+     * Get next site to crawl. Can return null (if nothing to crawl)
+     */
+    public String next() {
+        if (linkedSites.size() == 0) {
+            return null;
+        }
+        synchronized (this) {
+            // Need to check again if size has changed
+            if (linkedSites.size() > 0) {
+                String s = linkedSites.get(0);
+                linkedSites.remove(0);
+                crawledSites.add(s);
+                return s;
+            }
+            return null;
+        }
+    }
+
+}
+```
+<em>Volatile</em>>
+
+if declared with the volatile keyword then it is guaranteed that any thread that reads the field will see the most recently written value. The volatile keyword will not perform any mutual exclusive lock on the variable.
+
+## Deadlocks
+
+Deadlock occurs when two or more threads are unable to proceed because each of them is waiting for the other to release a resource or take a specific action. 
+
+Consider this, you have two threads and two locks (let’s call them threadA, threadB, lockA and lockB). ThreadA will try to acquire lockA first and if it’s successful, it will try to acquire lockB. ThreadB, on the other hand, tries to acquire lockB first and then lockA.
+
+```java
+import java.util.concurrent.locks.ReentrantLock;
+
+public class Main {
+    public static void main(String[] args) {
+        ReentrantLock lockA = new ReentrantLock();
+        ReentrantLock lockB = new ReentrantLock();
+
+        Thread threadA = new Thread(() -> {
+            lockA.lock();
+            try {
+                System.out.println("Thread-A has acquired Lock-A");
+                lockB.lock();
+                try {
+                    System.out.println("Thread-A has acquired Lock-B");
+                } finally {
+                    lockB.unlock();
+                }
+            } finally {
+                lockA.unlock();
+            }
+        });
+
+        Thread threadB = new Thread(() -> {
+            lockB.lock();
+            try {
+                System.out.println("Thread-B has acquired Lock-B");
+                lockA.lock();
+                try {
+                    System.out.println("Thread-B has acquired Lock-A");
+                } finally {
+                    lockA.unlock();
+                }
+            } finally {
+                lockB.unlock();
+            }
+        });
+        
+        threadA.start();
+        threadB.start();
+    }
+}
+```
+Here, Thread A acquires lockA and is waiting to lockB. Thread B has acquired lockB and is waiting to acquire lockA.
+
+Here, threadA will never acquire lockB as it is held by threadB. Similarly, threadB can never acquire lockA as it is held by threadA. This kind of situation is called a deadlock.
+
+### How to avoid deadlocks
+
+1. Define a strict order in which resources should be acquired. All threads must follow the same order when requesting resources.
+2. Avoid nesting of locks or synchronized blocks. The cause for the deadlock in the previous example was that the threads were not able to release one lock without acquiring the other lock.
+3. Ensure that threads do not acquire multiple resources simultaneously. If a thread holds one resource and needs another, it should release the first resource before attempting to acquire the second. This prevents circular dependencies and reduces the likelihood of deadlocks.
+4. Set timeouts when acquiring locks or resources. If a thread fails to acquire a lock within a specified time, it releases all acquired locks and tries again later. This prevents a situation where a thread holds a lock indefinitely, potentially causing a deadlock.
+
+
 ## Problems
 - ex. leetcode 1114. Print in order 
+
 
 ### Method 1:  Pair Synchronization
 
@@ -750,7 +1067,7 @@ class Foo {
 
 
 
-### Method 3: volatile
+### Method 4: volatile
 
 ```java
 class Foo {
