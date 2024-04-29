@@ -8,7 +8,7 @@
 - Goal: enable multitasking
 
 - Problems caused by concurrency -- multiple processes/threads share some resources:
-	1. race conditions: a race condition is a condition of a program where its behavior depends on relative timing or interleaving of multiple threads or processes. occurs when two or more threads can access shared data and they try to change it at the same time
+	1. race conditions: a race condition is a condition of a program where its behavior depends on relative timing or interleaving of multiple threads or processes. occurs when two or more threads can access shared data and they try to change it at the same time.
 	2. deadlocks: the concurrent processes wait for some necessary resources from each other. As a result, none of them can make progress.
 	3. resource starvation: a process is perpetually denied necessary resources to progress its works.
     4. visibility problem occurs if thread A reads shared data which is later changed by thread B and thread A is unaware of this change. Leads to Liveness failure: The program does not react anymore due to problems in the concurrent access of data, e.g. deadlocks.
