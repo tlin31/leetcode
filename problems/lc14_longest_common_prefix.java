@@ -70,3 +70,10 @@ public String longestCommonPrefix(String[] strs) {
     }
     return pre;
 }
+
+
+
+
+
+
+

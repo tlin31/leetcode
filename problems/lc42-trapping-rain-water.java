@@ -107,6 +107,7 @@ public int trap(int[] height) {
     int[] max_left = new int[height.length];
     int[] max_right = new int[height.length];
 
+    // boundries are -1 and -2 because 2 edge can't store water
     for (int i = 1; i < height.length - 1; i++) {
         max_left[i] = Math.max(max_left[i - 1], height[i - 1]);
     }
@@ -162,7 +163,6 @@ stats:
                     if (height[left] >= maxleft) 
                         maxleft = height[left];
                     else 
-
                         // water accumulate between the max left & current left
                         res += maxleft - height[left];
 

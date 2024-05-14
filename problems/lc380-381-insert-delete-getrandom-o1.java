@@ -1,4 +1,4 @@
-380. Insert Delete GetRandom O(1) - Medium
+380&381. Insert Delete GetRandom O(1) - Medium/hard
 
 Design a data structure that supports all following operations in average O(1) time.
 
@@ -52,7 +52,7 @@ method:
 		Hashmap (element, its index)
 		Array List of elements.
 
-	- GetRandom: There is no indexes in hashmap, and hence to get true random value, one has first to convert 
+	- GetRandom: There is no indexes in hashmap, and hence to get true random value, one has first convert 
 	  hashmap keys in a list, that would take linear time. 
 
 	  The solution here is to build a list of keys aside and to use this list to compute GetRandom 
@@ -158,7 +158,8 @@ public class RandomizedSet {
 	    /** Inserts a value to the set. Returns true if the set did not already contain the specified element. */
 	    public boolean insert(int val) {
 	        boolean contain = locs.containsKey(val);
-	        if ( ! contain ) locs.put( val, new HashSet<Integer>() ); 
+	        if ( ! contain ) 
+	        	locs.put( val, new HashSet<Integer>() ); 
 	        locs.get(val).add(nums.size());        
 	        nums.add(val);
 	        return ! contain ;
@@ -167,7 +168,7 @@ public class RandomizedSet {
 	    /** Removes a value from the set. Returns true if the set contained the specified element. */
 	    public boolean remove(int val) {
 	        boolean contain = locs.containsKey(val);
-	        if ( ! contain ) return false;
+	        if ( !contain ) return false;
 
 	        int loc = locs.get(val).iterator().next();
             locs.get(val).remove(loc);

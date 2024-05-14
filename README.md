@@ -24,8 +24,11 @@ note:
 
         while(leftPointer< RightPointer) 
 
--------------
-6. Sliding Windows:
+6. Peak and valley:
+- when there are a simultaneously increasing or decreasing array
+- ex. lc 135-Candy
+
+Sliding Windows:
 	
 	problem: [lc3 - Longest Substring Without Repeating Characters](problems/lc3_longest_substring_without_repeating_char.java)
 			 [lc 76 - Minimum Window Substring](problems/lc76-min-window-substr.java)

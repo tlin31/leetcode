@@ -43,7 +43,7 @@ Constraints:
 
 ******************************************************
 key:
-	- 
+	- DP
 	- edge case:
 		1) empty string, return empty
 		2)
@@ -95,6 +95,10 @@ Method:
         dp.put(0, 0);
 
         for (int[] job : jobs) {
+            // floorEntry()gets the max key&value pair that's smaller than job[0]
+            // It returns a key-value mapping associated with the greatest key less than or equal 
+            // to the given key, or null if there is no such key.
+
             int curProfit = dp.floorEntry(job[0]).getValue() + job[2];
 
             if (cur > dp.lastEntry().getValue())
@@ -149,6 +153,7 @@ public class JobScheduling {
         return dp[n-1];
     }
 
+    //binary search
     private int search(Job[] jobs, int index) {
         int start = 0, end = index - 1;
         while (start <= end) {
@@ -183,57 +188,4 @@ public class JobScheduling {
         return dp[-1][1]
 
 
-
-=======================================================================================================
-method 2:
-
-Stats:
-
-	- 
-	- 
-
-
-Method:
-
-	-	
-	-	
-
-
-
-
-
-
-
-
-
-
-~~~~~~~~~~~~~~~~~~~~~~~     python      ~~~~~~~~~~~~~~~~~~~~~~~~
-
-
-=======================================================================================================
-method 3:
-
-Stats:
-
-	- 
-	- 
-
-
-Method:
-
-	-	
-	-	
-
-
-
-
-
-
-
-
-
-
-
-
-~~~~~~~~~~~~~~~~~~~~~~~     python      ~~~~~~~~~~~~~~~~~~~~~~~~
 

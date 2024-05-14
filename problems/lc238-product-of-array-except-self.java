@@ -24,8 +24,8 @@ for the purpose of space complexity analysis.)
 key:
 	- left product and right product
 	- edge case:
-		1) empty string, return empty
-		2)
+		1) empty array
+		2) bunch of zeros or bunch of 1s
 
 ******************************************************
 

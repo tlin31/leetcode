@@ -150,7 +150,7 @@ public int romanToInt(String str) {
         if(a[s - 'A'] > a[prev - 'A']) {
             sum = sum - 2 * a[prev - 'A'];
         }
-        sum = sum + a[s - 'A'];
+        sum += a[s - 'A'];
         prev = s;
     }
     return sum;

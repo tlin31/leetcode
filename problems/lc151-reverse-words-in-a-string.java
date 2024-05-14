@@ -131,7 +131,7 @@ Method:
 
 
 	public String reverseWords(String s) {
-		String[] words = s.trim().split(" +");
+		String[] words = s.trim().split(" +");//first trim leading/trailing spaces, then split by space
 		Collections.reverse(Arrays.asList(words));
 		return String.join(" ", words);
 	}
@@ -153,10 +153,13 @@ Method:
 
 public String reverseWords(String s) {
         if (s.length() < 1) return s; // empty string
+
         int startIdx = 0;
         char[] str = s.toCharArray();
+
         // reverse whole string
         reverse(str, 0, str.length - 1);
+
         // reverse word one by one
         for (int i = 0; i < str.length; i++) {
             if (str[i] != ' ') {
@@ -169,6 +172,7 @@ public String reverseWords(String s) {
                 i = j;
             }
         }
+
         return new String(str, 0, startIdx);
     }
 
@@ -179,4 +183,6 @@ public String reverseWords(String s) {
             str[end] = tmp;
         }
     }
+
+
 
