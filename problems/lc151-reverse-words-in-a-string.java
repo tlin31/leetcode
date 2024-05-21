@@ -163,7 +163,8 @@ public String reverseWords(String s) {
         // reverse word one by one
         for (int i = 0; i < str.length; i++) {
             if (str[i] != ' ') {
-                if (startIdx != 0) str[startIdx++] = ' ';
+                if (startIdx != 0) 
+                	str[startIdx++] = ' ';
                 int j = i;
                 while (j < str.length && str[j] != ' ')
                     str[startIdx++] = str[j++];

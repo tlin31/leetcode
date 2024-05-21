@@ -44,11 +44,9 @@ https://www.geeksforgeeks.org/different-approaches-to-concurrent-programming-in-
 - Every thread has its own memory cache. 
 - If a thread reads shared data, it stores this data in its own memory cache.
 - A thread can re-read the shared data.
-
 - A thread in Java is the direction or path that is taken while a program is being executed. Generally, all the programs have at least one thread, known as the main thread, that is provided by the JVM or Java Virtual Machine at the starting of the program’s execution. At this point, when the main thread is provided, the main() method is invoked by the main thread.
 - Thread is critical in the program because it enables multiple operations to take place within a single method. Each thread in the program often has its own **program counter, stack, and local variable**
 - Thread in Java enables concurrent execution, dividing tasks for improved performance. It's essential for handling operations like I/O and network communication efficiently. Understanding threads is crucial for responsive Java applications. 
-
 - Extending java.lang.Thread class
 - Implementing Runnable interface
 
@@ -112,7 +110,7 @@ Sceanrio: user need to download files from 2 different servers, each server has 
 
 ## Implement concurrent programming
 
-### Method extends Thread
+### Method 1. Method extends Thread
 
 --> just override the thread object’s run() method. The run() method will be invoked when the thread is started.
 
@@ -143,7 +141,7 @@ Note:
 
 
 
-### Method 1. Separate Class that implements Runnable
+### Method 2. Separate Class that implements Runnable
 
 - Pro:
     - Loose Coupling: Since a separate class can be reused
@@ -286,7 +284,7 @@ Output:
 
 <summary>Other methods that'll get race conditions</summary>
 
-### Method 2: Main App Implements Runnable
+### Method 3: Main App Implements Runnable
 
 - Pros:
     - run method can call methods in the main application including the private ones.
@@ -384,7 +382,7 @@ Output:
     pool-1-thread-1 Counter: 1
     pool-1-thread-1 Counter: 2   
 
-### Method 3.1: Inner Class And Anonymous Inner Class that Implements Runnable 
+### Method 4.1: Inner Class And Anonymous Inner Class that Implements Runnable 
 
 - Pro:
     - easy to access the main application because methods in inner classes can access any public or private methods or instance variables of the outer class.
@@ -486,7 +484,7 @@ Output:
 
 
 
-### Method 3.2: Anonymous Inner Class that implements Runnable
+### Method 4.2: Anonymous Inner Class that implements Runnable
 
 - shorten the syntax by using Anonymous Inner Classes where the user gives the class definition and instantiate the class all in one fell swoop. 
 - Pro:
@@ -568,7 +566,7 @@ Output:
 
 
 
-### Method 4: Lambda Expressions
+### Method 5: Lambda Expressions
 
 Lambda expressions are very similar in behaviour to anonymous inner classes. 
 They have complete access to code from surrounding classes including the private data. 
