@@ -43,28 +43,27 @@ stats:
 	- 时间复杂度：排序的话算作 O（K log（K））,最外层的 for 循环，所以就是 O（n K log（K））。
 	- 空间复杂度：O（NK），用来存储结果。
 
-	public List<List<String>> groupAnagrams(String[] strs) {
-		if (strs == null || strs.length == 0) 
-			return new ArrayList<List<String>>();
+class Solution {
+    public List<List<String>> groupAnagrams(String[] strs) {
+        Map<String, List<String>> map = new HashMap<>();
+        
+        for (String word : strs) {
+            char[] chars = word.toCharArray();
+            Arrays.sort(chars);
+            String sortedWord = new String(chars);
+            
+            if (!map.containsKey(sortedWord)) {
+                map.put(sortedWord, new ArrayList<>());
+            }
+            
+            map.get(sortedWord).add(word);
+        }
+        
+        return new ArrayList<>(map.values());
+    }
+}
 
-		Map<String, List<String>> map = new HashMap<String, List<String>>();
 
-		Arrays.sort(strs);
-
-		for (String s : strs) {
-			char[] ca = s.toCharArray();
-			Arrays.sort(ca);
-
-			//!!! string.valueof
-			String keyStr = String.valueOf(ca);
-
-			if (!map.containsKey(keyStr)) 
-				map.put(keyStr, new ArrayList<String>());
-			
-			map.get(keyStr).add(s);
-		}
-		return new ArrayList<List<String>>(map.values());
-	}
 
 
 =======================================================================================================

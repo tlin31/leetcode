@@ -7,11 +7,9 @@
 4. Quick Sort: Java's sort 
 5. Insertion Sort
 6. Merge Sort
-
-
-Bubble Sort
-Heap Sort
-Radix Sort
+7. Heap Sort
+8. Radix Sort
+9. Bubble Sort
 
 ## Summary:
 
@@ -44,7 +42,7 @@ Tips:
 	4) Create an array outputArray[] of size N.
 	5) Traverse array inputArray[] from end and update outputArray[ countArray[ inputArray[i] ] – 1] = inputArray[i]. Also, update countArray[ inputArray[i] ] = countArray[ inputArray[i] ]- – .
 
-```
+```java
 import java.util.Arrays;
 
 public class CountSort {
@@ -343,6 +341,10 @@ class GFG {
 
 ### 3. In Problem
 
+
+
+
+
 ## Insertion sort
 
 Tips:
@@ -420,8 +422,240 @@ class InsertionSort {
 
 
 
+## 7.Heap Sort
+
+Heap sort is an in-place algorithm. 
+
+Its typical implementation is not stable but can be made stable 
+
+Typically 2-3 times slower than well-implemented QuickSort.  The reason for slowness is a lack of locality of reference.
+
+### Algorithm
+First convert the array into heap data structure using heapify, then one by one delete the root node of the Max-heap and replace it with the last node in the heap and then heapify the root of the heap. Repeat this process until size of heap is greater than 1.
+
+1. Build a heap from the given input array.
+2. Repeat the following steps until the heap contains only one element:
+3. Swap the root element of the heap (which is the largest element) with the last element of the heap.
+4. Remove the last element of the heap (which is now in the correct position).
+5. Heapify the remaining elements of the heap.
+6. The sorted array is obtained by reversing the order of the elements in the input array.
+
+```java
+ public void sort(int arr[])
+    {
+        int N = arr.length;
+
+        // Build heap (rearrange array)
+        for (int i = N / 2 - 1; i >= 0; i--)
+            heapify(arr, N, i);
+
+        // One by one extract an element from heap
+        for (int i = N - 1; i > 0; i--) {
+            // Move current root to end
+            int temp = arr[0];
+            arr[0] = arr[i];
+            arr[i] = temp;
+
+            // call max heapify on the reduced heap
+            heapify(arr, i, 0);
+        }
+    }
+
+    // To heapify a subtree rooted with node i which is
+    // an index in arr[]. n is size of heap
+    void heapify(int arr[], int N, int i)
+    {
+        int largest = i; // Initialize largest as root
+        int l = 2 * i + 1; // left = 2*i + 1
+        int r = 2 * i + 2; // right = 2*i + 2
+
+        // If left child is larger than root
+        if (l < N && arr[l] > arr[largest])
+            largest = l;
+
+        // If right child is larger than largest so far
+        if (r < N && arr[r] > arr[largest])
+            largest = r;
+
+        // If largest is not root
+        if (largest != i) {
+            int swap = arr[i];
+            arr[i] = arr[largest];
+            arr[largest] = swap;
+
+            // Recursively heapify the affected sub-tree
+            heapify(arr, N, largest);
+        }
+    }
+```
+### Complexity & Analysis
+Time Complexity: O(N log N)
+Auxiliary Space: O(log n), due to the recursive call stack. However, auxiliary space can be O(1) for iterative implementation.
+
+Advantages of Heap Sort:
+
+1. Efficient Time Complexity: Heap Sort has a time complexity of O(n log n) in all cases. This makes it efficient for sorting large datasets. The log n factor comes from the height of the binary heap, and it ensures that the algorithm maintains good performance even with a large number of elements.
+
+2. Memory Usage – Memory usage can be minimal (by writing an iterative heapify() instead of a recursive one). So apart from what is necessary to hold the initial list of items to be sorted, it needs no additional memory space to work
+
+3. Simplicity –  It is simpler to understand than other equally efficient sorting algorithms because it does not use advanced computer science concepts such as recursion.
+
+Disadvantages of Heap Sort:
+1. Costly: Heap sort is costly as the constants are higher compared to merge sort even if the time complexity is O(n Log n) for both.
+
+2. Unstable: Heap sort is unstable. It might rearrange the relative order.
+
+3. Efficient: Heap Sort is not very efficient when working with highly complex data. 
+
+
+## 8. Radix Sort
+Radix Sort is a linear sorting algorithm that sorts elements by processing them digit by digit. It is an efficient sorting algorithm for integers or strings with fixed-size keys. 
+
+distributes the elements into buckets based on each digit’s value. By repeatedly sorting the elements by their significant digits, from the least significant to the most significant
+
+non-comparative sorting
+
+### Complexity
+
+Time complexity： O(d * (n + b)), where d is the number of digits, n is the number of elements, and b is the base of the number system being used.
+
+In practical implementations, radix sort is often faster than **other comparison-based sorting** algorithms, such as quicksort or merge sort, for large datasets, especially when the keys have many digits. 
+
+
+Auxiliary Space: 
+
+O(n + b), where n is the number of elements and b is the base of the number system. This space complexity comes from the need to create buckets for each digit value and to copy the elements back to the original array after each digit has been sorted.
+
+
+### Algorithm
+1. Start with the least significant digit (rightmost digit).
+2. Sort the values based on the digit in focus by first putting the values in the correct bucket based on the digit in focus, and then put them back into array in the correct order.
+3. Move to the next digit, and sort again, like in the step above, until there are no digits left.
+
+```java
+class Radix {
+
+    // A utility function to get maximum value in arr[]
+    static int getMax(int arr[], int n)
+    {
+        int mx = arr[0];
+        for (int i = 1; i < n; i++)
+            if (arr[i] > mx)
+                mx = arr[i];
+        return mx;
+    }
+
+    // A function to do counting sort of arr[] according to
+    // the digit represented by exp.
+    static void countSort(int arr[], int n, int exp)
+    {
+        int output[] = new int[n]; // output array
+        int i;
+        int count[] = new int[10];
+        Arrays.fill(count, 0);
+
+        // Store count of occurrences in count[]
+        for (i = 0; i < n; i++)
+            count[(arr[i] / exp) % 10]++;
+
+        // Change count[i] so that count[i] now contains
+        // actual position of this digit in output[]
+        for (i = 1; i < 10; i++)
+            count[i] += count[i - 1];
+
+        // Build the output array
+        for (i = n - 1; i >= 0; i--) {
+            output[count[(arr[i] / exp) % 10] - 1] = arr[i];
+            count[(arr[i] / exp) % 10]--;
+        }
+
+        // Copy the output array to arr[], so that arr[] now
+        // contains sorted numbers according to current
+        // digit
+        for (i = 0; i < n; i++)
+            arr[i] = output[i];
+    }
+
+    // The main function to that sorts arr[] of
+    // size n using Radix Sort
+    static void radixsort(int arr[], int n)
+    {
+        // Find the maximum number to know number of digits
+        int m = getMax(arr, n);
+
+        // Do counting sort for every digit. Note that
+        // instead of passing digit number, exp is passed.
+        // exp is 10^i where i is current digit number
+        for (int exp = 1; m / exp > 0; exp *= 10)
+            countSort(arr, n, exp);
+    }
+
+    // A utility function to print an array
+    static void print(int arr[], int n)
+    {
+        for (int i = 0; i < n; i++)
+            System.out.print(arr[i] + " ");
+    }
+
+    // Main driver method
+    public static void main(String[] args)
+    {
+        int arr[] = { 170, 45, 75, 90, 802, 24, 2, 66 };
+        int n = arr.length;
+
+        // Function Call
+        radixsort(arr, n);
+        print(arr, n);
+    }
+}
+```
+
+
 
 ## Bubble Sort
+repeatedly swapping the adjacent elements if they are in the wrong order.
+
+### Complexity
+Time Complexity: O(N^2)
+
+Auxiliary Space: O(1)
+
+
+
+### Algorithm
+- traverse from left and compare adjacent elements and the higher one is placed at right side. 
+- In this way, the largest element is moved to the rightmost end at first. 
+- This process is then continued to find the second largest and place it and so on until the data is sorted.
+
+```java
+ static void bubbleSort(int arr[], int n)
+    {
+        int i, j, temp;
+        boolean swapped;
+        for (i = 0; i < n - 1; i++) {
+            swapped = false;
+            for (j = 0; j < n - i - 1; j++) {
+                if (arr[j] > arr[j + 1]) {
+                    
+                    // Swap arr[j] and arr[j+1]
+                    temp = arr[j];
+                    arr[j] = arr[j + 1];
+                    arr[j + 1] = temp;
+                    swapped = true;
+                }
+            }
+
+            // If no two elements were
+            // swapped by inner loop, then break
+            if (swapped == false)
+                break;
+        }
+    }
+
+```
+
+
+
 
 
 

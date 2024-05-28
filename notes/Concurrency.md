@@ -39,7 +39,7 @@ https://www.geeksforgeeks.org/different-approaches-to-concurrent-programming-in-
 **thread: achieve parallel processing or asynchronous behavior.** 
 - lightweight process
 - is the segment of a process which means a process can have multiple threads and these multiple threads are contained within a process. 
-- A thread has three states: Running, Ready, and Blocked. 
+- A thread has 6 states: New State, Runnable State, Blocked State, Waiting State, Timed Waiting State, Terminated State 
 - It has its own **call stack**, but can access shared data of other threads in the same process.
 - Every thread has its own memory cache. 
 - If a thread reads shared data, it stores this data in its own memory cache.
@@ -167,7 +167,7 @@ Steps:
 
 5. Calling the shutdown method means shutting down the thread that’s watching to see if any new tasks have been added or not.
 
-Executors and Thread Pools
+### Method 2.1 Executors and Thread Pools
 
 1. reuse existing threads while also limiting the number of threads you can create 
 2. The ExecutorService class allows us to create a certain number of threads and distribute tasks among the threads. Since you are creating a fixed number of threads, you have a lot of control over the performance of your application.
@@ -278,6 +278,14 @@ Output:
     Thread: pool-1-thread-1 Counter: 3 Task: task 5
     Thread: pool-1-thread-1 Counter: 4 Task: task 5
     Thread: pool-1-thread-1 Counter: 5 Task: task 5
+
+
+### Method 3. 实现 Callable 接口，并结合 Future 实现
+首先定义一个 Callable 的实现类，并实现 call 方法。call 方法是带返回值的。
+然后通过 FutureTask 的构造方法，把这个 Callable 实现类传进去。
+把 FutureTask 作为 Thread 类的 target ，创建 Thread 线程对象。
+通过 FutureTask 的 get 方法获取线程的执行结果。
+
 
 
 <details>
@@ -676,7 +684,180 @@ Output:
     pool-1-thread-2 Counter:3
     pool-1-thread-2 Counter:4
 
+
 </details>
+
+## Thread Pool
+
+    Def: A thread pool reuses previously created threads to execute current tasks and offers a solution to the problem of thread cycle overhead and resource thrashing
+
+https://www.geeksforgeeks.org/thread-pools-java/
+
+### Scenario
+
+Server Programs such as database and web servers repeatedly execute requests from multiple clients and these are oriented around processing a large number of short tasks. An approach for building a server application would be to create a new thread each time a request arrives and service this new request in the newly created thread. While this approach seems simple to implement, it has significant disadvantages. A server that creates a new thread for every request would spend more time and consume more system resources in creating and destroying threads than processing actual requests.
+
+To use thread pools, we first create a object of ExecutorService and pass a set of tasks to it. ThreadPoolExecutor class allows to set the core and maximum pool size.The runnables that are run by a particular thread are executed sequentially.
+
+![fig 6](https://media.geeksforgeeks.org/wp-content/uploads/Thread_Pool.jpg)
+
+### Implementation method
+
+1. Executors.newFixedThreadPool：创建一个固定大小的线程池，可控制并发的线程数，超出的线程会在队列中等待。
+2. Executors.newCachedThreadPool：创建一个可缓存的线程池，若线程数超过处理所需，缓存一段时间后会回收，若线程数不够，则新建线程。
+3. Executors.newSingleThreadExecutor：创建单个线程数的线程池，它可以保证先进先出的执行顺序。
+
+单个线程的线程池相比于线程来说，它的优点有以下 2 个：
+- 可以复用线程：即使是单个线程池，也可以复用线程。
+- 提供了任务管理功能：单个线程池也拥有任务队列，在任务队列可以存储多个任务，这是线程无法实现的，并且当任务队列满了之后，可以执行拒绝策略，这些都是线程不具备的。
+
+4. Executors.newScheduledThreadPool：创建一个可以执行延迟任务的线程池。 threadPool.schedule()
+5. Executors.newSingleThreadScheduledExecutor：创建一个单线程的可以执行延迟任务的线程池。
+6. Executors.newWorkStealingPool：创建一个抢占式执行的线程池(任务执行顺序不确定)【JDK 1.8 添加】。
+7. ThreadPoolExecutor：手动创建线程池的方式，它创建时最多可以设置 7 个参数。
+
+
+### Thread Pool Example: FixedThreadPool
+
+Steps to be followed
+1. Create a task(Runnable Object) to execute
+2. Create Executor Pool using Executors
+3. Pass tasks to Executor Pool
+4. Shutdown the Executor Pool
+
+```java
+public static void fixedThreadPool() {
+    // 创建 2 个线程的线程池
+    ExecutorService threadPool = Executors.newFixedThreadPool(2);
+
+    // 创建任务
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            System.out.println("任务被执行,线程:" + Thread.currentThread().getName());
+        }
+    };
+
+    // 线程池执行任务(一次添加 4 个任务)
+    // 执行任务的方法有两种:submit 和 execute
+    threadPool.submit(runnable);  // 执行方式 1:submit
+    threadPool.execute(runnable); // 执行方式 2:execute
+    threadPool.execute(runnable);
+    threadPool.execute(runnable);
+}
+```
+https://www.51cto.com/article/703288.html
+
+
+
+```java
+import java.text.SimpleDateFormat; 
+import java.util.Date; 
+import java.util.concurrent.ExecutorService; 
+import java.util.concurrent.Executors; 
+
+// Task class to be executed (Step 1) 
+class Task implements Runnable 
+{ 
+    private String name; 
+    
+    public Task(String s) 
+    { 
+        name = s; 
+    } 
+    
+    // Prints task name and sleeps for 1s 
+    // This Whole process is repeated 5 times 
+    public void run() 
+    { 
+        try
+        { 
+            for (int i = 0; i<=5; i++) 
+            { 
+                if (i==0) 
+                { 
+                    Date d = new Date(); 
+                    SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss"); 
+                    System.out.println("Initialization Time for"
+                            + " task name - "+ name +" = " +ft.format(d)); 
+                    //prints the initialization time for every task 
+                } 
+                else
+                { 
+                    Date d = new Date(); 
+                    SimpleDateFormat ft = new SimpleDateFormat("hh:mm:ss"); 
+                    System.out.println("Executing Time for task name - "+ 
+                            name +" = " +ft.format(d)); 
+                    // prints the execution time for every task 
+                } 
+                Thread.sleep(1000); 
+            } 
+            System.out.println(name+" complete"); 
+        } 
+        
+        catch(InterruptedException e) 
+        { 
+            e.printStackTrace(); 
+        } 
+    } 
+} 
+public class Test 
+{ 
+    // Maximum number of threads in thread pool 
+    static final int MAX_T = 3;          
+
+    public static void main(String[] args) 
+    { 
+        // creates five tasks 
+        Runnable r1 = new Task("task 1"); 
+        Runnable r2 = new Task("task 2"); 
+        Runnable r3 = new Task("task 3"); 
+        Runnable r4 = new Task("task 4"); 
+        Runnable r5 = new Task("task 5");    
+        
+        // creates a thread pool with MAX_T no. of 
+        // threads as the fixed pool size(Step 2) 
+        ExecutorService pool = Executors.newFixedThreadPool(MAX_T); 
+        
+        // passes the Task objects to the pool to execute (Step 3) 
+        pool.execute(r1); 
+        pool.execute(r2); 
+        pool.execute(r3); 
+        pool.execute(r4); 
+        pool.execute(r5); 
+        
+        // pool shutdown ( Step 4) 
+        pool.shutdown();     
+    } 
+} 
+```
+As seen in the execution of the program, the task 4 or task 5 are executed only when a thread in the pool becomes idle. Until then, the extra tasks are placed in a queue.
+
+
+### advantages 
+ex. when you want to process 100 requests at a time, but do not want to create 100 Threads for the same, so as to reduce JVM overload. You can use this approach to create a ThreadPool of 10 Threads and you can submit 100 requests to this ThreadPool. 
+
+ThreadPool will create maximum of 10 threads to process 10 requests at a time.  After process completion of any single Thread, 
+
+ThreadPool will internally allocate the 11th request to this Thread and will keep on doing the same to all the remaining requests.
+
+### Risks
+
+1. Deadlock : While deadlock can occur in any multi-threaded program, thread pools introduce another case of deadlock, one in which all the executing threads are waiting for the results from the blocked threads waiting in the queue due to the unavailability of threads for execution.
+2. Thread Leakage :Thread Leakage occurs if a thread is removed from the pool to execute a task but not returned to it when the task completed. As an example, if the thread throws an exception and pool class does not catch this exception, then the thread will simply exit, reducing the size of the thread pool by one. If this repeats many times, then the pool would eventually become empty and no threads would be available to execute other requests.
+3. Resource Thrashing :If the thread pool size is very large then time is wasted in context switching between threads. Having more threads than the optimal number may cause starvation problem leading to resource thrashing as explained.
+
+### Important Points
+1. The Thread Pool has to be ended explicitly at the end. If this is not done, then the program goes on executing and never ends. Call shutdown() on the pool to end the executor. If you try to send another task to the executor after shutdown, it will throw a RejectedExecutionException.
+2. You can restrict maximum number of threads that can run in JVM, reducing chances of JVM running out of memory.
+3. If you need to implement your loop to create new threads for processing, using ThreadPool will help to process faster, as ThreadPool does not create new Threads after it reached it’s max limit.
+After completion of Thread Processing, ThreadPool can use the same Thread to do another process(so saving the time and resources to create another Thread.)
+
+### Tuning Thread Pool
+The optimum size of the thread pool depends on the number of processors available and the nature of the tasks. On a N processor system for a queue of only computation type processes, a maximum thread pool size of N or N+1 will achieve the maximum efficiency. 
+
+But tasks may wait for I/O and in such a case we take into account the ratio of waiting time(W) and service time(S) for a request; resulting in a maximum pool size of N*(1+ W/S) for maximum efficiency.
+
 
 ## Race Condition
 
@@ -883,7 +1064,14 @@ public class CrawledSites {
 ```
 <em>Volatile</em>
 
+volatile is used to indicate that a variable's value can be modified by different threads. Used with the syntax, volatile dataType variableName = x; It ensures that changes made to a volatile variable by one thread are immediately visible to other threads.
+
+ex.
+
+    private static volatile int MY_INT = 0;
+
 if declared with the volatile keyword then it is guaranteed that any thread that reads the field will see the most recently written value. The volatile keyword will not perform any mutual exclusive lock on the variable.
+
 
 ## Deadlocks
 
@@ -945,6 +1133,13 @@ Here, threadA will never acquire lockB as it is held by threadB. Similarly, thre
 3. Ensure that threads do not acquire multiple resources simultaneously. If a thread holds one resource and needs another, it should release the first resource before attempting to acquire the second. This prevents circular dependencies and reduces the likelihood of deadlocks.
 4. Set timeouts when acquiring locks or resources. If a thread fails to acquire a lock within a specified time, it releases all acquired locks and tries again later. This prevents a situation where a thread holds a lock indefinitely, potentially causing a deadlock.
 
+尽量使用 tryLock(long timeout, TimeUnit unit)的方法(ReentrantLock、ReentrantReadWriteLock)，设置超时时间，超时可以退出防止死锁。
+
+尽量使用 Java. util. concurrent 并发类代替自己手写锁。
+
+尽量降低锁的使用粒度，尽量不要几个功能用同一把锁。
+
+尽量减少同步的代码块。
 
 ## Problems
 - ex. leetcode 1114. Print in order 
@@ -1136,6 +1331,91 @@ class Foo {
     }
 }
 ```
+## ThreadLocal 
+
+def: 是线程本地存储，在每个线程中都创建了一个 ThreadLocalMap 对象，每个线程可以访问自己内部 ThreadLocalMap 对象内的 value。通过这种方式，避免资源在多线程间共享。
+
+经典的使用场景是为每个线程分配一个 JDBC 连接 Connection。这样就可以保证每个线程的都在各自的 Connection 上进行数据库的操作，不会出现 A 线程关了 B线程正在使用的 Connection； 还有 Session 管理 等问题。
+
+```java
+public class TestThreadLocal {
+    
+    //线程本地存储变量
+    private static final ThreadLocal<Integer> THREAD_LOCAL_NUM = new ThreadLocal<Integer>() {
+        @Override
+        protected Integer initialValue() {
+            return 0;
+        }
+    };
+ 
+    public static void main(String[] args) {
+        for (int i = 0; i <3; i++) {//启动三个线程
+            Thread t = new Thread() {
+                @Override
+                public void run() {
+                    add10ByThreadLocal();
+                }
+            };
+            t.start();
+        }
+    }
+    
+    /**
+     * 线程本地存储变量加 5
+     */
+    private static void add10ByThreadLocal() {
+        for (int i = 0; i <5; i++) {
+            Integer n = THREAD_LOCAL_NUM.get();
+            n += 1;
+            THREAD_LOCAL_NUM.set(n);
+            System.out.println(Thread.currentThread().getName() + " : ThreadLocal num=" + n);
+        }
+    }
+    
+}
+```
+
+
+打印结果：启动了 3 个线程，每个线程最后都打印到 "ThreadLocal num=5"，而不是 num 一直在累加直到值等于 15
+
+    Thread-0 : ThreadLocal num=1
+    Thread-1 : ThreadLocal num=1
+    Thread-0 : ThreadLocal num=2
+    Thread-0 : ThreadLocal num=3
+    Thread-1 : ThreadLocal num=2
+    Thread-2 : ThreadLocal num=1
+    Thread-0 : ThreadLocal num=4
+    Thread-2 : ThreadLocal num=2
+    Thread-1 : ThreadLocal num=3
+    Thread-1 : ThreadLocal num=4
+    Thread-2 : ThreadLocal num=3
+    Thread-0 : ThreadLocal num=5
+    Thread-2 : ThreadLocal num=4
+    Thread-2 : ThreadLocal num=5
+    Thread-1 : ThreadLocal num=5
+
+
+## Questions:
+
+1. synchronized 和 Lock 有什么区别？
+
+synchronized 可以给类、方法、代码块加锁；而 lock 只能给代码块加锁。
+
+synchronized 不需要手动获取锁和释放锁，使用简单，发生异常会自动释放锁，不会造成死锁；而 lock 需要自己加锁和释放锁，如果使用不当没有 unLock()去释放锁就会造成死锁。
+
+通过 Lock 可以知道有没有成功获取锁，而 synchronized 却无法办到。
+
+2. synchronized 和 ReentrantLock 区别是什么？
+
+synchronized 早期的实现比较低效，对比 ReentrantLock，大多数场景性能都相差较大，但是在 Java 6 中对 synchronized 进行了非常多的改进。
+
+主要区别如下：
+
+ReentrantLock 使用起来比较灵活，但是必须有释放锁的配合动作；
+
+ReentrantLock 必须手动获取与释放锁，而 synchronized 不需要手动释放和开启锁；
+
+ReentrantLock 只适用于代码块锁，而 synchronized 可用于修饰方法、代码块等。
 
 1242. Web Crawler Multithreaded: Medium
 1279. Traffic Light Controlled Intersection: easy
