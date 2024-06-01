@@ -21,6 +21,7 @@ A solution set is:
 
 Key：
 - edge case: less than 4 numbers
+- need to cast to long for test cases
 - early fail: if smallest one *4>target or largest *4<target, return empty 
 
 
@@ -58,7 +59,7 @@ public class Solution {
                 int low = j + 1, high = num.length - 1;
 
                 while (low < high) {
-                    int sum = num[i] + num[j] + num[low] + num[high];
+                    long sum = (long)nums[i] + (long)nums[j] + (long)nums[low] + (long)nums[high];
                     if (sum == target) {
                         ans.add(Arrays.asList(num[i], num[j], num[low], num[high]));
 

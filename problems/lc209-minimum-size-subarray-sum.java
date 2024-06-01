@@ -73,34 +73,68 @@ stats:
     subarray sum can expressed as the difference between two cumulative sum. Hence, given a 
     start index for the cumulative sum array, the other end index can be searched using binary search.
   - 
-  private int solveNLogN(int s, int[] nums) {
-        int[] sums = new int[nums.length + 1];
-        for (int i = 1; i < sums.length; i++) 
-          sums[i] = sums[i - 1] + nums[i - 1];
-        
-        int minLen = Integer.MAX_VALUE;
-        for (int i = 0; i < sums.length; i++) {
-            int end = binarySearch(i + 1, sums.length - 1, sums[i] + s, sums);
-            if (end == sums.length) 
-              break;
-            if (end - i < minLen) 
-              minLen = end - i;
+
+
+
+  /**
+ * This solution uses binary search method on window size and tries to find if a
+ * window of size is available in the nums array or not.
+ *
+ * This solution only works if there are only positive numbers.
+ *
+ * T(k) = T(k/2) + O(N) ==> T(k) = O(N log(k)). Here k is N. Thus the time
+ * complexity will be O(N log(N)).
+ *
+ * Time Complexity: O(N log(N))
+ *
+ * Space Complexity: O(1)
+ *
+ * N = Length of input array.
+ */
+class Solution {
+    public int minSubArrayLen(int target, int[] nums) {
+        if (nums == null || target < 0) {
+            throw new IllegalArgumentException("Input array is null");
         }
-        return minLen == Integer.MAX_VALUE ? 0 : minLen;
-    }
-    
-    private int binarySearch(int lo, int hi, int key, int[] sums) {
-        while (lo <= hi) {
-           int mid = (lo + hi) / 2;
-           if (sums[mid] >= key){
-               hi = mid - 1;
-           } else {
-               lo = mid + 1;
-           }
+
+        int len = nums.length;
+        int start = 1;
+        int end = len;
+        int minLen = len + 1;
+
+        while (start <= end) {
+            int mid = start + (end - start) / 2;
+            int foundWindowSize = windowExists(nums, target, mid);
+            if (foundWindowSize > 0) {
+                end = foundWindowSize - 1;
+                minLen = foundWindowSize;
+            } else {
+                start = mid + 1;
+            }
         }
-        return lo;
+
+        return minLen % (len + 1);
     }
 
+    private int windowExists(int[] nums, int target, int maxWindowSize) {
+        int foundWindowSize = 0;
+        for (int i = 0; i < nums.length; i++) {
+            target -= nums[i];
+            foundWindowSize++;
+
+            if (i >= maxWindowSize) {
+                foundWindowSize--;
+                target += nums[i - maxWindowSize];
+            }
+
+            if (target <= 0) {
+                return foundWindowSize;
+            }
+        }
+
+        return -1;
+    }
+}
 =======================================================================================================
 method 3:
 

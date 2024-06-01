@@ -74,6 +74,56 @@ key:
 ******************************************************
 
 
+public class Solution {
+    public List<String> fullJustify(String[] words, int maxWidth) {
+        List<String> res = new ArrayList<>();
+        List<String> curWords = new ArrayList<>();
+        int curLen = 0;
+
+        for (String word : words) {
+
+            // curWrods.size is the number of current spaces
+            if (curLen + word.length() + curWords.size() > maxWidth) {
+                int totalSpaces = maxWidth - curLen;
+                int gaps = curWords.size() - 1;
+
+                //1 word firs this whole line
+                if (gaps == 0) {
+                    res.add(curWords.get(0) + " ".repeat(totalSpaces));
+                } 
+                else {
+                    int spacePerGap = totalSpaces / gaps;
+                    int extraSpaces = totalSpaces % gaps;
+                    StringBuilder line = new StringBuilder();
+                    for (int i = 0; i < curWords.size(); i++) {
+                        line.append(curWords.get(i));
+                        if (i < gaps) {
+                            line.append(" ".repeat(spacePerGap));
+                            if (i < extraSpaces) {
+                                line.append(' ');
+                            }
+                        }
+                    }
+                    res.add(line.toString());
+                }
+                curWords.clear();
+                curLen = 0;
+            }
+
+            // add new words will still stay in this cur line
+            curWords.add(word);
+            curLen += word.length();
+        }
+
+        StringBuilder lastLine = new StringBuilder(String.join(" ", curWords));
+        while (lastLine.length() < maxWidth) {
+            lastLine.append(' ');
+        }
+        res.add(lastLine.toString());
+
+        return res;
+    }
+}
 
 =======================================================================================================
 method 1:
