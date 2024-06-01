@@ -27,6 +27,7 @@ note:
 6. Peak and valley:
 - when there are a simultaneously increasing or decreasing array
 - ex. lc 135-Candy
+- can use Stack to 
 
 Sliding Windows:
 	
