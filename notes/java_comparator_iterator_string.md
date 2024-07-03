@@ -11,7 +11,7 @@
 
 - 1. if want increasing order: compare(int x, int y) and return (x - y);
 ```java
-        public int compare(Student a, Student b) { cc
+        public int compare(Student a, Student b) { 
             return a.rollno - b.rollno; 
         } 
 
@@ -19,7 +19,7 @@
 ```
 
 
-- 2. if comparining two intervals:
+- 2. if comparing two intervals:
 ```java
         Arrays.sort(intervals, (i1, i2) -> Integer.compare(i1[0], i2[0]));
 ```
@@ -96,6 +96,44 @@ public class MultipleFieldSorter
         });
 
 ```
+### Treemap sort by value
+
+- general comparator: 
+```java
+    static <K,V extends Comparable<? super V>>
+    SortedSet<Map.Entry<K,V>> entriesSortedByValues(Map<K,V> map) {
+        SortedSet<Map.Entry<K,V>> sortedEntries = new TreeSet<Map.Entry<K,V>>(
+            new Comparator<Map.Entry<K,V>>() {
+                @Override public int compare(Map.Entry<K,V> e1, Map.Entry<K,V> e2) {
+                    int res = e1.getValue().compareTo(e2.getValue());
+                    return res != 0 ? res : 1;
+                }
+            }
+        );
+        sortedEntries.addAll(map.entrySet());
+        return sortedEntries;
+    }
+
+    Map<String,Integer> map = new TreeMap<String,Integer>();
+    map.put("A", 3);
+    map.put("B", 2);
+    map.put("C", 1);   
+
+    System.out.println(map);
+    // prints "{A=3, B=2, C=1}"
+    System.out.println(entriesSortedByValues(map));
+    // prints "[C=1, B=2, A=3]"
+```
+
+```java
+        // 将TreeMap的条目转换为一个ArrayList
+        List<Map.Entry<String, Integer>> entries = new ArrayList<>(scoreMap.entrySet());
+
+        // 使用自定义Comparator对ArrayList进行排序，根据分数降序排序
+        entries.sort(Map.Entry.comparingByValue(Comparator.reverseOrder()));
+```
+
+
 
 ### Collections.sort:
 

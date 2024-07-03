@@ -78,6 +78,38 @@ A D O B E C O D E B A N C
       l             r
 
 //继续减小 l，直到窗口中不再包含所有字母，然后开始移动 r，不停的重复上边的过程，直到全部遍历完
+class Solution {
+    public String minWindow(String s, String t) {
+        int[] map= new int[128];
+        for (char c: t.toCharArray()){
+            map[c]++;
+        }
+
+        int start=0, end=0, minStart=0, minLen=Integer.MAX_VALUE, counter=t.length();
+        while(end<s.length()){
+            char c1= s.charAt(end);
+            if (map[c1]>0) counter--;
+            map[c1]--;
+            end++;
+            while(counter==0){ //all char in t should be mapped to 0
+                if (minLen>end-start){
+                    minLen=end-start;
+                    minStart=start;
+                }
+                // move start pointer, shrink the window
+                char c2= s.charAt(start);
+                map[c2]++;
+
+                // When map[c2]>0, then a char exists in t was deleted
+                // increase counter, break out of the loop, searching for that c2 
+                if (map[c2]>0) counter++;
+                start++;
+            }
+        }
+        return minLen==Integer.MAX_VALUE?"":s.substring(minStart,minStart+minLen);
+    }
+}
+
 =======================================================================================================
 method 1:
 

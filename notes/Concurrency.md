@@ -108,11 +108,19 @@ Sceanrio: user need to download files from 2 different servers, each server has 
 
 3. Execute method is a little bit of misnomer because when a task is added to the task in the queue that is created above with Executors.newFixedThreadPool, it doesn’t necessarily start executing it right away. It starts executing when one of those executing simultaneously(pool size) finishes execution.
 
+
 ## Implement concurrent programming
+
+线程池的使用步骤可以归纳总结为五步
+1. 利用Executors工厂类的静态方法,创建线程池对象;
+2. 编写Runnable或Callable实现类的实例对象;
+3. 利用ExecutorService的submit方法或ScheduledExecutorService的schedule方法提交并执行线程任务
+4. 如果有执行结果,则处理异步执行结果(Future)
+5. 调用shutdown()方法,关闭线程池
 
 ### Method 1. Method extends Thread
 
---> just override the thread object’s run() method. The run() method will be invoked when the thread is started.
+just override the thread object’s run() method. The run() method will be invoked when the thread is started.
 
 ```java
 public class ExampleThread extends Thread {
@@ -143,6 +151,13 @@ Note:
 
 ### Method 2. Separate Class that implements Runnable
 
+**java.lang.Runnable** is an interface that is to be implemented by a class whose instances are intended to be **executed by a thread**. 
+
+There are two ways to start a new Thread – Subclass Thread and implement Runnable. 
+
+There is no need of subclassing a Thread when a task can be done by overriding only run() method of Runnable. 
+
+
 - Pro:
     - Loose Coupling: Since a separate class can be reused
     - Constructors: Arguments can be passed to constructors for different cases. For example, describing different loop limits for threads.
@@ -152,6 +167,78 @@ Note:
     - bit inconvenient to call back to the main application. A reference had to be passed along the constructor, and even if there is access to reference, only public methods(pause method in the given example) in the main application can be called.
 
 Steps: 
+1. Create a Runnable implementer and implement the run() method. 
+2. Instantiate the Thread class and pass the implementer to the Thread, Thread has a constructor which accepts Runnable instances.
+3. Invoke start() of Thread instance, start internally calls run() of the implementer. Invoking start() creates a new Thread that executes the code written in run(). Calling run() directly doesn’t create and start a new Thread, it will run in the same thread. To start a new line of execution, call start() on the thread. 
+```java
+
+public class RunnableDemo {
+
+    public static void main(String[] args)
+    {
+        System.out.println("Main thread is- "
+                        + Thread.currentThread().getName());
+        Thread t1 = new Thread(new RunnableDemo().new RunnableImpl());
+        t1.start();
+    }
+
+    private class RunnableImpl implements Runnable {
+
+        public void run()
+        {
+            System.out.println(Thread.currentThread().getName()
+                            + ", executing run() method!");
+        }
+    }
+}
+
+```
+
+For catching exceptions:
+```java
+
+import java.io.FileNotFoundException;
+
+public class RunnableDemo {
+
+    public static void main(String[] args)
+    {
+        System.out.println("Main thread is- " +
+                        Thread.currentThread().getName());
+        Thread t1 = new Thread(new RunnableDemo().new RunnableImpl());
+        t1.start();
+    }
+
+    private class RunnableImpl implements Runnable {
+
+        public void run()
+        {
+            System.out.println(Thread.currentThread().getName()
+                            + ", executing run() method!");
+            /**
+            * Checked exception can't be thrown, Runnable must
+            * handle checked exception itself.
+            */
+            try {
+                throw new FileNotFoundException();
+            }
+            catch (FileNotFoundException e) {
+                System.out.println("Must catch here!");
+                e.printStackTrace();
+            }
+
+            int r = 1 / 0;
+            /*
+            * Below commented line is an example
+            * of thrown RuntimeException.
+            */
+            // throw new NullPointerException();
+        }
+    }
+}
+```
+
+Steps to pause and use shutdown
 1. create an entirely separate class that implements the runnable interface.
 ```
     public class MyRunnable implements Runnable {
@@ -159,13 +246,15 @@ Steps:
     }
 ```
 
-2. make some instances of the main class and pass them to execute. Let’s apply this first approach to making threads that just count. So, each thread will print the thread name, task number and counter value.
+2. make some instances of the main class and pass them to execute. Let’s apply this first approach to making threads that just count. So, each thread will print the thread name, task number and counter value. 
 
 3. use the pause method to sit around waiting so that system switches back and forth. Print statements will thus be interleaved.
 
 4. Pass the constructor arguments to the constructor of the Runnable, so that different instances will count for a different number of times.
 
 5. Calling the shutdown method means shutting down the thread that’s watching to see if any new tasks have been added or not.
+
+
 
 ### Method 2.1 Executors and Thread Pools
 
@@ -286,6 +375,76 @@ Output:
 把 FutureTask 作为 Thread 类的 target ，创建 Thread 线程对象。
 通过 FutureTask 的 get 方法获取线程的执行结果。
 
+我们有时需要利用线程进行一些计算,然后获取这些计算的结果,而java中的Future接口就是专门用于描述异步计算结果的,我们可以通过Future 对象获取线程计算的结果
+
+常用方法
+    cancel(boolean mayInterruptIfRunning)
+        试图取消对此任务的执行。 
+    get() 
+    get(long timeout, TimeUnit unit) 
+    isCancelled() 
+        如果在任务正常完成前将其取消，则返回 true
+    isDone() 
+        如果任务已完成，则返回 true。
+
+```java
+package com.itheima.demo04;
+
+import java.util.concurrent.*;
+
+/*
+    练习异步计算结果
+ */
+public class FutureDemo {
+    public static void main(String[] args) throws Exception {
+        //1:获取线程池对象
+        ExecutorService es = Executors.newCachedThreadPool();
+        //2:创建Callable类型的任务对象
+        Future<Integer> f = es.submit(new MyCall(1, 1));
+        
+        //3:判断任务是否已经完成
+        //test1(f);
+        boolean b = f.cancel(true);
+        //System.out.println("取消任务执行的结果:"+b);
+        //Integer v = f.get(1, TimeUnit.SECONDS);//由于等待时间过短,任务来不及执行完成,会报异常
+        //System.out.println("任务执行的结果是:"+v);
+    }
+    //正常测试流程
+    private static void test1(Future<Integer> f) throws InterruptedException, ExecutionException {
+        boolean done = f.isDone();
+        System.out.println("第一次判断任务是否完成:"+done);
+        boolean cancelled = f.isCancelled();
+        System.out.println("第一次判断任务是否取消:"+cancelled);
+        Integer v = f.get();//一直等待任务的执行,直到完成为止
+        System.out.println("任务执行的结果是:"+v);
+
+        //再一次判断是否完成
+        boolean done2 = f.isDone();
+        System.out.println("第二次判断任务是否完成:"+done2);
+        boolean cancelled2 = f.isCancelled();
+        System.out.println("第二次判断任务是否取消:"+cancelled2);
+    }
+}
+class MyCall implements Callable<Integer>{
+    private int a;
+    private int b;
+    //通过构造方法传递两个参数
+
+    public MyCall(int a, int b) {
+        this.a = a;
+        this.b = b;
+    }
+
+    @Override
+    public Integer call() throws Exception {
+        String name = Thread.currentThread().getName();
+        System.out.println(name+"准备开始计算...");
+        Thread.sleep(2000);
+        System.out.println(name+"计算完成...");
+        return a+b;
+    }
+}
+```
 
 
 <details>
@@ -703,19 +862,35 @@ To use thread pools, we first create a object of ExecutorService and pass a set 
 
 ### Implementation method
 
-1. Executors.newFixedThreadPool：创建一个固定大小的线程池，可控制并发的线程数，超出的线程会在队列中等待。
-2. Executors.newCachedThreadPool：创建一个可缓存的线程池，若线程数超过处理所需，缓存一段时间后会回收，若线程数不够，则新建线程。
-3. Executors.newSingleThreadExecutor：创建单个线程数的线程池，它可以保证先进先出的执行顺序。
+1. Executors.newFixedThreadPool：创建一个固定大小的线程池，可控制并发的线程数，超出的线程会在队列中等待。可重用固定线程数，多任务只缓存，不会创建更多线程
+2. Executors.newCachedThreadPool：创建一个可缓存的线程池，若线程数超过处理所需，缓存一段时间后会回收，若线程数不够，则新建线程。里面的线程可重用,且在第一次使用时才创建
+```java
+ExecutorService es = Executors.newCachedThreadPool();
+for (int i = 1; i <=10 ; i++) {
+      es.submit(new MyRunnable(i));
+ }
+ ```
+3. Executors.newSingleThreadExecutor：创建单个线程数的线程池，它可以保证先进先出的执行顺序。使用单个worker线程的 Executor，以无界队列方式来运行该线程，任务累加/缓存的时候不限制数量
 
 单个线程的线程池相比于线程来说，它的优点有以下 2 个：
 - 可以复用线程：即使是单个线程池，也可以复用线程。
 - 提供了任务管理功能：单个线程池也拥有任务队列，在任务队列可以存储多个任务，这是线程无法实现的，并且当任务队列满了之后，可以执行拒绝策略，这些都是线程不具备的。
-
 4. Executors.newScheduledThreadPool：创建一个可以执行延迟任务的线程池。 threadPool.schedule()
 5. Executors.newSingleThreadScheduledExecutor：创建一个单线程的可以执行延迟任务的线程池。
 6. Executors.newWorkStealingPool：创建一个抢占式执行的线程池(任务执行顺序不确定)【JDK 1.8 添加】。
 7. ThreadPoolExecutor：手动创建线程池的方式，它创建时最多可以设置 7 个参数。
 
+```java
+public ThreadPoolExecutor(
+    int corePoolSize,           //核心线程数量
+    int maximumPoolSize,        //最大线程数
+    long keepAliveTime,         //最大空闲时间/存活时间，当这段时间没有线程用的时候，线程池会回收
+    TimeUnit unit,              //时间单位
+    BlockingQueue<Runnable> workQueue,   //任务队列，新任务加到这里，如果加满，再创建新线程
+    ThreadFactory threadFactory, // 线程工厂，可被implement，创建自己的
+     RejectedExecutionHandler handler  //饱和处理机制，当任务数量到达核心线程&最大线程&任务队列也满了
+    ) 
+``` 
 
 ### Thread Pool Example: FixedThreadPool
 
@@ -858,6 +1033,30 @@ The optimum size of the thread pool depends on the number of processors availabl
 
 But tasks may wait for I/O and in such a case we take into account the ratio of waiting time(W) and service time(S) for a request; resulting in a maximum pool size of N*(1+ W/S) for maximum efficiency.
 
+自定义：
+1. 核心线程数量corePoolSize
+- 需要依据任务的处理时间和每秒产生的任务数量来确定
+- 例如:执行一个任务需要0.1秒,系统百分之80的时间每秒都会产生100个任务,那么要想在1秒内处理完这100个任务,就需要10个线程,此时我们就可以设计核心线程数为10;
+- 我们一般按照**8020**原则设计即可,既按照百分之80的情况设计核心线程数,剩下的百分之20可以利用最大线程数处理;
+
+2. 任务队列长度(workQueue)
+
+    核心线程数/单个任务执行时间x2
+
+例如上面的场景中,核心线程数设计为10,单个任务执行时间为0.1秒,则队列长度可以设计为200-->可以缓存200个任务
+
+3. 最大线程数量maximumPoolSize
+
+除了需要参照核心线程数的条件外,还需要参照系统每秒产生的最大任务数决定/硬件
+ex.如果系统每秒最大产生的任务是1000个, 最大线程数=(最大任务数-任务队列长度)*单个任务执行时间; 
+ex. 最大线程数=(1000-200)*0.1=80个;
+
+4. 线程最大空闲时间keepAliveTime
+- 完全参考系统运行环境和硬件压力设定,没有固定的参考值, 用户可以根据经验和系统产生任务的时间间隔合理设置一个值
+
+5. 需要介绍如何合理配置线程池的大小
+1) 从自身硬件环境分析
+2) 从自身项目应用访问环境分析
 
 ## Race Condition
 
@@ -988,6 +1187,7 @@ public class SharedCache {
 
 ### Synchronized Blocks And Methods
 Synchronized blocks are pieces of Java code that can be executed by only one thread at a time. 
+synchronized能够保证在同一时刻最多只有一个线程执行该段代码，以达到保证并发安全的效果。
 
     // SYNTAX
     synchronized (Object reference_object) {
@@ -1008,6 +1208,18 @@ Synchronization：
 ```java
 public synchronized void critial() {
     // some thread critical stuff
+}
+
+
+@Override
+public void run(){
+    synchronized (MyTask.class){
+            if(id>0){
+                System.out.println(userName+"使用"+name+"秒杀:"+id-- +"号商品成功啦!");
+            }else {
+                System.out.println(userName+"使用"+name+"秒杀失败啦!");
+            }
+    }
 }
 ```
 
@@ -1333,9 +1545,172 @@ class Foo {
 ```
 ## ThreadLocal 
 
-def: 是线程本地存储，在每个线程中都创建了一个 ThreadLocalMap 对象，每个线程可以访问自己内部 ThreadLocalMap 对象内的 value。通过这种方式，避免资源在多线程间共享。
+def: 线程本地存储，在每个线程中都创建了一个 ThreadLocalMap 对象，每个线程可以访问自己内部 ThreadLocalMap 对象内的 value。通过这种方式，避免资源在多线程间共享。
+
+allows you to create variables that can only be read and written by the same thread. This can be useful in situations where you have multiple threads accessing the same variable, but you want to ensure that each thread has its own isolated copy of the variable
+
+- 提供线程内局部变量，不同线程之间不会相互干扰。
+- ThreadLocal 实例通常来说都是 `private static` 修饰的，用于关联线程和线程的上下文。
+- 减少同一个线程内的函数 或 组件之间传递变量的复杂性。(传递数据)
+- 线程并发：多线程并发场景下，即单线程场景下用不上。
+- 线程隔离：每个线程变量都是独立的，不会相互影响。
 
 经典的使用场景是为每个线程分配一个 JDBC 连接 Connection。这样就可以保证每个线程的都在各自的 Connection 上进行数据库的操作，不会出现 A 线程关了 B线程正在使用的 Connection； 还有 Session 管理 等问题。
+![Screenshot JDBC](https://cdn-53h3.flowus.net.cn/oss/abbc1c6f-1871-472f-a20b-6d3fb845e902/image.png?time=1717455600&token=545d916751722b577c65f1332126e720&role=sharePaid&img_process=/resize,w_1381/quality,q_90/)
+
+
+Note: we should be extra careful when we’re using ThreadLocals and thread pools together.
+
+### vs Synchronized
+||||
+|-|-|-|
+||**Synchronized**|**ThreadLocal**|
+|原理|同步机制采用“以时间换空间”的方式，只提供了一份变量，让不同的线程排队访问。|采用 “以空间换时间”的方式，为每一个线程都提供了一份变量的副本，从而实现同时访问而不互相干扰。|
+|**则重点**|多个线程之间访问资源的**同步**。|并发情况下让每个线程之间数据相互**隔离**。|
+
+### Design
+JDK8之后每个Thread维护一个ThreadLocalMap, 这个Map的key是ThreadLocal实例本身,value才是真正要存储的值Object
+
+![Screenshot jdk8](https://img-blog.csdnimg.cn/20200422163908400.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L2Jic2N6MDA3,size_16,color_FFFFFF,t_70）
+
+1. 每个THreadLocal线程内部都有一个Map(ThreadLocalMap)
+
+2. Map里面存储的ThreadLocal对象(key)和线程变量副本(Value)也就是存储的值
+
+3. Thread内部的Map是由ThreadLocal维护的, 有THreadLocal负责向map获取和设置线程变量值
+
+4. 对于不同的线程, 每次获取value(也就是副本值),别的线程并不能获取当前线程的副本值, 形成了副本的隔离,互不干扰.
+
+
+### Code
+1. create
+
+    ThreadLocal<Integer> threadLocalValue = new ThreadLocal<>();
+
+2. Methods
+
+1) get():Returns the value in the current thread’s copy of this thread-local variable. If the variable has no value for the current thread, it is first initialized to the value returned by an invocation of the initialValue() method
+
+```java
+   public T get() {
+        // 获取当前线程对象
+        Thread t = Thread.currentThread();
+        // 获取此线程对象中维护的ThreadLocalMap对象
+        ThreadLocalMap map = getMap(t);
+        // 如果此map存在
+        if (map != null) {
+            // 以当前的ThreadLocal 为 key，调用getEntry获取对应的存储实体e
+            ThreadLocalMap.Entry e = map.getEntry(this);
+            // 找到对应的存储实体 e 
+            if (e != null) {
+                @SuppressWarnings("unchecked")
+                // 获取存储实体 e 对应的 value值
+                // 即为我们想要的当前线程对应此ThreadLocal的值
+                T result = (T)e.value;
+                return result;
+            }
+        }
+        // 如果map不存在，则证明此线程没有维护的ThreadLocalMap对象
+        // 调用setInitialValue进行初始化
+        return setInitialValue();
+    }
+
+    ThreadLocalMap getMap(Thread t) {
+        return t.threadLocals;
+    }
+
+    void createMap(Thread t, T firstValue) {
+        //这里的this是调用此方法的threadLocal
+        t.threadLocals = new ThreadLocalMap(this, firstValue);
+    }
+```
+
+2) initialValue(): Returns the current thread initial value for the local thread variable. Original code simply returns null, but it's a protected method, so it can be rewrite for sub class.
+
+```java
+    private static ThreadLocal gfg = new ThreadLocal() {
+        protected Object initialValue()
+        {
+            return new Integer(question--);
+        }
+    };
+```
+3) remove():Removes the current thread’s value for this thread-local variable. If this thread-local variable is subsequently read by the current thread, its value will be reinitialized by invoking its initialValue() method, unless its value is set by the current thread in the interim. This may result in multiple invocations of the initialValue method in the current thread
+
+4) set(): sets the current thread’s copy of this thread-local variable to the specified value. Most subclasses will have no need to override this method, relying solely on the initialValue() method to set the values of thread locals.
+
+```java
+ public void set(T value) {
+        // 获取当前线程对象
+        Thread t = Thread.currentThread();
+        // 获取此线程对象中维护的ThreadLocalMap对象
+        ThreadLocalMap map = getMap(t);
+        // 如果此map存在
+        if (map != null)
+            // 存在则调用map.set设置此实体entry
+            map.set(this, value);
+        else
+            // 1）当前线程Thread 不存在ThreadLocalMap对象
+            // 2）则调用createMap进行ThreadLocalMap对象的初始化
+            // 3）并将此实体entry作为第一个值存放至ThreadLocalMap中
+            createMap(t, value);
+    }
+
+```
+
+Example: 
+```java
+public class GFG {
+
+    // Main driver method
+    public static void main(String[] args)
+    {
+        // Creating objects of ThreadLocal class
+        ThreadLocal<Number> gfg_local
+            = new ThreadLocal<Number>();
+        ThreadLocal<String> gfg = new ThreadLocal<String>();
+
+        // Setting the value
+        gfg_local.set(100);
+
+        // Returning the current thread's value
+        System.out.println("value = " + gfg_local.get());
+
+        // Setting the value
+        gfg_local.set(90);
+
+        // Returns the current thread's value of
+        System.out.println("value = " + gfg_local.get());
+
+        // Setting the value
+        gfg_local.set(88.45);
+
+        // Returning the current thread's value of
+        System.out.println("value = " + gfg_local.get());
+
+        // Setting the value
+        gfg.set("GeeksforGeeks");
+
+        // Returning the current thread's value of
+        System.out.println("value = " + gfg.get());
+
+        // Removing value using remove() method
+        gfg.remove();
+
+        // Returning the current thread's value of
+        System.out.println("value = " + gfg.get());
+
+        // Removing value
+        gfg_local.remove();
+
+        // Returns the current thread's value of
+        System.out.println("value = " + gfg_local.get());
+    }
+}
+
+
+```
+
 
 ```java
 public class TestThreadLocal {
@@ -1393,6 +1768,27 @@ public class TestThreadLocal {
     Thread-2 : ThreadLocal num=4
     Thread-2 : ThreadLocal num=5
     Thread-1 : ThreadLocal num=5
+
+### ThreadLocal & ThreadPool
+
+1. Bad when use together:
+Since the application didn’t perform the necessary cleanups last time, it may re-use the same ThreadLocal data for the new request.
+
+
+2. Solution:
+- extend the ThreadPoolExecutor class and provide a custom hook implementation for the beforeExecute() and afterExecute() methods. 
+- The thread pool will call the beforeExecute() method before running anything using the borrowed thread. On the other hand, it’ll call the afterExecute() method after executing our logic.
+
+```java
+public class ThreadLocalAwareThreadPool extends ThreadPoolExecutor {
+
+    @Override
+    protected void afterExecute(Runnable r, Throwable t) {
+        // Call remove on each ThreadLocal
+    }
+}
+```
+
 
 
 ## Questions:

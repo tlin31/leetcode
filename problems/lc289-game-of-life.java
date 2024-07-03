@@ -115,7 +115,7 @@ public class Solution {
 ~~~~~~~~~~~~~~~~~~~~~~~     python      ~~~~~~~~~~~~~~~~~~~~~~~~
 classSolution(object):
     def gameOfLife(self, board):
-        """
+        ""
         :type board: List[List[int]], int = 0 dead,1 live
         " 2 dead -> live ; 3 live -> dead
         :rtype: void Do not return anything, modify board in-place instead.

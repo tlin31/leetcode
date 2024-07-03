@@ -87,6 +87,7 @@ stats:
         e--;
     }
 
+    // doesn't need to change the nums on the diagnal which is matrix[n][n]
     // swap matrix[0][1] & matrix[1][0]
     // here changes (0,1), (0,2), (1,2)
     for(int i = 0; i < matrix.length; i++){
