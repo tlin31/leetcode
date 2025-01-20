@@ -385,7 +385,68 @@ class BFS
 
 ```
 
+### bfs queue template in matrix
 
+example: lc 200 number of islands
+
+1. set boolean matrix visited to avoid going in loops
+2. can use queue to store indicies int[]
+3. in double for loop: if (condition met && !visited[i][j]), then queue offer current, set visited matrix to true, and call bfs
+4. in bfs method: 
+    while (!q.isEmpty()) 
+
+```java
+class Solution {
+    int[][] dirs = {{0,1}, {1,0}, {0, -1}, {-1, 0}};
+
+
+    public int numIslands(char[][] grid) {
+        if (grid.length == 0) {
+            return 0;
+        }
+        
+        int m = grid.length, n = grid[0].length;
+        
+        boolean[][] visited = new boolean[m][n];
+        Queue<int[]> queue = new LinkedList<>();
+        int count = 0;
+
+        for(int i=0; i<m; i++) {
+            for(int j=0; j<n; j++) {
+                if(grid[i][j] == '1' && !visited[i][j]) {
+                    queue.offer(new int[]{i, j});
+                    visited[i][j] = true;
+                    bfs(grid, queue, visited);
+                    count++;
+                }
+            }
+        }
+        
+        return count;
+    }
+    
+    private void bfs(char[][] grid, Queue<int[]> queue, boolean[][] visited) {
+        int m = grid.length;
+        int n = grid[0].length;
+        
+        while(!queue.isEmpty()) {
+            int[] curr = queue.poll();
+            for (int[] dir : dirs) {
+                int x = curr[0] + dir[0];
+                int y = curr[1] + dir[1];
+                
+                // if not valid/not island, keep going
+                if (x < 0 || x >= m || y < 0 || y >=n || visited[x][y] || grid[x][y] == '0') 
+                    continue;
+                
+                //else add the next 'island land'
+                visited[x][y] = true;
+                queue.offer(new int[]{x, y});
+            }
+        }
+    }
+}
+```
 ## DFS
 
 ### 总结
@@ -417,6 +478,29 @@ class BFS
         }
     }
 ```
+
+template for lc200
+```java
+    public int numIslands(char[][] A) {
+        int m = A.length, n = A[0].length, res = 0;
+        for (int i = 0; i < m; i++)
+            for (int j = 0; j < n; j++)
+                res += dfs(A, i, j);
+        return res;
+    }
+
+    private int dfs(char[][] A, int i, int j) {
+        int m = A.length, n = A[0].length;
+        if (i < 0 || i == m || j < 0 || j == n || A[i][j] == '0') return 0;
+        A[i][j] = '0';
+        dfs(A, i - 1, j);
+        dfs(A, i + 1, j);
+        dfs(A, i, j - 1);
+        dfs(A, i, j + 1);
+        return 1;
+    }
+```
+
 
 2. Use stack
 - algorithm:
@@ -570,12 +654,16 @@ class Graph
 - - key: in-degrees, dfs, stack
 
 - Topological sorting for Directed Acyclic Graph (DAG) is a linear ordering of vertices such that for every directed edge uv, vertex u comes before v in the ordering. 
+
 - not possible if the graph is not a DAG!!!
+
 - For example, a topological sorting of the following graph is “5 4 2 3 1 0”. There can be more than one topological sorting for a graph. For example, another topological sorting of the following graph is “4 5 2 3 1 0”. The first vertex in topological sorting is always a vertex with in-degree as 0 (a vertex with no incoming edges).
+
 - Theorem : A DAG G has at least one vertex with in-degree 0 and one vertex with out-degree 0.
 	- Proof: There’s a simple proof to the above fact is that a DAG does not contain a cycle which means that all paths will be of finite length. Now let S be the longest path from u(source) to v(destination). Since S is the longest path there can be no incoming edge to u and no outgoing edge from v, if this situation had occurred then S would not have been the longest path => indegree(u) = 0 and outdegree(v) = 0
 
-- in general:
+- Algo:
+```python
 	L ← Empty list that will contain the sorted elements
 	S ← Set of all nodes with no incoming edge
 	while S is non-empty do
@@ -589,7 +677,7 @@ class Graph
 	    return error   (graph has at least one cycle)
 	else 
 	    return L   (a topologically sorted order)
-
+```
 
 ### Algorithm 1: modify DFS
 1. create a temporary stack.
@@ -618,7 +706,7 @@ public List<Integer> topologicalSort(int start) {
     return result;
 }
  
-private void topologicalSortRecursive(int current, boolean[] isVisited, LinkedList<Integer> result) {
+private void topologicalSortRecursive(int current, boolean[] isVisited, LinkedList<Integer> result{
     isVisited[current] = true;
     for (int dest : adjVertices.get(current)) {
         if (!isVisited[dest])
@@ -714,6 +802,81 @@ class Graph
     } 
 
 ```
+Example lc 207 course schedule
+```java
+    - dfs
+    - 也需要建立有向图，还是用二维数组来建立，和 BFS 不同的是，我们像现在需要一个一维数组 visit 来记录访问状态
+    - 三种状态:
+        0表示还未访问过，
+        1表示已经访问了
+        -1 表示有冲突
+    - 大体思路是，先建立好有向图，然后从第一门课开始，找其可构成哪门课，暂时将当前课程标记为已访问，然后对新得到的课程
+        调用 DFS 递归，直到出现新的课程已经访问过了，则返回 false，没有冲突的话返回 true，然后把标记为已访问的课程
+        改为未访问
+
+stats:
+
+    - Runtime: 4 ms, faster than 75.85% of Java online submissions for Course Schedule.
+    - Memory Usage: 44.3 MB, less than 96.15%
+
+
+public boolean canFinish(int numCourses, int[][] prerequisites) {
+    if(prerequisites == null){
+        throw new IllegalArgumentException("illegal prerequisites array");
+    }
+ 
+    int len = prerequisites.length;
+ 
+    if(numCourses == 0 || len == 0){
+        return true;
+    }
+ 
+    //track visited courses
+    int[] visit = new int[numCourses];
+ 
+    // use the map to store what courses depend on a course 
+    HashMap<Integer,ArrayList<Integer>> map = new HashMap<Integer,ArrayList<Integer>>();
+    for(int[] a: prerequisites){
+        if(map.containsKey(a[1])){
+            map.get(a[1]).add(a[0]);
+        }else{
+            // new class never seen before
+            ArrayList<Integer> l = new ArrayList<Integer>();
+            l.add(a[0]);
+            map.put(a[1], l);
+        }
+    }
+ 
+    for(int i=0; i<numCourses; i++){
+        if(!canFinishDFS(map, visit, i))
+            return false;
+    }
+ 
+    return true;
+}
+ 
+private boolean canFinishDFS(HashMap<Integer,ArrayList<Integer>> map, int[] visit, int i){
+    if(visit[i]==-1) 
+        return false;
+    if(visit[i]==1) 
+        return true;
+ 
+    visit[i]=-1;
+    if(map.containsKey(i)){
+
+        // check if there's clash
+        for(int j: map.get(i)){
+            if(!canFinishDFS(map, visit, j)) 
+                return false;
+        }
+    }
+ 
+    visit[i]=1;
+ 
+    return true;
+}
+```
+
 
 #### Time complexity
 
@@ -892,8 +1055,7 @@ Algorithm
 ### General:
 - A disjoint-set data structure is a data structure that keeps track of a set of elements partitioned into a number of disjoint (non-overlapping) subsets. A union-find algorithm is an algorithm that performs two useful operations on such a data structure:
 
-    1. Find: Determine which subset a particular element is in. This can be used for determining if tw0 
-             elements are in the same subset.
+    1. Find: Determine which subset a particular element is in. This can be used for determining if 2 elements are in the same subset.
     2. Union: Join two subsets into a single subset.
 
 
@@ -1008,7 +1170,7 @@ Algorithm
     that when find() is called next time for 1, 2 or 3, the path to root is reduced.
 
                    9
-             /    /  \      \
+              /   /  \    \
             4    5    6      3 
           /          /  \   /  \
         0           7    8  1   2          
@@ -1032,6 +1194,7 @@ Algorithm
          }
     }
 ```
+
 
 
 
@@ -1149,6 +1312,277 @@ class Graph {
     } 
 }
 ```
+
+### union find applied in lc 200 number of islands
+
+```java
+class Solution {
+    
+    // store the parent
+    int[] par;
+    
+    public int numIslands(char[][] a) {
+        if(a.length==0) 
+            return 0;
+        
+        int n = a.length, m=a[0].length;
+        par = new int[m*n];
+        Arrays.fill(par, -1); 
+        
+        // go from bottom left corner to up.
+        for(int i=0;i<n;i++){
+            for(int j=0;j<m;j++){
+                
+                if(a[i][j]=='1'){
+                    par[i*m+j]= i*m+j; // note, that `par` was filled witn -1 values
+
+                    if(i>0 && a[i-1][j]=='1') 
+                        union(i*m+j, (i-1)*m+j); // union current+top
+
+                    if(j>0 && a[i][j-1]=='1') 
+                        union(i*m+j, i*m+(j-1)); // union current+left
+                }
+                
+            }
+        }
+        
+        // since all connected 1's are grouped with the same par value
+        Set<Integer> set = new HashSet<>();
+        for(int k=0;k<par.length;k++){
+            if(par[k]!=-1) 
+                set.add(find(k));
+        }
+        return set.size();
+    }
+    
+    int find(int x){
+        if(par[x]==x) 
+            return x;
+        par[x]=find(par[x]);
+        return par[x];
+    }    
+    
+    void union(int x, int y){
+        int px = find(x);
+        int py = find(y);
+        par[px]= par[py];
+    }
+    
+}
+```
+
+### union find in examples
+1. lc130 surrounded regions
+
+
+## Dijkstra’s Algorithm finding Shortest Path
+
+- single source
+- positive edges only
+- Time Complexity: O(V^2 )
+- Auxiliary Space: O(V)
+
+### algo
+
+1. Mark the source node with a current distance of 0 and the rest with infinity.
+
+2. Set the non-visited node with the smallest current distance as the current node.
+
+3. For each neighbor, N of the current node adds the current distance of the adjacent node with the weight of the edge connecting 0->1. If it is smaller than the current distance of Node, set it as the new current distance of N.
+
+4. Mark the current node 1 as visited.
+
+5. Go to step 2 if there are any nodes are unvisited.
+
+
+```java
+import java.io.*;
+import java.lang.*;
+import java.util.*;
+
+class ShortestPath {
+    // A utility function to find the vertex with minimum
+    // distance value, from the set of vertices not yet
+    // included in shortest path tree
+
+    static final int V = 9;
+    int minDistance(int dist[], Boolean sptSet[])
+    {
+        // Initialize min value
+        int min = Integer.MAX_VALUE, min_index = -1;
+
+        for (int v = 0; v < V; v++)
+            if (sptSet[v] == false && dist[v] <= min) {
+                min = dist[v];
+                min_index = v;
+            }
+
+        return min_index;
+    }
+
+    // A utility function to print the constructed distance
+    // array
+    void printSolution(int dist[])
+    {
+        System.out.println(
+            "Vertex \t\t Distance from Source");
+        for (int i = 0; i < V; i++)
+            System.out.println(i + " \t\t " + dist[i]);
+    }
+
+
+    void dijkstra(int graph[][], int src)
+    {
+        int dist[] = new int[V]; // The output array.
+                                 // dist[i] will hold the shortest distance from src to i
+
+        // sptSet[i] will true if vertex i is included in
+        // shortest path tree or shortest distance from src
+        // to i is finalized
+        Boolean sptSet[] = new Boolean[V];
+
+        // Initialize all distances as INFINITE and stpSet[]
+        // as false
+        for (int i = 0; i < V; i++) {
+            dist[i] = Integer.MAX_VALUE;
+            sptSet[i] = false;
+        }
+
+        // Distance of source vertex from itself is always 0
+        dist[src] = 0;
+
+        // Find shortest path for all vertices
+        for (int count = 0; count < V - 1; count++) {
+            // Pick the minimum distance vertex from the set
+            // of vertices not yet processed. u is always
+            // equal to src in first iteration.
+            int u = minDistance(dist, sptSet);
+
+            // Mark the picked vertex as processed
+            sptSet[u] = true;
+
+            // Update dist value of the adjacent vertices of the picked vertex.
+            for (int v = 0; v < V; v++)
+
+                // Update dist[v] only if is not in sptSet,
+                // there is an edge from u to v, and total
+                // weight of path from src to v through u is
+                // smaller than current value of dist[v]
+                if (!sptSet[v] && graph[u][v] != 0
+                    && dist[u] != Integer.MAX_VALUE
+                    && dist[u] + graph[u][v] < dist[v])
+
+                    dist[v] = dist[u] + graph[u][v];
+        }
+
+        printSolution(dist);
+    }
+
+    public static void main(String[] args) {
+        int graph[][]
+            = new int[][] { { 0, 4, 0, 0, 0, 0, 0, 8, 0 },
+                            { 4, 0, 8, 0, 0, 0, 0, 11, 0 },
+                            { 0, 8, 0, 7, 0, 4, 0, 0, 2 },
+                            { 0, 0, 7, 0, 9, 14, 0, 0, 0 },
+                            { 0, 0, 0, 9, 0, 10, 0, 0, 0 },
+                            { 0, 0, 4, 14, 10, 0, 2, 0, 0 },
+                            { 0, 0, 0, 0, 0, 2, 0, 1, 6 },
+                            { 8, 11, 0, 0, 0, 0, 1, 0, 7 },
+                            { 0, 0, 2, 0, 0, 0, 6, 7, 0 } };
+        ShortestPath t = new ShortestPath();
+
+        t.dijkstra(graph, 0);
+    }
+}
+```
+
+### Limitation of Dijkstra’s Algorithm:
+
+Since, we need to find the single source shortest path, we might initially think of using Dijkstra’s algorithm. However, Dijkstra is not suitable when the graph consists of negative edges. The reason is, it doesn’t revisit those nodes which have already been marked as visited. If a shorter path exists through a longer route with negative edges, Dijkstra’s algorithm will fail to handle it.
+
+
+## Bellman–Ford Algorithm
+- work for finding shortest paths in a graph
+- work with weighted graph with negative edges!
+- able to detect negative cycles
+- complexity:  O(V*E) Time and O(V) Space
+- 
+
+### Algorithm: 
+
+Relaxation means updating the shortest distance to a node if a shorter path is found through another node. For an edge (u, v) with weight w:
+
+If going through u gives a shorter path to v from the source node (i.e., distance[v] > distance[u] + w), we update the distance[v] as distance[u] + w.
+
+In the bellman-ford algorithm, this process is repeated (V – 1) times for all the edges.
+
+
+### Detection of a Negative Weight Cycle
+
+After running the Bellman-Ford algorithm, checking all edges in a graph V-1 times, all the shortest distances are found.
+
+But, if the graph contains negative cycles, and we go one more round checking all edges, we will find at least one shorter distance in this last round, right?
+
+So to detect negative cycles in the Bellman-Ford algorithm, after checking all edges V-1
+times, we just need to check all edges **one more time**, and if we find a shorter distance this last time, we can conclude that a negative cycle must exist.
+
+
+```java
+// Java program to find single source shortest path using 
+// Bellman-Ford algorithm
+
+import java.util.Arrays;
+
+class GfG {
+    static int[] bellmanFord(int V, int[][] edges, int src) {
+        
+        // Initially distance from source to all other vertices 
+        // is not known(Infinite).
+        int[] dist = new int[V];
+        Arrays.fill(dist, (int)1e8);
+        dist[src] = 0;
+
+        // Relaxation of all the edges V times, not (V - 1) as we  
+        // need one additional relaxation to detect negative cycle
+        for (int i = 0; i < V; i++) {
+            for (int[] edge : edges) {
+                int u = edge[0];
+                int v = edge[1];
+                int wt = edge[2];
+                if (dist[u] != 1e8 && dist[u] + wt < dist[v]) {
+                    
+                    // If this is the Vth relaxation, then there is
+                    // a negative cycle
+                    if (i == V - 1)
+                        return new int[]{-1};
+                    
+                    // Update shortest distance to node v
+                    dist[v] = dist[u] + wt;
+                }
+            }
+        }
+        return dist;
+    }
+
+    public static void main(String[] args) {
+        int V = 5;
+        int[][] edges = new int[][] {
+            {1, 3, 2},
+            {4, 3, -1},
+            {2, 4, 1},
+            {1, 2, 1},
+            {0, 1, 5}
+        };
+
+        int src = 0;
+        int[] ans = bellmanFord(V, edges, src);
+        for (int dist : ans) 
+            System.out.print(dist + " ");
+    }
+}
+```
+
+
 
 
 

@@ -35,17 +35,14 @@ method:
 
 stats:
 
-	- 
-	- Runtime: 1 ms, faster than 99.34% of Java online submissions for Insert Interval.
-	- Memory Usage: 40.5 MB, less than 90.63%
-
+	
 	public List<Interval> insert(List<Interval> intervals, Interval newInterval) {    
 		List<Interval> result = new ArrayList<>();
 		int i = 0;
 		int start = newInterval.start;
 		int end = newInterval.end;
 		    
-        // add first half: non-overlap intervals smaller than new interval, just add it to the result
+        // add first half: add all the non-overlap intervals smaller than new interval, just add it to the result
 		while (i < intervals.size() && intervals.get(i).end < start) {
 		    result.add(intervals.get(i++));
 		}
@@ -67,56 +64,29 @@ stats:
 	}
 
 --------
-    public int[][] insert(int[][] intervals, int[] newInterval) {
-            int i=0,
-            	j=0;
 
-            // find current's end >= new's start, remember i
-            // can also start copying here
-            for(i=0;i<intervals.length;i++){
-                if(intervals[i][1]>=newInterval[0]){
-                    break;
-                }
+
+ public int[][] insert(int[][] intervals, int[] newInterval) {
+        List<int[]> ans = new ArrayList<>();
+        int[] toAdd = newInterval;
+        
+        for (int i = 0; i < intervals.length; i ++) {
+            /*1. No overlap and toAdd appears before current interval, add toAdd to result.*/
+            if (intervals[i][0] > toAdd[1]) {
+                ans.add(toAdd);
+                toAdd = intervals[i];
             }
-
-            //find current's start > new's end
-            for(j=0;j<intervals.length;j++){
-                if(intervals[j][0]>newInterval[1]){
-                    break;
-                }
-            }
-
-            //move j back one, since in the above loop, it's greater
-            j=j-1;
-
-            // can merge the two 
-            if(i<=j){
-                intervals[i][0]=Math.min(intervals[i][0],newInterval[0]);
-                intervals[i][1]=Math.max(intervals[j][1],newInterval[1]);
-
-                //j-i => number of intervals being combined
-                int[][] result=new int[intervals.length-(j-i)][2];
-
-                // copy intervals to result starting at position 0, with i+1 elements
-                // copy i + 1 --> till i, nothing changes/merged
-                System.arraycopy(intervals, 0,result,0,i+1);
-
-                //copy intervals starting at j+1 to result, with length-j-1 elements
-                System.arraycopy(intervals,j+1,result,i+1,intervals.length-j-1);
-                return result;
-            }
-
-            // if i>j, then meaning we didn't find intersecting intervals, just append
-            else{
-                int[][] result=new int[intervals.length+1][2];
-                System.arraycopy(intervals,0,result,0,i);
-                result[i]=newInterval;
-                System.arraycopy(intervals,i,result,i+1,intervals.length-i);
-                return result;
-            }
+            /*2. Has overlap, update the toAdd to the merged interval.*/
+            else if (intervals[i][1] >= toAdd[0])  
+                toAdd = new int[] {Math.min(intervals[i][0], toAdd[0]),
+                                   Math.max(intervals[i][1], toAdd[1]) };
+            /*3. No overlap and toAdd appears after current interval, add current interval to result.*/
+            else ans.add(intervals[i]); 
+        }
+        ans.add(toAdd);
+        return ans.toArray(new int[ans.size()][2]);
     }
-
-
+    
 =======================================================================================================
 method 2:
 

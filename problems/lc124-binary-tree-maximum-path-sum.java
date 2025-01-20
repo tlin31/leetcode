@@ -101,26 +101,39 @@ public class Solution {
 }
 
 -----------------------------------------------------------------------------
-public class Solution {
-	int max = Integer.MIN_VALUE;
+
+public class BinaryTreeMaximumPathSum {
+    private int maxSum;
+
+    public int maxSumHelper(TreeNode root) {
+		
+		// base case
+        if (root == null) return 0; 
+		
+		// recursing through left and right subtree
+        int leftMax = maxSumHelper(root.left);
+        int rightMax = maxSumHelper(root.right);
+
+		// finding all the four paths and the maximum between all of them
+        int maxRightLeft = Math.max(leftMax, rightMax);
+        int maxOneNodeRoot = Math.max(root.val, (root.val + maxRightLeft));
+        int maxAll = Math.max(maxOneNodeRoot, leftMax + rightMax + root.val);
+		
+		// Storing the result in the maxSum holder
+        maxSum = Math.max(maxSum, maxAll);
+		
+		// returning the value if root was part of the answer
+        return maxOneNodeRoot;
+
+    }
+
     public int maxPathSum(TreeNode root) {
-        backtrack(root);
-        return max;
-    }
-    private int backtrack(TreeNode root){
-        if(root == null) return Integer.MIN_VALUE;
-        int left = backtrack(root.left);
-        int right = backtrack(root.right);
-        max = Math.max(max,Math.max(right,left));       //pick left branch or right branch
-        max = Math.max(max,root.val);                   //pick branch or root
+        maxSum = Integer.MIN_VALUE;
+        maxSumHelper(root);
+        return maxSum; // as maxSum will always store the result
 
-        //pick root + MAX(0,left) + MAX(0,right)
-        max = Math.max(max,root.val + Math.max(0,left) + Math.max(0,right)); 
-        return root.val + Math.max(0,Math.max(left,right));
     }
-
 }
-
 =======================================================================================================
 method 2:
 

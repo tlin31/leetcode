@@ -1186,7 +1186,7 @@ public class SharedCache {
 ```
 
 ### Synchronized Blocks And Methods
-Synchronized blocks are pieces of Java code that can be executed by only one thread at a time. 
+Synchronized bloc  ks are pieces of Java code that can be executed by only one thread at a time. 
 synchronized能够保证在同一时刻最多只有一个线程执行该段代码，以达到保证并发安全的效果。
 
     // SYNTAX

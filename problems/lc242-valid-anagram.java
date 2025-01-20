@@ -42,30 +42,27 @@ stats:
 
 
 
-public boolean isAnagram(String s, String t) {
-    
-    int[] charsMap = new int['z'-'a'+1];
-    
-    for(char c: s.toCharArray()) {
-        int pos = c - 'a';
-        charsMap[pos]++;
-    }
-    
-    for(char c: t.toCharArray()) {
-        int pos = c - 'a';
-        charsMap[pos]--;
-    }
-    
-    for(int count: charsMap) {
-        if(count != 0) {
-            return false;
+class Solution {
+    public boolean isAnagram(String s, String t) {
+        if (s.length()!= t.length()) return false;
+
+        int[] map = new int[26];
+
+        for(char c:s.toCharArray()){
+            map[c-'a']++;
         }
+
+        for(char c:t.toCharArray()){
+            if(map[c-'a']==0) return false;
+            else map[c-'a']--;
+        }
+
+        for(int value:map){
+            if(value !=0) return false;
+        }
+        return true;
     }
-    
-    return true;
 }
-
-
 
 =======================================================================================================
 method 2:

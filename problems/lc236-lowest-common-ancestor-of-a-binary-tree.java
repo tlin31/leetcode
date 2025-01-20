@@ -29,7 +29,8 @@ p and q are different and both values will exist in the binary tree.
 
 ******************************************************
 key:
-	- 
+	- use parent pointers to store path
+	- recursion: 
 	- edge case:
 		1) empty tree, null
 		2) if p or q == null? 
@@ -43,113 +44,39 @@ public class TreeNode {
       TreeNode(int x) { val = x; }
  }
 
+
+	
 =======================================================================================================
-method 1:
-
-method:
-
-	- By Storing root to n1 and root to n2 paths:
-		1) Find path from root to n1 and store it in a vector or array.
-		2) Find path from root to n2 and store it in another vector or array.
-		3) Traverse both paths till the values in arrays are same. Return the common element just 
-			before the mismatch.
-	- 
-
-stats:
-
-	- O(n)
-	- 
-
-
-// A Binary Tree node 
-class Node { 
-	int data; 
-	Node left, right; 
-
-	Node(int value) { 
-		data = value; 
-		left = right = null; 
-	} 
-} 
-
-
-	Node root; 
-	private List<Integer> path1 = new ArrayList<>(); 
-	private List<Integer> path2 = new ArrayList<>(); 
-
-	// Finds the path from root node to given root of the tree. 
-	int findLCA(int n1, int n2) { 
-		path1.clear(); 
-		path2.clear(); 
-		return findLCAInternal(root, n1, n2); 
-	} 
-
-	private int findLCAInternal(Node root, int n1, int n2) { 
-
-		if (!findPath(root, n1, path1) || !findPath(root, n2, path2)) { 
-			System.out.println((path1.size() > 0) ? "n1 is present" : "n1 is missing"); 
-			System.out.println((path2.size() > 0) ? "n2 is present" : "n2 is missing"); 
-			return -1; 
-		} 
-
-		int i; 
-		for (i = 0; i < path1.size() && i < path2.size(); i++) { 
-			
-		// System.out.println(path1.get(i) + " " + path2.get(i)); 
-			if (!path1.get(i).equals(path2.get(i))) 
-				break; 
-		} 
-
-		return path1.get(i-1); 
-	} 
-	
-	// Finds the path from root node to given root of the tree, Stores the 
-	// path in a vector path[], returns true if path exists otherwise false 
-	private boolean findPath(Node root, int n, List<Integer> path) 
-	{ 
-		if (root == null) { 
-			return false; 
-		} 
-		
-		// Store this node . The node will be removed if not in path from root to n. 
-		path.add(root.data); 
-
-		if (root.data == n) return true; 
-		
-
-		if (root.left != null && findPath(root.left, n, path)) { 
-			return true; 
-		} 
-
-		if (root.right != null && findPath(root.right, n, path)) { 
-			return true; 
-		} 
-
-		// If not present in subtree rooted with root, remove root from 
-		// path[] and return false 
-		path.remove(path.size()-1); 
-
-		return false; 
-	} 
-
-	
--------
-Start traversing the tree from the root node.
-If the current node itself is one of p or q, we would mark a variable mid as True and continue the search for the other node in the left and right branches.
-If either of the left or the right branch returns True, this means one of the two nodes was found below.
-If at any point in the traversal, any two of the three flags left, right or mid become True, this means we have found the lowest common ancestor for the nodes p and q.
-
+method 1: recursion
 
 Runtime: 5 ms, faster than 100.00% of Java online submissions for Lowest Common Ancestor of a Binary Tree.
 Memory Usage: 34.7 MB, less than 6.35%
 
+if both p and q exist in Tree rooted at root, then return their LCA
+if neither p and q exist in Tree rooted at root, then return null
+if only one of p or q (NOT both of them), exists in Tree rooted at root, return it
+
+对于 lowestCommonAncestor 这个函数的理解的话，它不一定可以返回最近的共同祖先，如果子树中只能找到 p 节点
+或者 q 节点，它最终返回其实就是 p 节点或者 q 节点。这其实对应于最后一种情况，也就是 leftCommonAncestor 和 
+rightCommonAncestor 都不为 null，说明 p 节点和 q 节点分处于两个子树中，直接 return root。
+
 
 public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
-    if (root == null || root == p || root == q) return root;
-    TreeNode left = lowestCommonAncestor(root.left, p, q);
-    TreeNode right = lowestCommonAncestor(root.right, p, q);
-    return left == null ? right : right == null ? left : root;
-}
+        if( root == p || root == q || root == null)
+            return root;
+
+        TreeNode left = lowestCommonAncestor( root.left,  p,  q);
+        TreeNode right = lowestCommonAncestor( root.right,  p,  q);
+
+    	//在左子树中没有找到，那一定在右子树中
+        if(left == null)
+            return right;
+        else if (right == null)
+            return left;
+        else
+            return root;
+        
+    }
 
 =======================================================================================================
 method 2:
@@ -345,4 +272,92 @@ class Solution {
         return null;
     }
 }
+=======================================================================================================
+method 1:
+
+method:
+
+	- By Storing root to n1 and root to n2 paths:
+		1) Find path from root to n1 and store it in a vector or array.
+		2) Find path from root to n2 and store it in another vector or array.
+		3) Traverse both paths till the values in arrays are same. Return the common element just 
+			before the mismatch.
+	- 
+
+stats:
+
+	- O(n)
+	- 
+
+
+// A Binary Tree node 
+class Node { 
+	int data; 
+	Node left, right; 
+
+	Node(int value) { 
+		data = value; 
+		left = right = null; 
+	} 
+} 
+
+
+	Node root; 
+	private List<Integer> path1 = new ArrayList<>(); 
+	private List<Integer> path2 = new ArrayList<>(); 
+
+	// Finds the path from root node to given root of the tree. 
+	int findLCA(int n1, int n2) { 
+		path1.clear(); 
+		path2.clear(); 
+		return findLCAInternal(root, n1, n2); 
+	} 
+
+	private int findLCAInternal(Node root, int n1, int n2) { 
+
+		if (!findPath(root, n1, path1) || !findPath(root, n2, path2)) { 
+			System.out.println((path1.size() > 0) ? "n1 is present" : "n1 is missing"); 
+			System.out.println((path2.size() > 0) ? "n2 is present" : "n2 is missing"); 
+			return -1; 
+		} 
+
+		int i; 
+		for (i = 0; i < path1.size() && i < path2.size(); i++) { 
+			
+		// System.out.println(path1.get(i) + " " + path2.get(i)); 
+			if (!path1.get(i).equals(path2.get(i))) 
+				break; 
+		} 
+
+		return path1.get(i-1); 
+	} 
+	
+	// Finds the path from root node to given root of the tree, Stores the 
+	// path in a vector path[], returns true if path exists otherwise false 
+	private boolean findPath(Node root, int n, List<Integer> path) 
+	{ 
+		if (root == null) { 
+			return false; 
+		} 
+		
+		// Store this node . The node will be removed if not in path from root to n. 
+		path.add(root.data); 
+
+		if (root.data == n) return true; 
+		
+
+		if (root.left != null && findPath(root.left, n, path)) { 
+			return true; 
+		} 
+
+		if (root.right != null && findPath(root.right, n, path)) { 
+			return true; 
+		} 
+
+		// If not present in subtree rooted with root, remove root from 
+		// path[] and return false 
+		path.remove(path.size()-1); 
+
+		return false; 
+	} 
 

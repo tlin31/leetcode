@@ -46,6 +46,27 @@ stats:
 	- Runtime: 1 ms, faster than 100.00% of Java online submissions for Number of Islands.
 	- Memory Usage: 40.3 MB, less than 100.00% 
 
+    public int numIslands(char[][] A) {
+        int m = A.length, n = A[0].length, res = 0;
+        for (int i = 0; i < m; i++)
+            for (int j = 0; j < n; j++)
+                res += dfs(A, i, j);
+        return res;
+    }
+
+    private int dfs(char[][] A, int i, int j) {
+        int m = A.length, n = A[0].length;
+        if (i < 0 || i == m || j < 0 || j == n || A[i][j] == '0') return 0;
+
+        A[i][j] = '0'; //change 1 to 0， marked as visited
+        dfs(A, i - 1, j);
+        dfs(A, i + 1, j);
+        dfs(A, i, j - 1);
+        dfs(A, i, j + 1);
+        return 1;
+    }
+
+-------------------------------
 
 public class Solution {
     int y;          // The height of the given grid
@@ -81,7 +102,6 @@ public class Solution {
     
     /**
      * Marks the given site as visited, then checks adjacent sites.
-     * 
      * Or, Marks the given site as water, if land, then checks adjacent sites.
      * 
      * Or, Given one coordinate (i,j) of an island, obliterates the island
@@ -186,13 +206,6 @@ method:
 
 	- bfs
 
-	- 
-
-stats:
-
-	- 
-	- 
-
 class Solution {
 	int[][] dirs = {{0,1}, {1,0}, {0, -1}, {-1, 0}};
 
@@ -243,3 +256,59 @@ class Solution {
         }
     }
 }
+
+----------------------
+加入queue的时候，把二维坐标转为了一维，就省去了再创建一个类表示坐标。
+
+
+public int numIslands(char[][] grid) {
+        int count = 0;
+        int rows = grid.length;
+        if (rows == 0) {
+            return 0;
+        }
+        int cols = grid[0].length;
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                if (grid[r][c] == '1') {
+                    count++;
+                    bfs(r, c, rows, cols, grid);
+                }
+            }
+        }
+        return count;
+    }
+
+ private void bfs(int r, int c, int rows, int cols, char[][] grid) {
+        Queue<Integer> queue = new LinkedList<Integer>();
+        queue.offer(r * cols + c);
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            int row = cur / cols;
+            int col = cur % cols;
+            //已经标记过就结束，这句很关键，不然会把一些节点重复加入
+            if(grid[row][col] == '2'){
+                continue;
+            }
+
+            grid[row][col] = '2';
+
+            //将上下左右连通的 1 加入队列
+            if (row != (rows - 1) && grid[row + 1][col] == '1') {
+                queue.offer((row + 1) * cols + col);
+            }
+            if (col != (cols - 1) && grid[row][col + 1] == '1') {
+                queue.offer(row * cols + col + 1);
+            }
+            if (row != 0 && grid[row - 1][col] == '1') {
+                queue.offer((row - 1) * cols + col);
+            }
+            if (col != 0 && grid[row][col - 1] == '1') {
+                queue.offer(row * cols + col - 1);
+            }
+
+        }
+ }
+
+
+

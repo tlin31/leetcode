@@ -22,6 +22,8 @@ key:
 
 	- method 1: two pointers, keep start and end
 	- method 2: use graph
+    - method 3: use StackTraceElement
+
 	- edge case:
 	1) empty array
 	2) negative or zero --> doesnt matter
@@ -296,4 +298,29 @@ stats:
 }
 
 
+========================================================================================================================
+stack
 
+class Solution {
+    // 8 Jaynary 2023
+    public int[][] merge(int[][] intervals) {
+        Arrays.sort(intervals, (a1,a2)-> a1[0]-a2[0]); // O(NlogN)
+
+        Stack<int[]> stack = new Stack<>(); //O(N)
+        stack.push(intervals[0]);
+        int i=1;
+        while(!stack.isEmpty() && i < intervals.length){ //O(N)
+            int[] current = stack.peek();
+            int[] next = intervals[i++];
+            if(current[1]>=next[0]){
+                stack.pop();
+                current[1] = Math.max(current[1], next[1]);
+                stack.push(current);
+            }else{
+                stack.push(next);
+            }
+        }
+
+        return stack.toArray(new int[stack.size()][2]);
+    }
+}

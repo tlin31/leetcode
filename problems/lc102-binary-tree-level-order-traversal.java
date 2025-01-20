@@ -19,7 +19,7 @@ return its level order traversal as:
 
 ******************************************************
 key:
-	- 
+	- queue bfs
 	- edge case:
 		1) empty tree, return empty ArrayList
 		2)
@@ -27,7 +27,34 @@ key:
 ******************************************************
 
 
+class Solution {
+    public List<List<Integer>> levelOrder(TreeNode root) {
+        Queue<TreeNode> q = new LinkedList<>();
+        List<List<Integer>> res = new LinkedList<>();
 
+        if(root==null) return res;
+        q.offer(root);
+        while(!q.isEmpty()){
+            int levelNum = q.size();
+            List<Integer> curLevel = new LinkedList<>();
+            for(int i = 0;i<levelNum;i++){
+                TreeNode curNode = q.poll();
+                
+                curLevel.add(curNode.val);
+                if (i == levelNum - 1) {
+                    res.add(curLevel);
+                }
+                if (curNode.left != null) {
+                    q.offer(curNode.left);
+                }
+                if (curNode.right != null) {
+                    q.offer(curNode.right);
+                }
+            }
+        }
+        return res;
+    }
+}
 =======================================================================================================
 method 1:
 
@@ -88,3 +115,7 @@ public List<List<Integer>> levelOrder(TreeNode root) {
 		levelOrderHelper(res, root.left, level + 1);
 		levelOrderHelper(res, root.right, level + 1);
 	}
+
+
+
+	

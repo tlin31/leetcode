@@ -51,16 +51,12 @@ stats:
 
 
 	public TreeNode invertTree(TreeNode root) {
-	    if (root == null) {
-	        return null;
-	    }
-	    final TreeNode left = root.left,
-	        		   right = root.right;
-	    root.left = invertTree(right);
-	    root.right = invertTree(left);
-	    return root;
-	}
-
+        if (root == null) return null;
+        TreeNode tempRight = root.right;
+        root.right = invertTree(root.left);
+        root.left = invertTree(tempRight);
+        return root;
+    }
 
 
 =======================================================================================================
@@ -80,7 +76,7 @@ stats:
 	    if (root == null) {
 	        return null;
 	    }
-	    final Deque < TreeNode > stack = new LinkedList < > ();
+	    final Deque <TreeNode> stack = new LinkedList < > ();
 	    stack.push(root);
 
 	    while (!stack.isEmpty()) {
@@ -141,4 +137,10 @@ stats:
 	    }
 	    return root;
 	}
+
+
+
+
+
+
 

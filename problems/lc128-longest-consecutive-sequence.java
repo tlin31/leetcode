@@ -1,4 +1,4 @@
-128. Longest Consecutive Sequence - Hard
+128. Longest Consecutive Sequence - Hard--> medium
 
 Given an unsorted array of integers, find the length of the longest consecutive elements sequence.
 
@@ -12,7 +12,7 @@ Explanation: The longest consecutive elements sequence is [1, 2, 3, 4]. Therefor
 
 ******************************************************
 key:
-	- 
+	- Hashmap 
 	- edge case:
 		1) empty string, return empty
 		2)
@@ -64,8 +64,7 @@ public int longestConsecutive(int[] num) {
             // keep track of the max length 
             res = Math.max(res, sum);
             
-            // extend the length to the boundary(s)
-            // of the sequence
+            // extend the length to the boundary(s)of the sequence
             // will do nothing if n has no neighbors
             map.put(n - left, sum);
             map.put(n + right, sum);

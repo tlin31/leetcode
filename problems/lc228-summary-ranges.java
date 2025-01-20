@@ -1,4 +1,4 @@
-228. Summary Ranges - Medium
+228. Summary Ranges - Medium-->easy
 
 
 Given a sorted integer array without duplicates, return the summary of its ranges.

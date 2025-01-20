@@ -46,7 +46,8 @@ Method 1:
 
 Stats:
 
-	- 
+	- Time: O(M * N), where M is number of rows, N is number of columns in the grid.
+Space: O(M * N), the space used by the depth stack during our recursion, in worst case is O(M * N).
 	- 
 
 
@@ -111,57 +112,53 @@ class Solution(object):
                    for c in range(len(grid[0])))
 
 =======================================================================================================
-method 2:
+method 2: bfs
 
 Stats:
 
 	- 
 	- 
+Time: O(M * N), where M is number of rows, N is number of columns in the grid.
+Space: O(M * N), the space used by the queue in bfs, in worst case is O(M * N)
 
 
-Method:
-
-	-	
-	-	
-
-
-
-class Solution {
+  // BFS
+    
+    private static int[][] DIRECTIONS = new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
     public int maxAreaOfIsland(int[][] grid) {
-        boolean[][] seen = new boolean[grid.length][grid[0].length];
-        int[] dir_x = new int[]{1, -1, 0, 0};
-        int[] dir_y = new int[]{0, 0, 1, -1};
-
-        int max = 0;
-        for (int r0 = 0; r0 < grid.length; r0++) {
-            for (int c0 = 0; c0 < grid[0].length; c0++) {
-                if (grid[r0][c0] == 1 && !seen[r0][c0]) {
-                    int count = 0;
-                    Stack<int[]> stack = new Stack();
-                    stack.push(new int[]{r0, c0});
-                    seen[r0][c0] = true;
-                    while (!stack.empty()) {
-                        int[] node = stack.pop();
-                        int r = node[0], c = node[1];
-                        count++;
-                        for (int k = 0; k < 4; k++) {
-                            int nr = r + dir_x[k];
-                            int nc = c + dir_y[k];
-                            if (0 <= nr && nr < grid.length &&
-                                    0 <= nc && nc < grid[0].length &&
-                                    grid[nr][nc] == 1 && !seen[nr][nc]) {
-                                stack.push(new int[]{nr, nc});
-                                seen[nr][nc] = true;
-                            }
-                        }
-                    }
-                    max = Math.max(max, count);
+        if (grid == null || grid.length == 0 || grid[0].length == 0) return 0;
+        int M = grid.length;
+        int N = grid[0].length;
+        boolean[][] visited = new boolean[M][N];
+        int res = 0;
+        for (int i=0; i<M; i++) {
+            for (int j=0; j<N; j++) {
+                if (grid[i][j] == 1 && !visited[i][j]) {
+                    res = Math.max(res, bfs(grid, visited, i, j));
                 }
             }
         }
-        return max;
+        return res;
     }
-}
+
+    private int bfs(int[][] grid, boolean[][] visited, int i, int j) {
+        Queue<int[]> q = new LinkedList<>();
+        q.add(new int[]{i, j});
+        visited[i][j] = true;
+        int res = 0;
+        while (!q.isEmpty()) {
+            int[] curr = q.poll();
+            res++;
+            for (int[] dir: DIRECTIONS) {
+                int x = curr[0] + dir[0];
+                int y = curr[1] + dir[1];
+                if (x < 0 || y < 0 || x >= grid.length || y >= grid[0].length || visited[x][y] || grid[x][y] != 1) continue;
+                q.add(new int[]{x, y});
+                visited[x][y] = true;
+            }
+        }
+        return res;
+    }
 
 
 
@@ -192,7 +189,7 @@ class Solution(object):
         return ans
 
 =======================================================================================================
-method 3:
+method 3:union find
 
 Stats:
 
@@ -204,7 +201,85 @@ Method:
 
 	-	
 	-	
+ // Union-Find
+    public int maxAreaOfIsland3(int[][] grid) {
+        if (grid == null || grid.length == 0 || grid[0].length == 0) return 0;
+        int M = grid.length;
+        int N = grid[0].length;
+        int res = 0;
+        UinionFind uf = new UinionFind(grid);
+        for (int i=0; i<M; i++) {
+            for (int j=0; j<N; j++) {
+                if (grid[i][j] == 1) {
+                    res = Math.max(res, link(grid, i, j, uf, M, N));
+                }
+            }
+        }
+        return res;
+    }
 
+    
+    private int link(int[][] grid, int i, int j, UinionFind uf, int M, int N) {
+        int pre = i * N + j;
+        int res = uf.getSize(pre);
+        for (int[] dir: DIRECTIONS) {
+            int x = i + dir[0];
+            int y = j + dir[1];
+            if (x < 0 || y < 0 || x >= M || y >= N || grid[x][y] != 1) continue;
+            res = Math.max(res, uf.union(pre, x * N + y));
+        }
+        return res;
+    }
+
+    class UinionFind {
+        int[] parent;
+        int[] size;
+        int[] rank;
+
+        UinionFind(int[][] grid) {
+            int M = grid.length;
+            int N = grid[0].length;
+            this.parent = new int[M * N];
+            for (int i=0; i<M*N; i++) this.parent[i] = i;
+            this.rank = new int[M * N];
+            this.size = new int[M * N];
+            Arrays.fill(this.size, 1);
+        }
+
+        int find(int x) {
+            if (this.parent[x] != x) {
+                this.parent[x] = find(this.parent[x]);
+            }
+            return this.parent[x];
+        }
+
+        int union(int x, int y) {
+            int px = find(x);
+            int py = find(y);
+
+            if (px == py) return this.size[px];
+            if (this.rank[px] > this.rank[py]) {
+                this.parent[py] = px;
+                this.size[px] = this.size[px] + this.size[py];
+                return this.size[px];
+            } else if (this.rank[px] < this.rank[py]) {
+                this.parent[px] = py;
+                this.size[py] = this.size[px] + this.size[py];
+                return this.size[py];
+            } else {
+                this.parent[px] = py;
+                this.rank[py]++;
+                this.size[py] = this.size[px] + this.size[py];
+                return this.size[py];
+            }
+        }
+
+        int getSize(int x) {
+            return this.size[find(x)];
+        }
+    }
+
+}
 
 
 

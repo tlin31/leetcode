@@ -45,9 +45,6 @@ method 1:
 
 method:
 	- stack
-	- one thing to notice is the "average O(1) run time". there is nothing below O(1) in run time, 
-		which suggests in most cases, I solve it in O(1), while in some cases, I need to solve it in 
-		(n) or O(h). These two limitations are big hints.
 	- once you get to a TreeNode, in order to get the smallest, you need to go all the way down its 
 		left branch. So our first step is to point to pointer to the left most TreeNode. 
 	- The problem is how to do back trace. Since the TreeNode does not have father pointer, we cannot 
@@ -64,6 +61,9 @@ stats:
 
 	- Runtime: 57 ms, faster than 90.70% of Java online submissions for Binary Search Tree Iterator.
 	- Memory Usage: 50.4 MB, less than 92.59% o
+
+O(h) memory, hasNext() in O(1) time, But next() is O(h) time.
+
 
 
 

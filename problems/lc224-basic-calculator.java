@@ -20,13 +20,86 @@ Output: 23
 
 ******************************************************
 key:
-	- 
+	- stack
 	- edge case:
 		1) empty string, return empty
 		2)
 
 ******************************************************
 
+
+=======================================================================================================
+method 2:
+
+method:
+
+	- a lot faster
+	- 
+
+stats:
+
+	- Runtime: 1 ms, faster than 100.00% of Java online submissions for Basic Calculator.
+	- Memory Usage: 39.6 MB, less than 72.31%
+
+
+
+class Solution {
+    int i = 0;
+
+    public int calculate(String s) {
+        i=0;
+        s = "(" + s + ")";
+        return helper(s);
+    }
+
+    int helper(String s) {
+        int num =0;
+        int val = 0;
+        int presign = 1;
+
+        while(i < s.length()) {
+            char c = s.charAt(i);
+            if(c==' ') {
+                i++;
+            }
+
+            else if(c=='+') {
+                val = val + presign * num;
+
+                //reset
+                num=0;
+                presign = 1;
+                i++;
+            }
+
+            else if(c=='-') {
+                val = val + presign * num;
+                
+                num=0;
+                presign = -1;
+                i++;
+            }
+
+            else if(c=='(') {
+                i++; 
+                val = val + presign * helper(s);
+            }
+
+            else if(c==')') {
+                val = val + presign * num;
+                i++;
+                // return to prev recursion stack!!
+                return val;
+            }
+            else {
+                int n = c-'0';
+                num = num * 10 + n;
+                i++;
+            }
+        }
+        return val;
+    }
+}
 
 
 =======================================================================================================
@@ -71,67 +144,6 @@ public static int calculate(String s) {
 }
 
 
-=======================================================================================================
-method 2:
-
-method:
-
-	- a lot faster
-	- 
-
-stats:
-
-	- Runtime: 1 ms, faster than 100.00% of Java online submissions for Basic Calculator.
-	- Memory Usage: 39.6 MB, less than 72.31%
-
-
-
-class Solution {
-    int i = 0;
-
-    public int calculate(String s) {
-        i=0;
-        s = "(" + s + ")";
-        return helper(s);
-    }
-
-    int helper(String s) {
-        int num =0;
-        int val = 0;
-        int presign = 1;
-        while(i < s.length()) {
-            char c = s.charAt(i);
-            if(c==' ') {
-                i++;
-            }else if(c=='+') {
-                val = val + presign * num;
-
-                //reset
-                num=0;
-                presign = 1;
-                i++;
-            }else if(c=='-') {
-                val = val + presign * num;
-                num=0;
-                presign = -1;
-                i++;
-            }else if(c=='(') {
-                i++; 
-                val = val + presign * helper(s);
-            }else if(c==')') {
-                val = val + presign * num;
-                i++;
-                // return to prev recursion stack!!
-                return val;
-            }else {
-                int n = c-'0';
-                num = num * 10 + n;
-                i++;
-            }
-        }
-        return val;
-    }
-}
 
 =======================================================================================================
 method 3:

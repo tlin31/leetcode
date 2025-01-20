@@ -1,4 +1,4 @@
-155. Min Stack - Easy
+155. Min Stack - Easy-->medium
 
 Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.
 
@@ -30,15 +30,50 @@ key:
 
 ******************************************************
 
-
+class MinStack {
+    private Node head;
+    
+    private class Node {
+        int val;
+        int min;
+        Node next;
+            
+        private Node(int val, int min, Node next) {
+            this.val = val;
+            this.min = min;
+            this.next = next;
+        }
+    }
+        
+    public void push(int x) {
+        if (head == null) 
+            head = new Node(x, x, null);
+        else 
+            head = new Node(x, Math.min(x, head.min), head);
+    }
+    
+    public void pop() {
+        head = head.next;
+    }
+    
+    public int top() {
+        return head.val;
+    }
+    
+    public int getMin() {
+        return head.min;
+    }
+        
+    
+}
 
 =======================================================================================================
 method 1:
 
 method:
 	- stack stores the pair [cur_value, min_value]
-	- the numbers below it will not change for as long as number x remains on the Stack. Numbers could 
-	  come and go above x for the duration of x's presence, but never below.
+	- the numbers below it will not change for as long as number x remains on the Stack
+      Numbers could come and go above x for the duration of x's presence, but never below.
 
 	- So, whenever number x is the top of the Stack, the minimum will always be the same, as it's 
 	  simply the minimum out of x and all the numbers below it. 
@@ -94,7 +129,10 @@ method 2:
 method:
 
 	- 2 stacks
-	- An improvement is to put pairs onto the min-tracker Stack. The first value of the pair would be the same as before, and the second value would be how many times that minimum was repeated. For example, this is how the min-tracker Stack for the example just above would appear.
+	- An improvement is to put pairs onto the min-tracker Stack. The first value of 
+    the pair would be the same as before, and the second value would be how many times 
+    that minimum was repeated. For example, this is how the min-tracker Stack for the 
+    example just above would appear.
 
 ex.
 min stack:		12		30		7		6		45		6		6		14		6

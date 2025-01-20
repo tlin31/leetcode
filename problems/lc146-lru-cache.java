@@ -58,7 +58,7 @@ method:
 	- One interesting property about double linked list is that the node can remove itself 
 	  	without other reference &  constant time to add and remove nodes from the head or tail.
 	-  + create a pseudo head and tail to mark the boundary, so that we dont need to check the NULL
-		node during the update. --> code  concise and clean + good performance
+		node during the update. --> code concise and clean + good performance
 
 	- actual implementation:
 		-> get: after get the value, move this element to the head

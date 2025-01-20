@@ -146,8 +146,9 @@ Stats:
 
 Method:
 
-	- follow Root->Left->Right direction, i.e. do all the business with the node (= update the current 
-	  number and root-to-leaf sum), and then do the recursive calls for the left and right child nodes.
+	- follow Root->Left->Right direction, i.e. do all the business with the node (= update the 
+		current number and root-to-leaf sum), and then do the recursive calls for the left 
+	    and right child nodes.
 
 
 

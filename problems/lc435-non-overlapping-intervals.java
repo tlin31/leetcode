@@ -45,7 +45,7 @@ method 1:
 method:
 	- Actually, the problem is the same as "Given a collection of intervals, find the maximum number 
 		of intervals that are non-overlapping." (the classic Greedy problem: Interval Scheduling). 
-	- 1. Why {all intervals} - {max compatible intervals} = minimum deleted intervals? 
+	- 1.Why {all intervals} - {max compatible intervals} = minimum deleted intervals? 
 		Suppose interval A in the latter max compatible set B and A causes two other intervals 
 		be deleted. If we delete A instead and insert those two deleted intervals to B can obtain 
 		a larger set, then it contradicts B is the max compatible intervals.
@@ -57,7 +57,7 @@ method:
  
 stats:
 
-	- Total complexity: O(nlogn)
+	- Total complexity: O(n*logn)
 	- Sorting Interval.end in ascending order is O(nlogn), then traverse intervals array to get the 
 		maximum number of non-overlapping intervals is O(n). Total is O(nlogn).
 
@@ -124,6 +124,7 @@ stats:
             curr = intervals[i];
             if(overlapping(prev, curr)) {
                 toRemove++;
+                //greedy, keeps the larger one
                 if(prev.end >= curr.end) {
                     prev = curr;
                 }

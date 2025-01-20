@@ -47,17 +47,6 @@ key:
 Method 1: recursion
 
 
-Stats:
-
-	- 
-	- 
-
-
-Method:
-
-	-	
-	-	
-
 class Solution {
 
   public boolean isValidBST(TreeNode root) {
@@ -118,6 +107,7 @@ Method:
 	-	Compute inorder traversal list inorder & Check if each element in inorder is < the next one.
 	-  the last added inorder element is enough to ensure at each step that the tree is BST (or not). 
 	-  use a tree node pre to record the last node,
+
 		while current root is not null OR still nodes in stack:
 			while root is not null:
 				add root to the stack and move to its left child

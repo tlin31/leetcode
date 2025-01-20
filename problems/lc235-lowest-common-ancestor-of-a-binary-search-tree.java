@@ -29,7 +29,7 @@ p and q are different and both values will exist in the BST.
 
 ******************************************************
 key:
-	- 
+	- 直到在root/lca的一左一右
 	- edge case:
 		1) empty string, return empty
 		2)
@@ -50,6 +50,7 @@ stats:
 
 	- 
 	- 
+	
 	if(root.val > p.val && root.val > q.val) 
 		return lowestCommonAncestor(root.left, p, q);
     else if(root.val < p.val && root.val < q.val) 
@@ -65,8 +66,13 @@ method 2:
 method:
 
 	- iterative
-	- Just walk down from the whole trees root as long as both p and q are in the same subtree (meaning their values are both smaller or both larger than root's). This walks straight from the root to the LCA, not looking at the rest of the tree, so it's pretty much as fast as it gets. A few ways to do it:
+	- Just walk down from the whole trees root as long as both p and q are in the same subtree 
+	(meaning their values are both smaller or both larger than root's). This walks straight 
+	from the root to the LCA, not looking at the rest of the tree, so it's pretty much as 
+	fast as it gets. A few ways to do it:
 
+
+(in case of overflow, I'd do (root.val - (long)p.val) * (root.val - (long)q.val))
 
 
 stats:
@@ -75,14 +81,31 @@ stats:
 	- 
 
 	public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
-	    while ((root.val - p.val) * (root.val - q.val) > 0)
+	    while ((root.val - p.val) * (root.val - q.val) > 0){
 	    	if (p.val < root.val)
-	    		root = root.left
+	    		root = root.left;
 	    	else 
-	    		root = root.right
+	    		root = root.right;
+	    }
 	    return root;
 	}
 
+
+class Solution {
+    public TreeNode lowestCommonAncestor(TreeNode root, TreeNode p, TreeNode q) {
+        int small = Math.min(p.val, q.val);
+        int large = Math.max(p.val, q.val);
+        while (root != null) {
+            if (root.val > large) // p, q belong to the left subtree
+                root = root.left;
+            else if (root.val < small) // p, q belong to the right subtree
+                root = root.right;
+            else // Now, small <= root.val <= large -> This root is the LCA between p and q
+                return root;
+        }
+        return null;
+    }
+}
 =======================================================================================================
 method 3:
 

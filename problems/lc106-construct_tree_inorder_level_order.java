@@ -82,6 +82,7 @@ class Solution {
   public TreeNode buildTree(int[] inorder, int[] postorder) {
     this.postorder = postorder;
     this.inorder = inorder;
+
     // start from the last postorder element
     post_idx = postorder.length - 1;
 
@@ -91,6 +92,7 @@ class Solution {
       idx_map.put(val, idx++);
     return helper(0, inorder.length - 1);
   }
+
   public TreeNode helper(int in_left, int in_right) {
     // if there is no elements to construct subtrees
     if (in_left > in_right)
@@ -118,96 +120,46 @@ class Solution {
 
 
 ------------------------------------------------------------------------------------
-class Tree  
-{ 
-    Node root; 
-   
-    Node buildTree(int in[], int level[])  
-    { 
-        Node startnode = null; 		// artificial root node
-        return constructTree(startnode, level, in, 0, in.length - 1); 
-    } 
-   
-    // main function
-    Node constructTree(Node startNode, int[] levelOrder, int[] inOrder,  int inStart, int inEnd)  
-    { 
-   
-        // if start index is more than end index 
-        if (inStart > inEnd)   return null; 
-   
-        if (inStart == inEnd)   return new Node(inOrder[inStart]); 
-              
-        boolean found = false; 
-        int index = 0; 
-   
-        // it represents the index in inOrder array of element that 
-        // appear first in levelOrder array. 
-        for (int i = 0; i < levelOrder.length - 1; i++)  
-        { 
-            int data = levelOrder[i]; 
-            for (int j = inStart; j < inEnd; j++)  
-            { 
-            	// found the node in in order array, then create the node and record its index.
-                if (data == inOrder[j])  
-                { 
-                    startNode = new Node(data); 
-                    index = j; 
-                    found = true; 
-                    break; 
-                } 
-            } 
-            if (found == true) 
-                break; 
-        } 
-   
-        //elements present before index are part of left child of startNode. 
-        //elements present after index are part of right child of startNode. 
-        startNode.setLeft(constructTree(startNode, levelOrder, inOrder,    inStart, index - 1)); 
-        startNode.setRight(constructTree(startNode, levelOrder, inOrder,   index + 1, inEnd)); 
-        return startNode; 
-    } 
-   
-    /* Utility function to print inorder traversal of binary tree */
-    void printInorder(Node node)  
-    { 
-        if (node == null)   return; 
-        printInorder(node.left); 
-        System.out.print(node.data + " "); 
-        printInorder(node.right); 
-    } 
-   
-    // Driver program to test the above functions 
-    public static void main(String args[])  
-    { 
-        Tree tree = new Tree(); 
-        int in[] = new int[]{4, 8, 10, 12, 14, 20, 22}; 
-        int level[] = new int[]{20, 8, 22, 4, 12, 10, 14}; 
-        int n = in.length; 
-        Node node = tree.buildTree(in, level); 
-   
-        /* Let us test the built tree by printing Inorder traversal */
-        System.out.print("Inorder traversal of the constructed tree is "); 
-        tree.printInorder(node); 
-    } 
-} 
+class Solution {public TreeNode buildTree(int[] inorder, int[] postorder) {
+    Map<Integer,Integer> inorderMap = new HashMap<>();
+
+    for(int i=0;i<inorder.length;i++) inorderMap.put(inorder[i],i);
+
+    return buildTreeFromPostIn(0,inorder.length-1,postorder,0,
+        postorder.length-1,inorderMap);
+}
+private TreeNode buildTreeFromPostIn(int inorderStart, int inorderEnd, 
+int[] post, int postStart, int postEnd, Map<Integer,Integer> inorderMap){
+
+    if(inorderStart>inorderEnd || postStart>postEnd) return null;
+
+    TreeNode root = new TreeNode(post[postEnd]);
+    int rootIndex = inorderMap.get(post[postEnd]);
+
+    int leftSubTree= rootIndex-inorderStart;
+
+    root.left=buildTreeFromPostIn(inorderStart,rootIndex-1,post,
+        postStart,postStart+leftSubTree-1,inorderMap);
+
+    root.right=buildTreeFromPostIn(rootIndex+1,inorderEnd,post,
+        postStart+leftSubTree,postEnd-1,inorderMap);
+    return root;
+}
+}
 
 
 
 =======================================================================================================
-method 2:
+method 2: stack
 
 Stats:
 
     - 
     - 
 
-
 Method:
-
-    -  Instead of scanning the preorder array from beginning to end and using inorder array as a 
-       kind of mark, in this question, the key point is to scanning the postorder array from end 
-       to beginning and also use inorder array from end to beginning as a mark because the logic 
-       is more clear in this way. 
+    -  scan the postorder array from end to beginning and 
+       also use inorder array from end to beginning as a mark 
        
     -  The core idea is: Starting from the last element of the postorder and inorder array, we put 
        elements from postorder array to a stack and each one is the right child of the last one 
@@ -220,35 +172,59 @@ Method:
        last element we have popped out from the stack.
    
 
-public TreeNode buildTree(int[] inorder, int[] postorder) {
+class Solution 
+{
+    public TreeNode buildTree(int[] inorder, int[] postorder) {
+    // If either of the input arrays are empty, the tree is empty, so return null
     if (inorder.length == 0 || postorder.length == 0) return null;
+    
+    // Initialize indices to the last elements of the inorder and postorder traversals
     int ip = inorder.length - 1;
     int pp = postorder.length - 1;
-    
+
     Stack<TreeNode> stack = new Stack<TreeNode>();
     TreeNode prev = null;
     TreeNode root = new TreeNode(postorder[pp]);
+    // Push the root onto the stack and move to the next element in the postorder traversal
     stack.push(root);
     pp--;
-    
+
+    // Process the rest of the nodes in the postorder traversal
     while (pp >= 0) {
+        // While the stack is not empty and the top of the stack is the current inorder element
         while (!stack.isEmpty() && stack.peek().val == inorder[ip]) {
+            // The top of the stack is the parent of the current node, so pop it off the stack and update prev
             prev = stack.pop();
             ip--;
         }
+
+        // Create a new node for the current postorder element
         TreeNode newNode = new TreeNode(postorder[pp]);
+        // If prev is not null, the parent of the current node is prev, so attach the node 
+        // as the left child of prev
         if (prev != null) {
             prev.left = newNode;
-        } else if (!stack.isEmpty()) {
+        } 
+        
+        // If prev is null, the parent of the current node is the current top of the stack, so 
+        // attach the node as the right child of the current top of the stack
+        else if (!stack.isEmpty()) {
             TreeNode currTop = stack.peek();
             currTop.right = newNode;
         }
+        // Push the new node onto the stack, reset prev to null, and move to the next element in the postorder traversal
         stack.push(newNode);
         prev = null;
         pp--;
     }
-    
+
+    // Return the root of the binary tree
     return root;
+    }
 }
+
+
+
+
 
 
