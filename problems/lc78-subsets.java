@@ -131,8 +131,10 @@ stats:
     public List<List<Integer>> subsets(int[] nums) {
         List<List<Integer>> ans = new ArrayList<>();
         ans.add(new ArrayList<>());//初始化空数组
+
         for(int i = 0;i<nums.length;i++){
             List<List<Integer>> ans_tmp = new ArrayList<>();
+            
             //遍历之前的所有结果
             for(List<Integer> list : ans){
                 List<Integer> tmp = new ArrayList<>(list);

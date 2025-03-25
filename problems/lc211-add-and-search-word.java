@@ -28,38 +28,42 @@ key:
 ******************************************************
 
 
-
 class WordDictionary {
-    private TrieNode root;
-
-    class TrieNode(){
-        String word = "";
-        TrieNode[] children = new TrieNode[26];
-
-    }
-    /** Initialize your data structure here. */
+    private WordDictionary[] children;
+    boolean isEndOfWord;
+    // Initialize your data structure here. 
     public WordDictionary() {
-        TrieNode root = new TrieNode();
+        children = new WordDictionary[26];
+        isEndOfWord = false;
     }
     
-    /** Adds a word into the data structure. */
+    // Adds a word into the data structure. 
     public void addWord(String word) {
-        TrieNode pointer = root;
-        for (char c: word.toCharArray()){
-            if (pointer.children[c - 'a'] == null){
-                pointer.children[c - 'a'] = new TrieNode();
+        WordDictionary curr = this;
+        for(char c: word.toCharArray()){
+            if(curr.children[c - 'a'] == null)
+                curr.children[c - 'a'] = new WordDictionary();
+            curr = curr.children[c - 'a'];
+        }
+        curr.isEndOfWord = true;
+    }
+    
+    // Returns if the word is in the data structure. A word could contain the dot character '.' to represent any one letter. 
+    public boolean search(String word) {
+        WordDictionary curr = this;
+        for(int i = 0; i < word.length(); i++){
+            char c = word.charAt(i);
+            if(c == '.'){
+                for(WordDictionary ch: curr.children)
+                    if(ch != null && ch.search(word.substring(i+1))) return true;
+                return false;
             }
 
-            pointer = pointer.children[c - 'a'];
+            if(curr.children[c - 'a'] == null) return false;
 
+            curr = curr.children[c - 'a'];
         }
-
-        pointer.word = word;
-    }
-    
-    /** Returns if the word is in the data structure. A word could contain the dot character '.' to represent any one letter. */
-    public boolean search(String word) {
-        
+        return curr != null && curr.isEndOfWord;
     }
 }
 
@@ -140,6 +144,7 @@ stats:
 
 	- 
 	- 
+
 
 =======================================================================================================
 method 3:

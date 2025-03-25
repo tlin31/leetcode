@@ -80,7 +80,7 @@ class Solution {
 method 2:
 
 key:
-	- use of ans.peek().length --> dont need another var
+	- use of ans.peek().length --> don't need another var
 	- use of str a + str b --> dot product!!!
 
 Runtime: 1 ms, faster than 65.50% 
@@ -110,6 +110,7 @@ Memory Usage: 36 MB, less than 98.63%
 
       for (int i = 0; i < digits.length(); i++) {
           int x = Character.getNumericValue(digits.charAt(i));
+
           while (ans.peek().length() == i) {
               String t = ans.remove();
               for (char s: mapping[x].toCharArray())
@@ -118,3 +119,6 @@ Memory Usage: 36 MB, less than 98.63%
       }
       return ans;
   }
+
+
+

@@ -1,19 +1,35 @@
 93. Restore IP Addresses - Medium
 
-Given a string containing only digits, restore it by returning all possible valid IP address combinations.
+A valid IP address consists of exactly four integers separated by single dots. Each integer is 
+between 0 and 255 (inclusive) and cannot have leading zeros.
 
-Example:
+For example, "0.1.2.201" and "192.168.1.1" are valid IP addresses, but "0.011.255.245", 
+"192.168.1.312" and "192.168@1.1" are invalid IP addresses.
 
-Input: "25525511135"
-Output: ["255.255.11.135", "255.255.111.35"]
+Given a string s containing only digits, return all possible valid IP addresses that can 
+be formed by inserting dots into s. You are not allowed to reorder or remove any digits in s. 
+You may return the valid IP addresses in any order.
 
-Note:
-	Definition of valid IP address:
-		1. The length of the ip without '.' should be equal to the length of s;
-		2. The digit order of ip should be same as the digit order of s;
-		3. Each part separated by the '.' should not start with '0' except only '0';
-		4. Each part separared by the '.' should not larger than 255;
+ 
 
+Example 1:
+
+Input: s = "25525511135"
+Output: ["255.255.11.135","255.255.111.35"]
+Example 2:
+
+Input: s = "0000"
+Output: ["0.0.0.0"]
+Example 3:
+
+Input: s = "101023"
+Output: ["1.0.10.23","1.0.102.3","10.1.0.23","10.10.2.3","101.0.2.3"]
+ 
+
+Constraints:
+
+1 <= s.length <= 20
+s consists of digits only.
 ******************************************************
 key:
 	- backtrack
@@ -22,6 +38,29 @@ key:
 		2)
 
 ******************************************************
+
+
+    public List<String> restoreIpAddresses(String s) {
+        List<String> result = new ArrayList<>();
+        doRestore(result, "", s, 0);
+        return result;
+    }
+    
+    // k = num of parts, part is the num between two .
+    private void doRestore(List<String> result, String path, String s, int k) {
+        if (s.isEmpty() || k == 4) {
+            if (s.isEmpty() && k == 4)
+                result.add(path.substring(1));
+            return;
+        }
+
+        // Avoid leading 0
+        for (int i = 1; i <= (s.charAt(0) == '0' ? 1 : 3) && i <= s.length(); i++) { 
+            String part = s.substring(0, i);
+            if (Integer.valueOf(part) <= 255)
+                doRestore(result, path + "." + part, s.substring(i), k + 1);
+        }
+    }
 
 
 
@@ -130,26 +169,6 @@ stats:
 	- 
 	- 
 
-    public List<String> restoreIpAddresses(String s) {
-        List<String> result = new ArrayList<>();
-        doRestore(result, "", s, 0);
-        return result;
-    }
-    
-    private void doRestore(List<String> result, String path, String s, int k) {
-        if (s.isEmpty() || k == 4) {
-            if (s.isEmpty() && k == 4)
-                result.add(path.substring(1));
-            return;
-        }
-
-        // Avoid leading 0
-        for (int i = 1; i <= (s.charAt(0) == '0' ? 1 : 3) && i <= s.length(); i++) { 
-            String part = s.substring(0, i);
-            if (Integer.valueOf(part) <= 255)
-                doRestore(result, path + "." + part, s.substring(i), k + 1);
-        }
-    }
 
     
 

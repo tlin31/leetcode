@@ -1,14 +1,19 @@
 489. Robot Room Cleaner - Hard
 
-Given a robot cleaner in a room modeled as a grid. Each cell in the grid can be empty or blocked.
+You are controlling a robot that is located somewhere in a room. The room is modeled as 
+an m x n binary grid where 0 represents a wall and 1 represents an empty slot.
 
-The robot cleaner with 4 given APIs can move forward, turn left or turn right. Each turn it made is 
-90 degrees.
+The robot starts at an unknown location in the room that is guaranteed to be empty, and 
+you do not have access to the grid, but you can move the robot using the given API Robot.
 
-When it tries to move into a blocked cell, its bumper sensor detects the obstacle and it stays on the 
-current cell.
+You are tasked to use the robot to clean the entire room (i.e., clean every empty cell 
+	in the room). The robot with the four given APIs can move forward, turn left, or turn 
+right. Each turn is 90 degrees.
 
-Q:Design an algorithm to clean the entire room using only the 4 given APIs shown below.
+When the robot tries to move into a wall cell, its bumper sensor detects the obstacle, 
+and it stays on the current cell.
+
+Design an algorithm to clean the entire room using the following APIs:
 
 interface Robot {
   // returns true if next cell is open and robot moves into the cell.
@@ -23,39 +28,46 @@ interface Robot {
   // Clean the current cell.
   void clean();
 }
-Example:
+Note that the initial direction of the robot will be facing up. You can assume all four 
+edges of the grid are all surrounded by a wall.
 
-Input:
-room = [
-  [1,1,1,1,1,0,1,1],
-  [1,1,1,1,1,0,1,1],
-  [1,0,1,1,1,1,1,1],
-  [0,0,0,1,0,0,0,0],
-  [1,1,1,1,1,1,1,1]
-],
-row = 1,
-col = 3
+ 
 
-Explanation:
-All grids in the room are marked by either 0 or 1.
+Custom testing:
+
+The input is only given to initialize the room and the robot's position internally. 
+You must solve this problem "blindfolded". In other words, you must control the robot using 
+only the four mentioned APIs without knowing the room layout and the initial robot's position.
+
+ 
+
+Example 1:
+
+
+Input: room = [[1,1,1,1,1,0,1,1],[1,1,1,1,1,0,1,1],[1,0,1,1,1,1,1,1],[0,0,0,1,0,0,0,0],[1,1,1,1,1,1,1,1]], row = 1, col = 3
+Output: Robot cleaned all rooms.
+Explanation: All grids in the room are marked by either 0 or 1.
 0 means the cell is blocked, while 1 means the cell is accessible.
 The robot initially starts at the position of row=1, col=3.
 From the top left corner, its position is one row below and three columns right.
 
-Notes:
+Example 2:
 
-The input is only given to initialize the room and the robot position internally. You must solve this 
-problem "blindfolded". In other words, you must control the robot using only the mentioned 4 APIs, 
-without knowing the room layout and the initial robot position.
+Input: room = [[1]], row = 0, col = 0
+Output: Robot cleaned all rooms.
+ 
 
-The robot initial position will always be in an accessible cell.
+Constraints:
 
-The initial direction of the robot will be facing up.
-
-All accessible cells are connected, which means the all cells marked as 1 will be accessible by the robot.
-Assume all four edges of the grid are all surrounded by wall.
-
-
+m == room.length
+n == room[i].length
+1 <= m <= 100
+1 <= n <= 200
+room[i][j] is either 0 or 1.
+0 <= row < m
+0 <= col < n
+room[row][col] == 1
+All the empty cells can be visited from the starting position.
 ******************************************************
 key:
   - dfs
@@ -119,7 +131,7 @@ class Solution {
 			
 			if(robot.move()){
 				//if the robot can move(meaning there's no physical obstacle)
-				dfs(robot,x+dirs[dir][0],y+dirs[dir][1],dir);
+				dfs(robot, x+dirs[dir][0], y+dirs[dir][1], dir);
 
 				// go back to starting position when stuck
 				robot.turnRight();
@@ -128,7 +140,8 @@ class Solution {
 				robot.turnRight();
 				robot.turnRight();
 			}
-			robot.turnLeft();
+			
+			robot.turnRight();
 			dir = (dir+1)%4;
 		}
 	}

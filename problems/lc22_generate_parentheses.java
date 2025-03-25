@@ -66,6 +66,8 @@ key:
 		f(3): "("f(0)")"f(2), "("f(1)")"f(1), "("f(2)")"
 		So f(n) = "("f(0)")"f(n-1) , "("f(1)")"f(n-2) "("f(2)")"f(n-3) ... "("f(i)")"f(n-1-i) ... "(f(n1)")
 
+
+
 // Runtime: 1 ms, faster than 93.54% of Java online submissions for Generate Parentheses.
 // Memory Usage: 36 MB, less than 100.00% o
 public class Solution {
@@ -90,3 +92,5 @@ public class Solution {
         return lists.get(lists.size() - 1);
     }
 }
+
+

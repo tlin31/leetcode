@@ -26,27 +26,32 @@ key:
 
 ******************************************************
 
+class Solution {
+    public List<List<Integer>> permute(int[] nums) {
+        List<List<Integer>> ans = new ArrayList<>();
+        backtrack(new ArrayList<>(), ans, nums);
+        return ans;
+    }
 
-	public List<List<Integer>> permute(int[] nums) {
-	   List<List<Integer>> list = new ArrayList<>();
-	   // Arrays.sort(nums); // not necessary
-	   backtrack(list, new ArrayList<>(), nums);
-	   return list;
-	}
+    public void backtrack(
+        List<Integer> curr,
+        List<List<Integer>> ans,
+        int[] nums
+    ) {
+        if (curr.size() == nums.length) {
+            ans.add(new ArrayList<>(curr));
+            return;
+        }
 
-	public void backtrack(List<List<Integer>> list, List<> cur, int[] nums) {
-		if (cur.lenth == nums.length) {
-			list.add(cur); 
-			return;
-		}
-
-		for (int i = 0; i < nums.length; i++) {
-			cur.add(nums[i]);
-			backtrack(list, cur, nums)
-
-		}
-	}
-
+        for (int num : nums) {
+            if (!curr.contains(num)) {
+                curr.add(num);
+                backtrack(curr, ans, nums);
+                curr.remove(curr.size() - 1);
+            }
+        }
+    }
+}
 
 
 
@@ -171,24 +176,24 @@ stats:
 	- 空间复杂度：O（1)
 
 	public List<List<Integer>> permute(int[] nums) {
-    List<List<Integer>> all = new ArrayList<>();
-    all.add(new ArrayList<>());
-    //在上边的基础上只加上最外层的 for 循环就够了，代表每次新添加的数字
-    for (int i = 0; i < nums.length; i++) {
-        int current_size = all.size();
-        for (int j = 0; j < current_size; j++) {
-            for (int k = 0; k <= i; k++) {
-                List<Integer> temp = new ArrayList<>(all.get(j));
-                temp.add(k, nums[i]);
-                all.add(temp);
-            }
-        }
-        for (int j = 0; j < current_size; j++) {
-            all.remove(0);
-        }
-    }
-    return all;
-}
+	    List<List<Integer>> all = new ArrayList<>();
+	    all.add(new ArrayList<>());
+	    //在上边的基础上只加上最外层的 for 循环就够了，代表每次新添加的数字
+	    for (int i = 0; i < nums.length; i++) {
+	        int current_size = all.size();
+	        for (int j = 0; j < current_size; j++) {
+	            for (int k = 0; k <= i; k++) {
+	                List<Integer> temp = new ArrayList<>(all.get(j));
+	                temp.add(k, nums[i]);
+	                all.add(temp);
+	            }
+	        }
+	        for (int j = 0; j < current_size; j++) {
+	            all.remove(0);
+	        }
+	    }
+	    return all;
+	}
 
 =======================================================================================================
 method 4:

@@ -322,11 +322,6 @@ Redo:
 
 
 
-
-
-
-
-
  
 (刷到 835)
 
@@ -521,11 +516,92 @@ Notes:
 
 
 
- 
+ ## Backtrack
 
+我们只要在递归之前做出选择，在递归之后撤销刚才的选择
 
+框架：
 
+    result = []
+    def backtrack(路路径, 选择列列表):
+        if 满⾜足结束条件: 
+            result.add(路路径)
+        return
+    
+        for 选择 in 选择列列表: 
+            做选择
+            backtrack(路路径, 选择列列表) 
+            撤销选择
 
+如果有list all permutations的情况，比如 17. Letter Combinations of a Phone Number， 则不撤销选择，一直往前走
+
+```java
+class Solution {
+  Map<String, String> phone = new HashMap<String, String>() {{
+    put("2", "abc");
+    put("3", "def");
+    put("4", "ghi");
+    put("5", "jkl");
+    put("6", "mno");
+    put("7", "pqrs");
+    put("8", "tuv");
+    put("9", "wxyz");
+  }};
+
+  List<String> output = new ArrayList<String>();
+
+  // main method
+  public List<String> letterCombinations(String digits) {
+    if (digits.length() != 0)
+        backtrack("", digits);
+
+    return output;
+  }
+
+  public void backtrack(String combination, String next_digits) {
+    // if there is no more digits to check
+    if (next_digits.length() == 0) {
+      output.add(combination);
+    }
+    else {
+      // iterate over all letters which map the next available digit
+      String digit = next_digits.substring(0, 1);
+      String letters = phone.get(digit);
+      
+      for (int i = 0; i < letters.length(); i++) {
+        String letter = phone.get(digit).substring(i, i + 1);
+
+        // append the current letter to the combination
+        // and proceed to the next digits, substirng(1) means delete the first char in string
+        backtrack(combination + letter, next_digits.substring(1));
+      }
+    }
+  }
+```
+
+#### 不想得到所有合法的答案，只想要一个答案
+
+其实特别简单，只要稍微修改⼀一下回溯算法的代码即可:
+
+```java
+// 函数找到⼀一个答案后就返回 true
+bool backtrack(vector<string>& board, int row) {
+    // 触发结束条件
+    if (row == board.size()) {
+            res.push_back(board);
+            return true;
+        }
+        ...
+        for (int col = 0; col < n; col++) {
+            ...
+            board[row][col] = 'Q';
+            if (backtrack(board, row + 1))
+                return true;
+            board[row][col] = '.';
+        }
+    return false;
+}
+```
 
 
 ## Tree
@@ -1341,13 +1417,6 @@ Output
 |23|[696. Count Binary Substrings](https://leetcode.com/problems/count-binary-substrings/)|[Java](problems/lc696-count-binary-substrings.java)| | stack, array, layers | Easy
 |24|[1221. Split a String in Balanced Strings](https://leetcode.com/problems/split-a-string-in-balanced-strings/)|[Java](problems/lc1221-split-a-string-in-balanced-strings.java)| | stack, array, layers | Easy
  
-
-
-
-
- 
- 
-
  (刷tag 到 1221)
 
 

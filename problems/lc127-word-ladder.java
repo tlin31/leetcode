@@ -217,6 +217,7 @@ class Solution {
     return -1;
   }
 
+  //required to write function
   public int ladderLength(String beginWord, String endWord, List<String> wordList) {
 
     if (!wordList.contains(endWord)) {
@@ -232,7 +233,10 @@ class Solution {
           for (int i = 0; i < L; i++) {
             // Key is the generic word
             // Value is a list of words which have the same intermediate generic word.
+            // ex. word --> {*ord, w*rd, wo*d,wor*}
             String newWord = word.substring(0, i) + '*' + word.substring(i + 1, L);
+
+            //in dict: [*ord,{word}]
             List<String> transformations =
                 this.allComboDict.getOrDefault(newWord, new ArrayList<>());
             transformations.add(word);
@@ -256,6 +260,7 @@ class Solution {
     visitedBegin.put(beginWord, 1);
     visitedEnd.put(endWord, 1);
 
+    //手动bi-directional
     while (!Q_begin.isEmpty() && !Q_end.isEmpty()) {
 
       // One hop from begin word

@@ -120,10 +120,13 @@ stats:
             	//刚开始 ans_sub 的大小是 0，所以单独考虑一下这种情况
                 if(candidates[j] == t) {
                     combList.add(Arrays.asList(candidates[j])); // itself can form a list
-                } else {
+                } 
+                else {
                     for(List<Integer> prevlist: dp[t-candidates[j]]) { 
+
                         // only add to list when the candidates[j] >= the last element
-                        // so the list remains ascending order, can prevent duplicate (ex. has [2 3 3], no [3 2 3])
+                        // so the list remains ascending order, can prevent duplicate 
+                        // (ex. has [2 3 3], no [3 2 3])
                         // equal is needed since we can choose the same element many times   
                         if(candidates[j] >= prevlist.get(prevlist.size()-1)){
                             List temp = new ArrayList(prevlist); // temp is needed since 
@@ -133,6 +136,7 @@ stats:
                     }
                 }
             }
+            // update
             dp[t] = combList;
         }
         return dp[target];

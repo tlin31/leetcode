@@ -152,6 +152,7 @@ stats:
 	    if (row == n) {
 	        result.add(new ArrayList<String>(board));
 	    }
+	    
 	    for (int col=0; col<n; col++){
 	        int id1 = col - row + n;
 	        int id2 = col + row;

@@ -49,8 +49,9 @@ stats:
 			we either examine or create a node in the trie till we reach the end of the key.
 		- Space complexity : O(m).
 			worst case newly inserted key does not share a prefix with the the keys already inserted 
-			in the trie. We have to add mm new nodes, which takes us O(m) space.
-	- search
+			in the trie. We have to add m new nodes, which takes us O(m) space.
+	
+    - search
 		- Time complexity : O(m) 
 		- Space complexity : O(1)
 

@@ -85,6 +85,29 @@ public class Solution {
     }
 }
 
+Improved: DP
+
+dp[i][j] refers to the number of assignments which can lead to a sum of j upto the i-th index
+
+
+public class Solution {
+    public int findTargetSumWays(int[] nums, int S) {
+        int[][] dp = new int[nums.length][2001];
+        dp[0][nums[0] + 1000] = 1;
+        dp[0][-nums[0] + 1000] += 1;
+        
+        for (int i = 1; i < nums.length; i++) {
+            for (int sum = -1000; sum <= 1000; sum++) {
+                if (dp[i - 1][sum + 1000] > 0) {
+                    dp[i][sum + nums[i] + 1000] += dp[i - 1][sum + 1000];
+                    dp[i][sum - nums[i] + 1000] += dp[i - 1][sum + 1000];
+                }
+            }
+        }
+        return S > 1000 ? 0 : dp[nums.length - 1][S + 1000];
+    }
+}
+
 =======================================================================================================
 method 2: 2 hashmaps
 
@@ -108,6 +131,7 @@ Method:
             for (int tempSum : dp.keySet()) {
                 int key1 = tempSum + num;
                 dp2.put(key1, dp2.getOrDefault(key1, 0) + dp.get(tempSum));
+
                 int key2 = tempSum - num;
                 dp2.put(key2, dp2.getOrDefault(key2, 0) + dp.get(tempSum));
             }
@@ -119,25 +143,7 @@ Method:
 
 -----
 
-dp[i][j] refers to the number of assignments which can lead to a sum of j upto the i-th index
 
-
-public class Solution {
-    public int findTargetSumWays(int[] nums, int S) {
-        int[][] dp = new int[nums.length][2001];
-        dp[0][nums[0] + 1000] = 1;
-        dp[0][-nums[0] + 1000] += 1;
-        for (int i = 1; i < nums.length; i++) {
-            for (int sum = -1000; sum <= 1000; sum++) {
-                if (dp[i - 1][sum + 1000] > 0) {
-                    dp[i][sum + nums[i] + 1000] += dp[i - 1][sum + 1000];
-                    dp[i][sum - nums[i] + 1000] += dp[i - 1][sum + 1000];
-                }
-            }
-        }
-        return S > 1000 ? 0 : dp[nums.length - 1][S + 1000];
-    }
-}
 =======================================================================================================
 method 3: DP - knapsack problem (whether we choose this item or not)
 

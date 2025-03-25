@@ -56,8 +56,12 @@ stats:
 
 public int[] findOrder(int numCourses, int[][] prerequisites) { 
     if (numCourses == 0) return null;
+
     // Convert graph presentation from edges to indegree of adjacent list.
-    int indegree[] = new int[numCourses], order[] = new int[numCourses], index = 0;
+    int indegree[] = new int[numCourses], 
+        order[] = new int[numCourses], 
+        index = 0;
+
     for (int i = 0; i < prerequisites.length; i++) // Indegree - how many prerequisites are needed.
         indegree[prerequisites[i][0]]++;    
 
