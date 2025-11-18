@@ -55,6 +55,104 @@ key:
 
 ******************************************************
 
+🪜 步骤 1：从字典中构建有向图
+
+节点：所有出现过的字母；
+有向边：通过相邻单词找出字母之间的先后顺序。
+
+构建规则：
+	遍历相邻两个单词 word1、word2：找到第一个不同的字符位置；
+
+	得到一条有向边 word1[i] → word2[i]；
+
+	！！停止比较（后面的字符不再有信息）；
+
+	若 word1 是 word2 的前缀但更长 → ❌ 无效字典，返回空串。
+
+🪜 步骤 2：拓扑排序（BFS or DFS）
+
+	统计每个字母的入度；
+
+	使用 BFS（Kahn算法） 从入度为 0 的字母开始；
+
+	不断弹出字母、更新其邻居入度；
+
+	若最后输出字母数量 < 总字母数量 → 图中存在环（返回空串）。
+
+
+import java.util.*;
+
+public class Solution {
+    public String alienOrder(String[] words) {
+        Map<Character, Set<Character>> graph = new HashMap<>();
+        Map<Character, Integer> indegree = new HashMap<>();
+
+        // 1. 初始化图中的所有字母节点
+        for (String w : words) {
+            for (char c : w.toCharArray()) {
+                graph.putIfAbsent(c, new HashSet<>());
+                indegree.putIfAbsent(c, 0);
+            }
+        }
+
+        // 2. 建图：根据相邻单词推断字符顺序
+        for (int i = 0; i < words.length - 1; i++) {
+            String w1 = words[i];
+            String w2 = words[i + 1];
+
+            // 特殊情况：前缀错误，如 ["abc", "ab"]
+            if (w1.length() > w2.length() && w1.startsWith(w2)) {
+                return "";
+            }
+
+            int len = Math.min(w1.length(), w2.length());
+            for (int j = 0; j < len; j++) {
+                char c1 = w1.charAt(j);
+                char c2 = w2.charAt(j);
+                if (c1 != c2) {
+                    // 发现一个新的顺序关系 c1 -> c2
+                    if (!graph.get(c1).contains(c2)) {
+                        graph.get(c1).add(c2);
+                        indegree.put(c2, indegree.get(c2) + 1);
+                    }
+                    break; // 只比较第一个不同的字符
+                }
+            }
+        }
+
+        // 3. BFS 拓扑排序
+        Queue<Character> queue = new LinkedList<>();
+        for (char c : indegree.keySet()) {
+            if (indegree.get(c) == 0) {
+                queue.offer(c);
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        while (!queue.isEmpty()) {
+            char cur = queue.poll();
+            sb.append(cur);
+
+            for (char next : graph.get(cur)) {
+                indegree.put(next, indegree.get(next) - 1);
+                if (indegree.get(next) == 0) {
+                    queue.offer(next);
+                }
+            }
+        }
+
+        // 检查是否所有字母都在结果中（判断是否有环）
+        return sb.length() == indegree.size() ? sb.toString() : "";
+    }
+}
+
+
+项目			复杂度
+构建图		O(C)，C = 所有字符数量
+比较相邻单词	O(Σ word.length)
+BFS 拓扑排序	O(V + E)
+总体时间复杂度	O(V + E)
+空间复杂度	O(V + E)
 
 
 =======================================================================================================

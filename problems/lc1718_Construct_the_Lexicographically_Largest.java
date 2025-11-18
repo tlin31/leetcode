@@ -110,7 +110,7 @@ class Solution {
 
                     else if (index + i < ans.length && ans[index + i] == 0) {
                         // assigning the second occurence of i in the desired position i.e, (current index + i )
-                        ans[i + index] = i; 
+                        ans[index + i] = i; 
 
 						// largest possible sequence satisfying the given conditions found.
                         if (calc(index + 1, ans, visited, n)) 

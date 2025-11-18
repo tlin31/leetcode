@@ -25,8 +25,8 @@ Design an in-memory file system to simulate the following functions:
 Example:
 
 Input: 
-["FileSystem","ls","mkdir","addContentToFile","ls","readContentFromFile"]
-[[],["/"],["/a/b/c"],["/a/b/c/d","hello"],["/"],["/a/b/c/d"]]
+["FileSystem","ls",  "mkdir",    "addContentToFile", "ls", "readContentFromFile"]
+[[],           ["/"],["/a/b/c"],["/a/b/c/d","hello"],["/"], ["/a/b/c/d"]]
 
 Output:
 [null,[],null,null,["a"],"hello"]

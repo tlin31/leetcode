@@ -46,49 +46,77 @@ method 1:
 method:
 
     - bfs
-    - 
+
+统计每个节点（课程）的 入度（in-degree）；
+
+先把所有 入度为 0 的节点加入队列；
+
+不断弹出队列中的节点，并“移除”它的出边（即让后继节点入度 -1）；
+
+每当某节点入度变为 0，就入队；
+
+最终输出的节点顺序即为拓扑排序。
+
+如果最终输出的节点数量 小于课程总数，说明存在环（无法完成所有课程）。
 
 stats:
 
-    - 
-    - 
+操作  时间复杂度
+构建图 O(E)
+BFS遍历   O(V + E)
+总复杂度    O(V + E) （线性）
+空间复杂度   O(V + E)
 
 
-public int[] findOrder(int numCourses, int[][] prerequisites) { 
-    if (numCourses == 0) return null;
 
-    // Convert graph presentation from edges to indegree of adjacent list.
-    int indegree[] = new int[numCourses], 
-        order[] = new int[numCourses], 
-        index = 0;
+import java.util.*;
 
-    for (int i = 0; i < prerequisites.length; i++) // Indegree - how many prerequisites are needed.
-        indegree[prerequisites[i][0]]++;    
-
-    Queue<Integer> queue = new LinkedList<Integer>();
-    for (int i = 0; i < numCourses; i++) 
-        if (indegree[i] == 0) {
-            // Add the course to the order because it has no prerequisites.
-            order[index++] = i;
-            queue.offer(i);
+class Solution {
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+        // 构建图和入度表
+        List<List<Integer>> graph = new ArrayList<>();
+        int[] indegree = new int[numCourses];
+        
+        for (int i = 0; i < numCourses; i++) {
+            graph.add(new ArrayList<>());
         }
-
-    // How many courses don't need prerequisites. 
-    while (!queue.isEmpty()) {
-        int prerequisite = queue.poll(); // Already finished this prerequisite course.
-        for (int i = 0; i < prerequisites.length; i++)  {
-            if (prerequisites[i][1] == prerequisite) {
-                indegree[prerequisites[i][0]]--; 
-                if (indegree[prerequisites[i][0]] == 0) {
-                    // If indegree is zero, then add the course to the order.
-                    order[index++] = prerequisites[i][0];
-                    queue.offer(prerequisites[i][0]);
+        
+        // 建图：edge = [a, b] 表示 b -> a
+        for (int[] edge : prerequisites) {
+            int course = edge[0];
+            int pre = edge[1];
+            graph.get(pre).add(course);
+            indegree[course]++;
+        }
+        
+        // BFS队列，存储所有入度为0的课程
+        Queue<Integer> queue = new LinkedList<>();
+        for (int i = 0; i < numCourses; i++) {
+            if (indegree[i] == 0) {
+                queue.offer(i);
+            }
+        }
+        
+        int[] order = new int[numCourses];
+        int index = 0;
+        
+        // BFS 拓扑排序
+        while (!queue.isEmpty()) {
+            int cur = queue.poll();
+            order[index++] = cur;
+            
+            // 移除当前节点的出边
+            for (int next : graph.get(cur)) {
+                indegree[next]--;
+                if (indegree[next] == 0) {
+                    queue.offer(next);
                 }
-            } 
+            }
         }
+        
+        // 如果排序结果中课程数量不足，说明有环
+        return index == numCourses ? order : new int[0];
     }
-
-    return (index == numCourses) ? order : new int[0];
 }
 
 =======================================================================================================

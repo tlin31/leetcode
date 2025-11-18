@@ -41,71 +41,72 @@ stats:
 
 
 
-public void solveSudoku(char[][] board) {
-    solver(board);
-}
+    public void solveSudoku(char[][] board) {
+        solver(board);
+    }
 
-private boolean solver(char[][] board) {
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 9; j++) {
-            
-            if (board[i][j] == '.') {
+    private boolean solver(char[][] board) {
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                
+                if (board[i][j] == '.') {
 
-            	//fills in incrementing number
-                char count = '1';
-                while (count <= '9') {
-                    if (isValid(i, j, board, count)) {
-                        board[i][j] = count;
+                	//fills in incrementing number
+                    char count = '1';
+                    while (count <= '9') {
+                        if (isValid(i, j, board, count)) {
+                            board[i][j] = count;
 
-                        //with this data filled in, go find the next one
-                        //recursion, keep finding 
-                        if (solver(board)) {
-                            return true;
-                        } else {
-                            //在board[i][j]放了count之后无解，则退回上一步
-                            board[i][j] = '.';
+                            //with this data filled in, go find the next one
+                            //recursion, keep finding 
+                            if (solver(board)) {
+                                return true;
+                            } else {
+                                //在board[i][j]放了count之后无解，则退回上一步
+                                board[i][j] = '.';
+                            }
                         }
+                        count++;
                     }
-                    count++;
+                    //这一格子的’。‘无解 
+                    return false;
                 }
-                return false;
             }
         }
+
+        //if return true for every sub board and exit the for loops, then it's
+        //a valid board
+        return true;
     }
 
-    //if return true for every sub board and exit the for loops, then it's
-    //a valid board
-    return true;
-}
-
-private boolean isValid(int row, int col, char[][] board, char c) {
-    //check column
-    for (int i = 0; i < 9; i++) {
-        if (board[row][i] == c) {
-            return false;
-        }
-    }
-
-    //check row
-    for (int i = 0; i < 9; i++) {
-        if (board[i][col] == c) {
-            return false;
-        }
-    }
-
-    //check small box
-    int start_row = row / 3 * 3;
-    int start_col = col / 3 * 3;
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            if (board[start_row + i][start_col + j] == c) {
+    private boolean isValid(int row, int col, char[][] board, char c) {
+        //check column
+        for (int i = 0; i < 9; i++) {
+            if (board[row][i] == c) {
                 return false;
             }
         }
 
+        //check row
+        for (int i = 0; i < 9; i++) {
+            if (board[i][col] == c) {
+                return false;
+            }
+        }
+
+        //check small box
+        int start_row = row / 3 * 3;
+        int start_col = col / 3 * 3;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[start_row + i][start_col + j] == c) {
+                    return false;
+                }
+            }
+
+        }
+        return true;
     }
-    return true;
-}
 
 
 =======================================================================================================

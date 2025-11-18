@@ -1,5 +1,4 @@
-2012. Sum of Beauty in the Array
-Medium
+2012. Sum of Beauty in the Array - Medium
 
 You are given a 0-indexed integer array nums. For each index i (1 <= i <= nums.length - 2) the 
 beauty of nums[i] equals:
@@ -96,7 +95,6 @@ class Solution {
         
         int beautyCount = 0;
         for(int i = 1; i < nums.length-1; i++) {
-
 
             if(left[i] && right[i]) {
                 beautyCount += 2;

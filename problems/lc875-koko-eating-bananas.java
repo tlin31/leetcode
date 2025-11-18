@@ -36,7 +36,7 @@ piles.length <= H <= 10^9
 
 ******************************************************
 key:
-	- binary search
+	- binary search， set a close bound for left and right
 	- edge case:
 		1) empty list, return 0
 		2) H = 0, return ????
@@ -44,46 +44,41 @@ key:
 ******************************************************
 
 
+class Solution {
+    public int minEatingSpeed(int[] piles, int h) {
+        int n = piles.length;
+        long total = 0;
+        for(int p:piles){
+            total += p;
+        }
+
+        //最少一小时吃了1个香蕉，最后+1是以防前面的得出零点几，至少是1
+        int low = (int)((total-1)/h) + 1;
+
+        //如果length中每一个pile用一个小时吃，也要用这么多
+        int high = (int)((total-n)/(h-n+1)) + 1;
+
+        while(low<high){
+            int mid = low+(high-low)/2;
+            int time = 0;
+            for(int p: piles){
+                time += (p-1)/mid +1;
+            }
+
+            if(time>h)  
+                low = mid+1;
+            else high = mid; 
+        }
+        return low;
+    }
+}
+
 
 =======================================================================================================
 method 1:
 
-method:
-
-	- Runtime: 13 ms, faster than 41.21% of Java online submissions for Koko Eating Bananas.
-	- Memory Usage: 39.1 MB, less than 100.00%
-
-
-stats:
-
-	- Time Complexity: O(NlogW), where N is the number of piles, and W is the maximum size of a pile.
-
-	- Space Complexity: O(1).
-
-
-    public int minEatingSpeed(int[] piles, int H) {
-        int l = 1, r = 1000000000;
-        while (l < r) {
-            int m = (l + r) / 2, total = 0;
-            for (int p : piles) total += (p + m - 1) / m;
-            if (total > H) l = m + 1; else r = m;
-        }
-        return l;
-    }
-
-
-=======================================================================================================
-method 2:
-
-method:
-
-	- faster, because set lo = 1, hi = max of the pile
-	- 
-
-stats:
-
-	- Runtime: 8 ms, faster than 83.97% of Java online submissions for Koko Eating Bananas.
-	- Memory Usage: 38.8 MB, less than 100.00% of Java online submissions for Koko Eating Bananas.
+    - Runtime: 8 ms, faster than 83.97% of Java online submissions for Koko Eating Bananas.
+    - Memory Usage: 38.8 MB, less than 100.00% of Java online submissions for Koko Eating Bananas.
 
    public int minEatingSpeed(int[] piles, int H) {
         int lo = 1, hi = getMaxPile(piles);
@@ -119,6 +114,42 @@ stats:
         }
         return maxPile;
     }
+
+
+
+=======================================================================================================
+method 2:
+
+method:
+
+	- 
+
+stats:
+
+method:
+
+    - Runtime: 13 ms, faster than 41.21% of Java online submissions for Koko Eating Bananas.
+    - Memory Usage: 39.1 MB, less than 100.00%
+
+
+stats:
+
+    - Time Complexity: O(NlogW), where N is the number of piles, and W is the maximum size of a pile.
+
+    - Space Complexity: O(1).
+
+
+    public int minEatingSpeed(int[] piles, int H) {
+        int l = 1, r = 1000000000;
+        while (l < r) {
+            int m = (l + r) / 2, total = 0;
+            for (int p : piles) total += (p + m - 1) / m;
+            if (total > H) l = m + 1; else r = m;
+        }
+        return l;
+    }
+
+
 =======================================================================================================
 method 3:
 

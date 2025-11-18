@@ -21,6 +21,7 @@ One possible answer is: [0,-3,9,-10,null,5], which represents the following heig
 
 ******************************************************
 key:
+    - binary search + recursion
     - recursion or dfs
     - edge case:
         1) empty string, return empty

@@ -88,13 +88,30 @@ Method:
   return n[l] > n[l + 1])? l : r
 
 
+如果我们从左到右看数组：
+
+若当前元素比右边大 → 峰值一定在 左边或自己
+
+若当前元素比右边小 → 峰值一定在 右边
+
+为什么？
+
+因为如果右边比当前大，说明右边还在“上坡”，肯定存在更高的点；
+
+如果右边比当前小，说明右边在“下坡”，峰值就在左侧或当前。
 
 
 
 public class Solution {
     public int findPeakElement(int[] nums) {
+        if(nums.length ==1) return 0;        
+        if(nums.length ==2) {
+            if(nums[0]<nums[1]) return 1;
+            else return 0;
+        }
         int l = 0, 
             r = nums.length - 1;
+
         while (l < r) {
             int mid = (l + r) / 2;
 

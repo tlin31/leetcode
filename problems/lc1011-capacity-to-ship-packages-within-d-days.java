@@ -54,7 +54,7 @@ Note:
 
 ******************************************************
 key:
-	- 
+	- binary search on weight
 	- edge case:
 		1) empty string, return empty
 		2)
@@ -76,7 +76,7 @@ method:
 	  calculated based on the value of mid ( (beg+end)/2 ).
 
 	  If number of days required are <= D days given, then we can end = mid-1. Update ans equal to mid.
- 	  Else beg = mid+1.
+ 	  else beg = mid+1.
 	- 
 
 stats:

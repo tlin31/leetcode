@@ -33,6 +33,71 @@ key:
 ******************************************************
 
 
+
+
+=======================================================================================================
+Method 1:
+
+核心思路：
+
+	每个元素 arr[i] 对多少个子数组贡献它自己作为“最小值”？
+	计算它作为“子数组最小值”出现的次数，并乘以 arr[i]，再累加即可。
+
+要计算贡献次数，必须知道：
+
+	左边有多少个连续比它 严格大 的元素
+
+	右边有多少个连续比它 大或等于 的元素
+
+	再用：
+
+	贡献=arr[i]×left[i]×right[i]
+
+这可用 单调递增栈（Monotonic Stack） 在 O(n) 完成。
+
+
+
+通过两次单调栈分别求 PLE 和 NLE，时间复杂度 O(n)。
+
+class Solution {
+    public int sumSubarrayMins(int[] arr) {
+        int n = arr.length;
+        int MOD = 1_000_000_007;
+
+        int[] left = new int[n];
+        int[] right = new int[n];
+
+        // 计算 left：上一个更小元素（严格小）
+        Deque<Integer> stack = new ArrayDeque<>();
+        for (int i = 0; i < n; i++) {
+            while (!stack.isEmpty() && arr[stack.peek()] > arr[i]) {
+                stack.pop();
+            }
+            left[i] = stack.isEmpty() ? i + 1 : i - stack.peek();
+            stack.push(i);
+        }
+
+        // 清空栈，计算 right：下一个小于等于元素
+        stack.clear();
+        for (int i = n - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && arr[stack.peek()] >= arr[i]) {
+                stack.pop();
+            }
+            right[i] = stack.isEmpty() ? n - i : stack.peek() - i;
+            stack.push(i);
+        }
+
+        long ans = 0;
+        for (int i = 0; i < n; i++) {
+            ans = (ans + (long) arr[i] * left[i] * right[i]) % MOD;
+        }
+
+        return (int) ans;
+    }
+}
+
+
+
 =======================================================================================================
 Method 1:
 

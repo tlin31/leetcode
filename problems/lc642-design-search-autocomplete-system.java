@@ -36,6 +36,7 @@ The system have already tracked down the following sentences and their correspon
 "island" : 3 times
 "ironman" : 2 times
 "i love leetcode" : 2 times
+
 Now, the user begins another search:
 
 Operation: input('i')
@@ -75,7 +76,6 @@ Note:
 ******************************************************
 key:
 	- Trie
-	- 精华在 traverse function!
 	- edge case:
 		1) empty string, return empty
 		2)
@@ -94,13 +94,117 @@ method:
 
 stats:
 
-	- AutocompleteSystem() takes O(k*l)time. We need to iterate over l sentences each of average length
-		k, to create the trie for the given set of sentencessentences.
+操作			时间复杂度		说明
+初始化		O(N * L)		N 句子，每句长度 L
+插入			O(L²)			每层更新 countMap
+查询			O(L + K log K)	L 前缀长度，K 为候选数目
+空间复杂度	O(N * L)		Trie 存储所有前缀路径
 
-	- input() takes O(p+q+ mlogm) time. Here, pp refers to the length of the sentence formed till now, 
-		cur_sent. q refers to the number of nodes in the trie considering the sentence formed till now as 
-		the root node. Again, we need to sort the listlist of length m indicating the options available 
-		for the hot sentences, which takes O(mlogm) time.
+
+🧩 1. 数据结构选择
+
+	要能快速根据 前缀 找到对应句子 ⇒ 用 Trie（字典树）。
+
+	Trie 每个节点存：
+
+	children: 字符 -> TrieNode
+
+	countMap: 记录该前缀下所有句子及其出现次数
+
+	或者 hotList: 当前节点下 top 3 热门句子（优化内存）
+
+🧩 2. Trie + 优先队列的核心逻辑
+
+	当我们输入字符时，不断沿 Trie 向下查找。
+
+	进入到某个 Trie 节点（对应当前前缀），获取它的所有句子。
+
+	按「出现次数高 → 字典序」排序，返回前三个。
+
+🧩 3. 句子统计
+
+	用一个全局 HashMap<String, Integer> 来记录每个句子的出现次数（frequency）。
+
+	每次遇到 '#'，将当前输入的句子：
+
+	加入 HashMap（计数 +1）
+
+	同时更新 Trie（路径上的节点都记录这个句子）
+
+
+class TrieNode {
+    Map<Character, TrieNode> children = new HashMap<>();
+    Map<String, Integer> countMap = new HashMap<>();
+}
+
+class AutocompleteSystem {
+    private TrieNode root;
+    private StringBuilder curInput = new StringBuilder();
+    private Map<String, Integer> countMap;
+
+    public AutocompleteSystem(String[] sentences, int[] times) {
+        root = new TrieNode();
+        countMap = new HashMap<>();
+        for (int i = 0; i < sentences.length; i++) {
+            countMap.put(sentences[i], times[i]);
+            insert(sentences[i], times[i]);
+        }
+    }
+
+    private void insert(String sentence, int count) {
+        TrieNode node = root;
+        for (char c : sentence.toCharArray()) {
+            node.children.putIfAbsent(c, new TrieNode());
+            node = node.children.get(c);
+            node.countMap.put(sentence, node.countMap.getOrDefault(sentence, 0) + count);
+        }
+    }
+
+    public List<String> input(char c) {
+        if (c == '#') {
+            String sentence = curInput.toString();
+            countMap.put(sentence, countMap.getOrDefault(sentence, 0) + 1);
+            insert(sentence, 1);
+            curInput = new StringBuilder();
+            return new ArrayList<>();
+        }
+
+        curInput.append(c);
+        TrieNode node = root;
+        for (char ch : curInput.toString().toCharArray()) {
+            if (!node.children.containsKey(ch)) return new ArrayList<>();
+            node = node.children.get(ch);
+        }
+
+        //根据存的value/count，如果一样比较string的大小
+        PriorityQueue<Map.Entry<String, Integer>> pq = new PriorityQueue<>(
+            (a, b) -> a.getValue().equals(b.getValue()) ?
+                a.getKey().compareTo(b.getKey()) : b.getValue() - a.getValue()
+        );
+
+        pq.addAll(node.countMap.entrySet());
+        List<String> res = new ArrayList<>();
+        int k = 3;
+        while (!pq.isEmpty() && k-- > 0) {
+            res.add(pq.poll().getKey());
+        }
+        return res;
+    }
+}
+
+
+如果要支持删除句子怎么办？
+→ 在 countMap 里减次数或删除，并在 Trie 路径上更新对应计数。
+
+如何优化内存？
+→ 用 hotList 而不是 countMap；或限制 Trie 深度。
+
+支持多线程查询？
+→ 可用读写锁 ReadWriteLock 或使用 ConcurrentHashMap 改造。
+
+==========================================================================================
+
+
 
 
 

@@ -325,8 +325,8 @@ class Node {
 		for (i = 0; i < path1.size() && i < path2.size(); i++) { 
 			
 		// System.out.println(path1.get(i) + " " + path2.get(i)); 
-			if (!path1.get(i).equals(path2.get(i))) 
-				break; 
+		if (!path1.get(i).equals(path2.get(i))) 
+			break; 
 		} 
 
 		return path1.get(i-1); 
@@ -346,6 +346,7 @@ class Node {
 		if (root.data == n) return true; 
 		
 
+		//不在左边就在右边
 		if (root.left != null && findPath(root.left, n, path)) { 
 			return true; 
 		} 

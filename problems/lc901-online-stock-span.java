@@ -53,62 +53,64 @@ key:
 Method 1:
 
 
-Stats:
+单调栈（Monotonic Stack）
 
-	- 
-	- 
+我们维护一个 单调递减栈（从栈顶到底部：高 → 低）
 
-
-Method:
-
-	- In a typical case, we get a new element like 7, and there are some previous elements like 11, 
-	  3, 9, 5, 6, 4. Lets try to create some relationship between this query and the next query.
-
-	- If (after getting 7) we get an element like 2, then the answer is 1. So in general, whenever 
-	  we get a smaller element, the answer is 1.
-
-	  If we get an element like 8, the answer is 1 plus the previous answer (for 7), as the 8 "stops" 
-	  on the same value that 7 does (namely, 9).
-
-	- If we get an element like 10, the answer is 1 plus the previous answer, plus the answer for 9.
-
-	- Notice throughout this evaluation, we only care about elements that occur in increasing order - 
-	  we "shortcut" to them. That is, from adding an element like 10, we cut to 7 [with "weight" 4], 
-	  then to 9 [with weight 2], then cut to 11 [with weight 1].
+栈中每个元素保存：(price, span)
 
 
-Algorithm
+新加入一个价格时：
 
-	- Lets maintain a weighted stack of decreasing elements. The size of the weight will be the 
-	  total number of elements skipped. For example, 11, 3, 9, 5, 6, 4, 7 will be (11, weight=1), 
-	  (9, weight=2), (7, weight=4).
+	当栈顶价格 ≤ 当前价格，就弹栈
 
-	- When we get a new element like 10, this helps us count the previous values faster by popping 
-	  weighted elements off the stack. The new stack at the end will look like (11, weight=1), 
-	  (10, weight=7).
+	弹出的所有元素的 span 累加到当前价格上
 
+	再把当前 (price, span) 入栈
+
+	因为每个元素只会被 push 一次、pop 一次，所以总复杂度：
+
+均摊 O(1) / 每次调用
+
+ex. 栈顶 -> (70, 1) (80, 1) (100, 1)
+当前输入 price = 75：
+	75 > 70 → pop
+
+	75 < 80 → stop
+
+	最后新 push (75,2)，span = 自己 1 + 被弹的 1
+
+
+复杂度分析
+
+每个元素最多 push 一次、pop 一次, 均摊 O(1)（好面试官会问这个，必须提）空间复杂度：O(n)
+
+
+因为每条记录弹出后永远不会再入栈：每个数据只会被处理两次（入栈、出栈），因此均摊 O(1)。
 
 
 class StockSpanner {
-    Stack<Integer> prices, weights;
+    // 每个元素是 {price, span}
+    Stack<int[]> stack;
 
     public StockSpanner() {
-        prices = new Stack();
-        weights = new Stack();
+        stack = new Stack<>();
     }
 
     public int next(int price) {
-        int w = 1;
-        while (!prices.isEmpty() && prices.peek() <= price) {
-            prices.pop();
-            w += weights.pop();
+        int span = 1;
+
+        // 弹出所有 <= 当前价格的记录
+        while (!stack.isEmpty() && stack.peek()[0] <= price) {
+            span += stack.pop()[1];
         }
 
-        prices.push(price);
-        weights.push(w);
-        return w;
+        // 入栈
+        stack.push(new int[]{price, span});
+        return span;
     }
 }
+
 
 
 

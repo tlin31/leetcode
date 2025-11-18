@@ -253,11 +253,11 @@ output:
 ### java
 1. initialize + import:
 
-'''
+```java
 	import java.util.*; 
 		Stack<Integer> stack = new Stack<Integer>(); 
 		Deque<TreeNode> stack = new ArrayDeque<>(); //deque
-'''
+```
 
 2. push to the stack:
 
@@ -289,6 +289,118 @@ output:
 
 ===== or use deque:
 	    Deque < TreeNode > stack = new LinkedList < > ();
+
+
+### 单调栈 Monotonic Stack
+
+当你遇到 **“找临近比它大/小的元素”、“下一次更大/更小”、“区间扩展到不能扩展为止”** 时，就应该立刻想到：
+
+单调栈（Monotonic Stack）是处理 **“局部与周围关系”** 的神器
+
+key：要找下一个更大的元素就用decreasing stack（小数靠上），条件是cur > stack.peek()就pop，pop出来的数字的next greater element就是cur
+
+
+模式1：Next Greater Element / Next Smaller Element
+
+给定数组，每个元素要找到：
+
+- 下一个更大的元素 / 上一个更大的元素
+
+- 下一个更小的元素 / 上一个更小的元素
+
+
+例子：
+- ① Next Greater Element I — LC 496: 用decreasing stack, 条件是cur > stack.peek()就pop，越小的数越靠上
+- ② Next Greater Element II — LC 503
+- ③ Daily Temperatures — LC 739 → 找下一天更高温度
+- ④ Online Stock Span — LC 901 → 找连续小于等于当前的天数（我们刚讲过）
+
+
+ex. LC 739,Daily Temperatures
+
+```java 
+public int[] dailyTemperatures(int[] temperatures) {
+    Stack<Integer> stack = new Stack<>();
+    int[] ret = new int[temperatures.length];
+    for(int i = 0; i < temperatures.length; i++) {
+        while(!stack.isEmpty() && temperatures[i] > temperatures[stack.peek()]) {
+            int idx = stack.pop();
+            ret[idx] = i - idx;
+        }
+        stack.push(i);
+    }
+    return ret;
+}
+```
+
+
+ex. LC 496 Next Greater Element I
+```java
+
+    public int[] nextGreaterElement(int[] findNums, int[] nums) {
+        Map<Integer, Integer> map = new HashMap<>(); // map from x to next greater element of x
+        Stack<Integer> stack = new Stack<>();
+        for (int num : nums) {
+            while (!stack.isEmpty() && stack.peek() < num)
+                map.put(stack.pop(), num);
+            stack.push(num);
+        }   
+        for (int i = 0; i < findNums.length; i++)
+            findNums[i] = map.getOrDefault(findNums[i], -1);
+        return findNums;
+    }
+```
+
+
+模式 2：连续区间向左右延伸，直到遇到更大/更小的阻碍
+
+比如：
+
+求以当前元素为中心，向两侧能够延伸多远
+
+求“最大矩形”、“最大面积”等区间类问题
+
+求滑动窗口中最大/最小（但更常用双端队列）
+
+ex. 
+- Largest Rectangle in Histogram — LC 84（⭐ 最经典单调栈算法题）: 利用单调递增栈找到每个条形向左右能扩展的最大宽度。
+
+- Maximal Rectangle — LC 85: 把每一行转为 histogram，用 LC84 求最大矩形。
+
+- Sum of Subarray Minimums — LC 907: 求所有子数组的最小值之和 → 需要前一个更小+后一个更小
+
+- Sum of Subarray Maximums — LC 2104
+
+- 1504. Count Submatrices With All Ones - Medium
+
+
+
+ex. Largest Rectangle in Histogram — LC 84, 存increasing
+stack，因为一旦碰到小的，就不把他算到面积里，直接结算他之前的
+
+```java
+        for (int i = 0; i < newHeights.length; i++) {
+            while (!stack.isEmpty() && newHeights[i] < newHeights[stack.peek()]) {
+                int h = newHeights[stack.pop()]; // 当前柱子高度
+
+                int right = i;                   // 右边界（遇到更矮的了）
+                int left = stack.isEmpty() ? -1 : stack.peek();  // 左边界
+
+                int width = right - left - 1;    // 宽度
+                maxArea = Math.max(maxArea, h * width);
+            }
+            stack.push(i);
+        }
+```
+
+
+
+模式 3：求 “前一个更小/大” + “后一个更小/大” 的组合
+
+常见于包含当前元素的最大面积/最大乘积/最优区间等问题。
+
+
+
 
 
 ## Deque

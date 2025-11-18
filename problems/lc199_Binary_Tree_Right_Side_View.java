@@ -77,14 +77,17 @@ iterative
 public List<Integer> rightSideView(TreeNode root) {
     Queue<TreeNode> queue = new LinkedList<TreeNode>();
     List<Integer> res = new LinkedList<>();
+
     if (root == null)
         return res;
+
     queue.offer(root);
     while (!queue.isEmpty()) {
         int levelNum = queue.size(); // 当前层元素的个数
         for (int i = 0; i < levelNum; i++) {
             TreeNode curNode = queue.poll();
-            //只保存当前层的最后一个元素
+
+            //只保存当前层的最后/最右一个元素
             if (i == levelNum - 1) {
                 res.add(curNode.val);
             }

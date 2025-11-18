@@ -85,7 +85,12 @@ public int slidingPuzzle(int[][] board) {
         Queue<String> queue = new LinkedList<>();
 
         // all the positions 0 can be swapped to, index = position of 0 in [0, 1,2,3,4,5]
-        // 
+        // 0  1  2
+        // 3  4  5
+        // 那么当0在位置0时，其可以移动到右边和下边，即 {1, 3} 位置；在位置1时，其可以移动到左边，右边和下边，
+        // 即 {0, 2, 4} 位置；在位置2时，其可以移动到左边和下边，即 {1, 5} 位置；在位置3时，其可以移动到
+        // 上边和右边，即 {0, 4} 位置；在位置4时，其可以移动到左边，右边和上边，即 {1, 3, 5} 位置；
+        // 在位置5时，其可以移动到上边和左边，即 {2, 4} 位置。
         int[][] dirs = new int[][] { { 1, 3 }, { 0, 2, 4 },
                 { 1, 5 }, { 0, 4 }, { 1, 3, 5 }, { 2, 4 } };
 
@@ -129,8 +134,9 @@ public int slidingPuzzle(int[][] board) {
 -------------------------------------------------
 We can easily conclude the swap displacement are -1, 1, -column, and column correspondingly.
 
+class Solution {
 
-	//  relative displacements of neighbors in board.
+	//relative displacements of neighbors in board
  	private static final int[] d = {0, 1, 0, -1, 0}; 
 
     public int slidingPuzzle(int[][] board) {
@@ -153,7 +159,7 @@ We can easily conclude the swap displacement are -1, 1, -column, and column corr
                 String str = q.poll();
                 if (str.equals("123450")) { return steps; } // found target.
 				
-				// board[x][y] is '0'.
+				// find the position of 0, and analyze its coordinates x, y
                 int i = str.indexOf("0"), 
                 	x = i / board[0].length, 
                 	y = i % board[0].length; 
@@ -194,6 +200,7 @@ method:
 
 	- DFS + backtrack
 	- use encode --> a int number instead of string
+    - slower
 
 stats:
 

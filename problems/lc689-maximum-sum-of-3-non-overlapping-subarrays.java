@@ -32,6 +32,66 @@ key:
 
 
 
+1. Calculate Subarray Sums:
+First, we compute the sums of all possible subarrays of length k. - 
+This can be done efficiently using a sliding window technique.
+
+2. Track Maximum Indices: We maintain two arrays:
+maxAtLeft[i]: This array stores the index of the max subarray sum from the left up to index i.
+maxAtRight[i]: stores the index of the max subarray sum from the right starting from index i.
+
+3. Find Maximum Sum of Three Subarrays:
+We iterate through the possible starting indices for the middle subarray and use the 
+maxAtLeft and maxAtRight arrays to find the best combination of three subarrays.
+We keep track of the maximum sum and the corresponding indices.
+
+
+class Solution {
+    public int[] maxSumOfThreeSubarrays(int[] nums, int k) {
+        if (nums == null || nums.length < k * 3)
+            return new int[] {};
+
+        int numSub = nums.length - k + 1;
+        int[] subSum = new int[numSub];
+
+        int sum = 0;
+
+        for (int i = 0; i < k; i++)
+            sum += nums[i];
+
+        subSum[0] = sum;
+
+        for (int i = k; i < nums.length; i++) {
+            sum -= nums[i - k];
+            sum += nums[i];
+            subSum[i - k + 1] = sum;
+        }
+
+        int[] maxAtLeft = new int[numSub];
+
+        for (int i = 1; i < numSub; i++)
+            maxAtLeft[i] = (subSum[i] > subSum[maxAtLeft[i - 1]]) ? i : maxAtLeft[i - 1];
+
+        int[] maxAtRight = new int[numSub];
+        maxAtRight[numSub - 1] = numSub - 1;
+
+        for (int i = numSub - 2; i >= 0; i--)
+            maxAtRight[i] = (subSum[i] >= subSum[maxAtRight[i + 1]]) ? i : maxAtRight[i + 1];
+
+        int[] maxThree = new int[3];
+        int maxSum = 0;
+        for (int i = k; i < numSub - k; i++) {
+            int curSum = subSum[maxAtLeft[i - k]] + subSum[i] + subSum[maxAtRight[i + k]];
+            if (curSum > maxSum) {
+                maxSum = curSum;
+                maxThree = new int[] { maxAtLeft[i - k], i, maxAtRight[i + k] };
+            }
+        }
+        return maxThree;
+    }
+}
+
+
 =======================================================================================================
 method 1:
 
@@ -56,7 +116,9 @@ method:
 
 stats:
 
-	- O(n)
+	- The overall time complexity is (O(n)), where (n) is the length of the input array nums. 
+      This is because we make a constant number of passes through the array.
+
 	- 
 
 class Solution {
@@ -140,6 +202,7 @@ stats:
 
 
 Can be generalize to more intervals!!
+
 public class Solution {
     public int[] MaxSumOfThreeSubarrays(int[] nums, int k, int intervals = 3)
         {

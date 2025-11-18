@@ -125,6 +125,13 @@ method 2:
 
 method:
     - a universal method, use the 0.5 to make it more biased.
+bs(nums, target - 0.5) → 第一个 ≥ target - 0.5 的位置，也就是 target 第一次出现的位置。
+
+bs(nums, target + 0.5) → 第一个 ≥ target + 0.5 的位置，也就是 target 最后一次出现之后的位置。
+
+ex. 所有 < 7.5 的数都算小；所有 > 8.5 的数都算大；
+这样二分就能准确分出区间 [7.5, 8.5)，从而锁定所有 == 8 的元素。
+
 
 public int[] searchRange(int[] nums, int target) {
         double left = target - 0.5, right = target + 0.5;
@@ -137,8 +144,10 @@ public int bs(int[] nums, double target) {
             int l = 0, h = nums.length-1;
             while(l <= h){
                 int m = l + (h - l)/2;
-                if(target > nums[m]) l = m+1;
-                else h = m-1;
+                if(target > nums[m]) 
+                    l = m+1;
+                else 
+                    h = m-1;
             }
             return l;
 }

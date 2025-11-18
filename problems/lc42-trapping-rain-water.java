@@ -192,12 +192,29 @@ method 3:
 method:
 
 	- stack
-	- 
+	- 每一层算一次
 
 stats:
 
 	- 
 	- 
+test case: [2,1,0,1,3], 下图中x代表墙壁，o代表水
+
+        x
+x o o o x
+x x o x x
+
+        // cur = 3
+        // stack: 0 1 \2
+        // h = 0, dist = 3-1-1 = 1, min = min(1,3) = 1, sum = 1*(1-0)=1
+
+        // cur =4
+        // stack: 0 1 \3
+        // h = 1, dist = 4-1-1=2, min=min(1,3)=1， sum=1+0 = 1
+
+        // stack: 0 \1
+        // h = 1, dist = 4-0-1 = 3, min = min(2,3)=2,sum = 1+1*3 =4 
+
 
 public int trap(int[] height) {
     int sum = 0;
@@ -205,7 +222,7 @@ public int trap(int[] height) {
     int current = 0;
     while (current < height.length) {
         
-        //如果栈不空并且当前指向的高度大于栈顶高度就一直循环
+        //如果栈不空并且当前的高度大于栈顶高度就一直循环
         while (!stack.empty() && height[current] > height[stack.peek()]) {
             int h = height[stack.peek()]; //取出要出栈的元素
             stack.pop(); //出栈

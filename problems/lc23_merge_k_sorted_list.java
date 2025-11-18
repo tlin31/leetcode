@@ -12,6 +12,14 @@ Input:
 ]
 Output: 1->1->2->3->4->4->5->6
 
+k == lists.length
+0 <= k <= 104
+0 <= lists[i].length <= 500
+-104 <= lists[i][j] <= 104
+lists[i] is sorted in ascending order.
+The sum of lists[i].length will not exceed 104.
+
+
 
 =========================================================================================================================================================
 method 1:
@@ -26,6 +34,7 @@ key:
 // Memory Usage: 42.2 MB, less than 30.06% 
 
 // O(nlgk) time and O(1) space
+
 
 public ListNode mergeKLists(ListNode[] lists) {
         if(lists == null || lists.length == 0) return null;
@@ -77,26 +86,54 @@ public ListNode mergeKLists(ListNode[] lists) {
 =========================================================================================================================================================
 method 2: priority queue 
 
+✨思想
+
+每个链表的头节点都是当前该链表最小元素
+
+把所有非空链表的头节点放入一个 小顶堆
+
+每次从堆中弹出最小的节点，把它加入结果链表
+
+若该节点有 next，则把 next 再放入堆
+
+直到堆空
+
+堆的大小最多为 k，插入/弹出都是 log k。
+
+时间：O(N log k)，N 是节点总数，k is the number of linked lists.
+
+空间：O(k)
+
 key:
 
 // Runtime: 35 ms, faster than 42.54% of Java online submissions for Merge k Sorted Lists.
 // Memory Usage: 43.3 MB, less than 26.78% 
 
+Time complexity : O(Nlogk) where k is the number of linked lists.
+
+The comparison cost will be reduced to O(logk) for every pop and insertion to priority queue. 
+But finding the node with the smallest value just costs O(1) time.
+There are N nodes in the final linked list.
+
+
+
 class Solution {
     public ListNode mergeKLists(ListNode[] lists) {
         if (lists==null || lists.length==0) return null;
         
+        // min heap
         PriorityQueue<ListNode> queue= new PriorityQueue<ListNode>(lists.length, (a,b)-> a.val-b.val);
         
         ListNode dummy = new ListNode(0);
         ListNode tail=dummy;
         
+        // 所有链表的头部入堆        
         for (ListNode node:lists)
             if (node!=null)
                 queue.add(node);
             
         while (!queue.isEmpty()){
-            tail.next=queue.poll();
+            tail.next=queue.poll(); //min node
             tail=tail.next;
             
             if (tail.next!=null)

@@ -520,7 +520,9 @@ public void dfsWithoutRecursion(int start) {
     while (!stack.isEmpty()) {
         int current = stack.pop();
         isVisited[current] = true;
+
         visit(current);
+        
         for (int dest : adjVertices.get(current)) {
             if (!isVisited[dest])
                 stack.push(dest);
@@ -1072,18 +1074,19 @@ Algorithm
   1. Find : Finds the representative of the set that i is an element of, it can be implemented by recursively traversing the parent array until we hit a node who is parent of itself.
 
 ```java
-
-    int find(int i) 
-    {
-        // If i is the parent of itself
-        if (parent[i] == i) {
-            // i is the representative of this set
-            return i;
-        } else {
-            //we recursively call Find on its parent
-            return find(parent[i]);
+        int find(int x) {
+            // // If i is the parent of itself
+            // if (parent[i] == i) {
+            //     // i is the representative of this set
+            //     return i;
+            // }             
+            if (x != parent[x]) {
+                parent[x] = find(parent[x]);  // find root with path compression
+            }
+            return parent[x];
         }
-    }
+        
+
  
 
 ```
@@ -1102,6 +1105,7 @@ Algorithm
         // moving all of i’s set into j’s set)
         this.Parent[irep] = jrep;
     }
+
 ```
 
 ### Improvements - Union by Rank & Path Compression
@@ -1110,7 +1114,9 @@ Algorithm
 
 1.  Union by Rank:
     - always attach smaller depth tree under the root of the deeper tree. This technique is called union   by rank. 
-    - rank is preferred instead of height because if path compression technique (we have discussed it below) is used, then rank is not always equal to height. Also, size (in place of height) of trees can also be used as rank. Using size as rank also yields worst case time complexity as O(Logn) (See this for proof)
+    
+    - rank is preferred instead of height because if path compression technique (we have discussed it below) is used, then rank is not always equal to height. Also, size (in place of height) of trees can also be used as rank. Using size as rank also yields worst case time complexity as O(Logn) 
+
     - The above operations can be optimized to O(Log n) in worst case. 
 
     Initially, all elements are single element subsets --> 0 1 2 3 

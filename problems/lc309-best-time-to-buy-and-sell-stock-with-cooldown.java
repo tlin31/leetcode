@@ -31,10 +31,14 @@ Method 1:
 
 https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/discuss/75928/Share-my-DP-solution-(By-State-Machine-Thinking)
 
+https://zxi.mytechroad.com/blog/wp-content/uploads/2018/01/309-ep150.png
+
 Method:
 
 	-	state diagram
 	-	There are three states, according to the action that you can take.
+
+		 buy s2, sell s1, hold s0
 
 		s0[i] = max(s0[i - 1], s2[i - 1]); // Stay at s0, or rest from s2
 		s1[i] = max(s1[i - 1], s0[i - 1] - prices[i]); // Stay at s1, or buy from s0

@@ -24,6 +24,141 @@ key:
 
 ******************************************************
 
+=======================================================================================================
+Method 1: stack
+
+把每一行当作 “柱状图”，用 84 题单调栈求最大矩形
+
+📌 本题最优、最常用方法：时间复杂度 O(m·n)
+
+height[j]：当前 row 往上连续 1 的个数
+
+ex.
+
+matrix:
+["1","0","1","0","0"],
+["1","0","1","1","1"],
+["1","1","1","1","1"],
+["1","0","0","1","0"]
+
+
+i = 0, height= [1, 0, 1, 0, 0]
+i = 1, height= [2, 0, 2, 1, 1]
+i = 2, height= [3, 1, 3, 2, 2]
+i = 3, height= [4, 0, 0, 3, 0]
+
+
+这一行就变成了 直方图问题（84 题），直接求最大矩形。
+
+class Solution {
+    public int maximalRectangle(char[][] matrix) {
+        if (matrix.length == 0) return 0;
+        int m = matrix.length, n = matrix[0].length;
+
+        int[] height = new int[n];
+        int maxArea = 0;
+
+        for (int i = 0; i < m; i++) {
+            // 更新高度
+            for (int j = 0; j < n; j++) {
+
+                height[j] = matrix[i][j] == '1' ? height[j] + 1 : 0;
+            }
+
+            // 对 height 用 84 题的单调栈求最大矩形
+            maxArea = Math.max(maxArea, largestRectangleArea(height));
+        }
+
+        return maxArea;
+    }
+
+    // 84 题代码
+    private int largestRectangleArea(int[] heights) {
+        int n = heights.length;
+        int[] h = Arrays.copyOf(heights, n + 1);
+        h[n] = 0;
+
+        Stack<Integer> stack = new Stack<>();
+        int max = 0;
+
+        for (int i = 0; i < h.length; i++) {
+            while (!stack.isEmpty() && h[i] < h[stack.peek()]) {
+                int height = h[stack.pop()];
+                int right = i;
+                int left = stack.isEmpty() ? -1 : stack.peek();
+                max = Math.max(max, height * (right - left - 1));
+            }
+            stack.push(i);
+        }
+
+        return max;
+    }
+}
+
+=======================================================================================================
+Method 1:DP + 左右边界
+
+
+对每一行维护三个 DP 数组：
+
+    height[j] 当前列连续 1 的高度
+
+    left[j] 该高度矩形的左边界
+
+    right[j] 该高度矩形的右边界
+
+面积 = height[j] * (right[j] - left[j])
+
+
+class Solution {
+    public int maximalRectangle(char[][] matrix) {
+        if (matrix.length == 0) return 0;
+
+        int m = matrix.length, n = matrix[0].length;
+        int[] height = new int[n];
+        int[] left = new int[n];
+        int[] right = new int[n];
+        Arrays.fill(right, n);
+
+        int max = 0;
+
+        for (int i = 0; i < m; i++) {
+            int curLeft = 0, curRight = n;
+
+            // 更新高度
+            for (int j = 0; j < n; j++) {
+                height[j] = matrix[i][j] == '1' ? height[j] + 1 : 0;
+            }
+
+            // 更新左边界
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == '1') {
+                    left[j] = Math.max(left[j], curLeft);
+                } else {
+                    left[j] = 0;
+                    curLeft = j + 1;
+                }
+            }
+
+            // 更新右边界
+            for (int j = n - 1; j >= 0; j--) {
+                if (matrix[i][j] == '1') {
+                    right[j] = Math.min(right[j], curRight);
+                } else {
+                    right[j] = n;
+                    curRight = j;
+                }
+            }
+
+            // 计算面积
+            for (int j = 0; j < n; j++) {
+                max = Math.max(max, height[j] * (right[j] - left[j]));
+            }
+        }
+
+        return max;
+    }
+}
 
 
 =======================================================================================================
@@ -31,19 +166,16 @@ Method 1:
 
 Method:
 
-	-	S1:扩张法
+	- 扩张法
 
 	- 根据两个限定规则：
 		所求矩形的第一个坐标点必然是这个二维数组中的某一点，且这一点是'1'
 		所求矩形一定是从一个 1*1 的矩形逐渐扩张而来的
 		所以，我们可以计算从二维数组中的每个点扩张而成的矩形的面积的最大值，即为待求解。因为已经假定是从某一个点扩张，
-			所以它只能选择向右扩张或向下扩张，然后在每一个递归函数中判断是否能够完成扩张：
+			所以它只能选择向右扩张或向下扩张，然后在每一个递归函数中判断是否能够完成扩张
 	-	
 
 Stats:
-
-	- 
-	- 
 
 
 
@@ -155,48 +287,6 @@ public static int maximalRectangle(char[][] matrix) {
     return maxArea;
 }
 
-=======================================================================================================
-method 3:
-
-Method:
-
-	-	This question is similar as [Largest Rectangle in Histogram]:
-		You can maintain a row length of Integer array H recorded its height of '1's, and scan 
-		and update row by row to find out the largest rectangle of each row.
-
-		For each row, if matrix[row][i] == '1'. H[i] +=1, or reset the H[i] to zero.
-		and accroding the algorithm of [Largest Rectangle in Histogram], to update the maximum area.
-	-	
-
-
-Stats:
-
-	- O(n^2)
-	- 
-
-
-class Solution {
-    public int maximalRectangle(char[][] matrix) {
-       int rLen = matrix.length, cLen = rLen == 0 ? 0 : matrix[0].length, max = 0;
-        int[] h = new int[cLen+1];
-   
-        for (int row = 0; row < rLen; row++) {
-            Stack<Integer> s = new Stack<Integer>();
-            s.push(-1);
-            for (int i = 0; i <= cLen ;i++) {
-                if(i < cLen && matrix[row][i] == '1')
-                    h[i] += 1;
-                else h[i] = 0;
-
-                while(s.peek() != -1 && h[i] < h[s.peek()]) {
-                    max = Math.max(max, h[s.pop()] * (i - s.peek() - 1));
-                }
-                s.push(i);
-            }
-        }
-        return max;
-    }
-}
 
 
 =======================================================================================================

@@ -15,6 +15,7 @@ matrix = [
 ]
 target = 3
 Output: true
+
 Example 2:
 
 Input:
@@ -59,35 +60,34 @@ stats:
 	- Space complexity : O(1).
 
 
-
-public class Solution {
-        public boolean searchMatrix(int[][] matrix, int target) {
-            if (matrix == null || matrix.length == 0) {
+class Solution {
+    public boolean searchMatrix(int[][] matrix, int target) {
+        if (matrix == null || matrix.length == 0) {
                 return false;
-            }
-
-            int start = 0, 
-            	end = rows * cols - 1;
-            	
-            int rows = matrix.length, 
-            	cols = matrix[0].length;
-
-             
-            while (start <= end) {
-                int mid = (start + end) / 2;
-                if (matrix[mid / cols][mid % cols] == target) {
-                    return true;
-                } 
-
-                if (matrix[mid / cols][mid % cols] < target) {
-                    start = mid + 1;
-                } else {
-                    end = mid - 1;
-                }
-            }
-            return false;
         }
+
+        int m = matrix.length;
+        int n = matrix[0].length;
+
+        // binary search
+        int left = 0, right = m * n - 1;
+        int pivotIdx, pivotElement;
+        while (left <= right) {
+            pivotIdx = (left + right) / 2;
+            pivotElement = matrix[pivotIdx / n][pivotIdx % n];
+            if (target == pivotElement) 
+                return true;
+            else if (target < pivotElement) 
+                right = pivotIdx - 1;
+            else 
+                left = pivotIdx + 1;
+            }
+        }
+        return false;
     }
+
+
+
 
 =======================================================================================================
 method 2:
@@ -102,13 +102,17 @@ stats:
 	- 
 	- 
 
+// not binary search！
+    
 public boolean searchMatrix(int[][] matrix, int target) {
     if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
         return false;
     }
     int row = 0;
     int col = matrix[0].length - 1;
+
     while (row < matrix.length && col >= 0) {
+
         if (matrix[row][col] == target) {
             return true;
         } else if (matrix[row][col] < target) {

@@ -86,6 +86,7 @@ public class Solution {
         y = g.length;
         if (y == 0) 
             return 0;
+        
         x = g[0].length;
         
         // Iterate over the entire given grid

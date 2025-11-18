@@ -23,6 +23,91 @@ key:
 
 ******************************************************
 
+💡 状态定义
+
+我们用 dp[i][j] 表示：
+
+第 i 天，最多允许进行 j 笔交易时的最大利润。
+
+注意：每次交易由 买入+卖出 组成，所以我们需要进一步区分状态：
+
+dp[i][j][0]：第 i 天，最多 j 次交易，不持有股票 时的最大利润。
+
+dp[i][j][1]：第 i 天，最多 j 次交易，持有股票 时的最大利润。
+
+
+💡 状态转移
+
+不持有股票 dp[i][j][0]：
+
+前一天就不持有：dp[i-1][j][0]
+
+今天卖出：dp[i-1][j][1] + prices[i]
+
+    
+    dp[i][j][0] = max(dp[i-1][j][0], dp[i-1][j][1] + prices[i])
+
+
+
+持有股票 dp[i][j][1]：
+
+前一天就持有：dp[i-1][j][1]
+
+今天买入（意味着之前完成了 j-1 次交易）：dp[i-1][j-1][0] - prices[i]
+
+
+    dp[i][j][1] = max(dp[i-1][j][1], dp[i-1][j-1][0] - prices[i])
+
+
+
+💡 边界条件
+
+第 0 天：
+
+dp[0][j][0] = 0
+
+dp[0][j][1] = -prices[0]
+
+特殊情况：如果 k >= n/2（天数的一半），等价于 不限次数交易，可以用贪心解法（累加所有上升区间）。
+
+
+class Solution {
+    public int maxProfit(int k, int[] prices) {
+        int n = prices.length;
+        if (n == 0) return 0;
+        
+        // 特殊情况：交易次数足够大，相当于无限交易
+        if (k >= n / 2) {
+            int profit = 0;
+            for (int i = 1; i < n; i++) {
+                if (prices[i] > prices[i - 1]) {
+                    profit += prices[i] - prices[i - 1];
+                }
+            }
+            return profit;
+        }
+        
+        // dp[i][j][0/1]
+        int[][][] dp = new int[n][k + 1][2];
+        
+        // 初始化
+        for (int j = 0; j <= k; j++) {
+            dp[0][j][0] = 0;
+            dp[0][j][1] = -prices[0];
+        }
+        
+        // 状态转移
+        for (int i = 1; i < n; i++) {
+            for (int j = 1; j <= k; j++) {
+                dp[i][j][0] = Math.max(dp[i-1][j][0], dp[i-1][j][1] + prices[i]);
+                dp[i][j][1] = Math.max(dp[i-1][j][1], dp[i-1][j-1][0] - prices[i]);
+            }
+        }
+        
+        return dp[n-1][k][0];
+    }
+}
+
 
 =======================================================================================================
 method 1: DP
@@ -34,18 +119,22 @@ Method:
         last day
 
    public int maxProfit(int k, int[] prices) {
-        if (k >= prices.length / 2) return quicksolve(prices); 	// very important for edge cases!!
+
+        //如果 k >= n/2（天数的一半），等价于 不限次数交易，可以用贪心解法（累加所有上升区间）。
+        if (k >= prices.length / 2) return quicksolve(prices); 	
         
         int[] cur_dp = new int[prices.length];
         int[] prev_dp = new int[prices.length];			// store previous transaction values				
         
         for (int i = 0; i < k; i++) {					// have i times of transaction
             int min = prices[0];
-            // go through all prices
+
+            // go through all prices at day j
             for (int j = 1; j < prices.length; j++) {
                 min = Math.min(min, prices[j] - prev_dp[j-1]);
                 cur_dp[j] = Math.max(cur_dp[j-1], prices[j]-min);
             }
+
             // swap current dp and the previous array
             int[] tmp = cur_dp;
             cur_dp = prev_dp;

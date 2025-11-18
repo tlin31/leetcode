@@ -66,24 +66,19 @@ ex. [9, 8, 7, 3, 2, 1, 6]
 	- map stores <nums element, the bigger element to its right>
 
 
-public class Solution {
     public int[] nextGreaterElement(int[] findNums, int[] nums) {
-        Stack < Integer > stack = new Stack < > ();
-        HashMap < Integer, Integer > map = new HashMap < > ();
-        int[] res = new int[findNums.length];
-        for (int i = 0; i < nums.length; i++) {
-            while (!stack.empty() && nums[i] > stack.peek())
-                map.put(stack.pop(), nums[i]);
-            stack.push(nums[i]);
-        }
-        while (!stack.empty())
-            map.put(stack.pop(), -1);
-        for (int i = 0; i < findNums.length; i++) {
-            res[i] = map.get(findNums[i]);
-        }
-        return res;
+        Map<Integer, Integer> map = new HashMap<>(); // map from x to next greater element of x
+        Stack<Integer> stack = new Stack<>();
+        for (int num : nums) {
+            while (!stack.isEmpty() && stack.peek() < num)
+                map.put(stack.pop(), num);
+            stack.push(num);
+        }   
+        for (int i = 0; i < findNums.length; i++)
+            findNums[i] = map.getOrDefault(findNums[i], -1);
+        
+        return findNums;
     }
-}
 
 
 

@@ -15,45 +15,75 @@ key:
 
 ******************************************************
 
-T[i][k][0] and T[i][k][1]: k = # of used transaction
-where the former denotes the maximum profit at the end of the i-th day with at most k transactions 
-and with 0 stock in our hand AFTER taking the action, while the latter denotes the maximum profit 
-at the end of the i-th day with at most k transactions and with 1 stock in our hand AFTER taking 
-the action. 
 
-Base cases:
-T[-1][k][0] = 0, T[-1][k][1] = -Infinity
-T[i][0][0] = 0, T[i][0][1] = -Infinity
+一共有 4 种关键状态（每一步可能的持仓情况）：
 
-Recurrence relations:
-T[i][k][0] = max(T[i-1][k][0], T[i-1][k][1] + prices[i])
-T[i][k][1] = max(T[i-1][k][1], T[i-1][k-1][0] - prices[i])
+buy1: 第一次买入后的最大利润
+
+sell1: 第一次卖出后的最大利润
+
+buy2: 第二次买入后的最大利润
+
+sell2: 第二次卖出后的最大利润
 
 
-Similar to the case where k = 1, except now we have four variables instead of two on each day: 
-T[i][1][0], T[i][1][1], T[i][2][0], T[i][2][1], and the recurrence relations are:
+状态转移方程：
 
-T[i][2][0] = max(T[i-1][2][0], T[i-1][2][1] + prices[i])
-T[i][2][1] = max(T[i-1][2][1], T[i-1][1][0] - prices[i])
-T[i][1][0] = max(T[i-1][1][0], T[i-1][1][1] + prices[i])
-T[i][1][1] = max(T[i-1][1][1], -prices[i])
+第一次买入
 
-where again we have taken advantage of the base caseT[i][0][0] = 0 for the last equation. The O(n) 
-time and O(1) space solution is as follows:
+buy1 = max(buy1, -prices[i])
 
-public int maxProfit(int[] prices) {
-    int T_i10 = 0, T_i11 = Integer.MIN_VALUE;
-    int T_i20 = 0, T_i21 = Integer.MIN_VALUE;
+（要么保持之前的买入状态，要么今天买入，利润是 -prices[i]）
+
+
+
+第一次卖出
+
+sell1 = max(sell1, buy1 + prices[i])
+
+（要么保持之前的卖出状态，要么今天卖出，利润是 buy1 + prices[i]）
+
+
+
+
+
+第二次买入
+
+buy2 = max(buy2, sell1 - prices[i])
+
+（第二次买入 = 用第一次卖出的利润 - 今天股价）
+
+
+
+
+第二次卖出
+
+sell2 = max(sell2, buy2 + prices[i])
+
+（要么保持之前的状态，要么今天卖出赚 profit）
+
+
+最终答案就是 sell2。
+
+public class Solution {
+    public int maxProfit(int[] prices) {
+        int sell1 = 0, 
+            sell2 = 0, 
+            buy1 = Integer.MAX_VALUE, 
+            buy2 = buy1; 
         
-    for (int price : prices) {
-        T_i20 = Math.max(T_i20, T_i21 + price);
-        T_i21 = Math.max(T_i21, T_i10 - price);
-        T_i10 = Math.max(T_i10, T_i11 + price);
-        T_i11 = Math.max(T_i11, -price);
+        for (int p : prices) {
+            sell2 = Math.max(sell2, p - buy2);      // p-buy2 = difference
+            buy2 = Math.min(buy2, p - sell1);         // want the min of today's price or difference btw today & last sell point
+            sell1 = Math.max(sell1, p - buy1);      // prev profit or new difference btw 
+            buy1 = Math.min(buy1, p);                   // lowest buying price
+        }
+        
+        return sell2; 
     }
-        
-    return T_i20;
 }
+
+
 
 
 
@@ -159,6 +189,50 @@ int maxProfit(int[] prices) {
         
         return ret;
     }
+
+
+
+=======================================================================================================
+
+T[i][k][0] and T[i][k][1]: k = # of used transaction
+where the former denotes the maximum profit at the end of the i-th day with at most k transactions 
+and with 0 stock in our hand AFTER taking the action, while the latter denotes the maximum profit 
+at the end of the i-th day with at most k transactions and with 1 stock in our hand AFTER taking 
+the action. 
+
+Base cases:
+T[-1][k][0] = 0, T[-1][k][1] = -Infinity
+T[i][0][0] = 0, T[i][0][1] = -Infinity
+
+Recurrence relations:
+T[i][k][0] = max(T[i-1][k][0], T[i-1][k][1] + prices[i])
+T[i][k][1] = max(T[i-1][k][1], T[i-1][k-1][0] - prices[i])
+
+
+Similar to the case where k = 1, except now we have four variables instead of two on each day: 
+T[i][1][0], T[i][1][1], T[i][2][0], T[i][2][1], and the recurrence relations are:
+
+T[i][2][0] = max(T[i-1][2][0], T[i-1][2][1] + prices[i])
+T[i][2][1] = max(T[i-1][2][1], T[i-1][1][0] - prices[i])
+T[i][1][0] = max(T[i-1][1][0], T[i-1][1][1] + prices[i])
+T[i][1][1] = max(T[i-1][1][1], -prices[i])
+
+where again we have taken advantage of the base caseT[i][0][0] = 0 for the last equation. The O(n) 
+time and O(1) space solution is as follows:
+
+public int maxProfit(int[] prices) {
+    int T_i10 = 0, T_i11 = Integer.MIN_VALUE;
+    int T_i20 = 0, T_i21 = Integer.MIN_VALUE;
+        
+    for (int price : prices) {
+        T_i20 = Math.max(T_i20, T_i21 + price);
+        T_i21 = Math.max(T_i21, T_i10 - price);
+        T_i10 = Math.max(T_i10, T_i11 + price);
+        T_i11 = Math.max(T_i11, -price);
+    }
+        
+    return T_i20;
+}
 
 
 

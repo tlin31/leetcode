@@ -19,6 +19,97 @@ nums2 = [3, 4]
 
 The median is (2 + 3)/2 = 2.5
 
+******************************************************
+key:
+    - 
+    - edge case:
+        1) 
+        2)
+
+******************************************************
+
+
+
+===================================================================================================
+Method 1:
+
+
+我们只在 较短的数组（nums1） 上二分。
+
+设：
+
+i 是在 nums1 上的分割点；
+
+j 是在 nums2 上的分割点，使得：
+
+i + j = (m + n + 1) / 2
+
+（确保左边元素个数等于右边或多一个）
+
+我们要满足：
+
+nums1[i-1] <= nums2[j]
+nums2[j-1] <= nums1[i]
+
+
+否则我们调整 i：
+
+如果 nums1[i-1] > nums2[j]，说明 i 太大，要左移；
+
+否则 i 太小，要右移。
+
+
+class Solution {
+    public double findMedianSortedArrays(int[] nums1, int[] nums2) {
+        // 确保 nums1 是较短的那个数组
+        if (nums1.length > nums2.length) {
+            return findMedianSortedArrays(nums2, nums1);
+        }
+
+        int m = nums1.length;
+        int n = nums2.length;
+
+        int left = 0;
+        int right = m;
+
+        while (left <= right) {
+            int i = (left + right) / 2;
+            int j = (m + n + 1) / 2 - i;
+
+            // 边界值处理
+            int maxLeft1 = (i == 0) ? Integer.MIN_VALUE : nums1[i - 1];
+
+            int maxLeft2 = (j == 0) ? Integer.MIN_VALUE : nums2[j - 1];
+
+            int minRight1 = (i == m) ? Integer.MAX_VALUE : nums1[i];
+
+            int minRight2 = (j == n) ? Integer.MAX_VALUE : nums2[j];
+
+            // 满足中位数条件
+            if (maxLeft1 <= minRight2 && maxLeft2 <= minRight1) {
+                if ((m + n) % 2 == 0) {
+                    return ((double)Math.max(maxLeft1, maxLeft2) + Math.min(minRight1, minRight2)) / 2;
+                } else {
+                    return (double)Math.max(maxLeft1, maxLeft2);
+                }
+            } 
+            // i 太大，往左走
+            else if (maxLeft1 > minRight2) {
+                right = i - 1;
+            } 
+            // i 太小，往右走
+            else {
+                left = i + 1;
+            }
+        }
+
+        throw new IllegalArgumentException("Input arrays are not sorted or invalid.");
+    }
+}
+
+
+
+
 ===================================================================================================================
 method 1:
 key:
@@ -71,6 +162,9 @@ runtime:
 	O(log(m + n))
 
 key:
+
+
+
 	Since we have 2 seperately sorted array in this question, to find the middle value is somewhat 
 	complicated. However, keep in mind that we do not care about the actual value of the numbers, 
 	what we want is the middle point from the combination of 2 arrays. In other words, we are looking 

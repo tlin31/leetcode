@@ -1,7 +1,6 @@
 1235. Maximum Profit in Job Scheduling - Hard
 
 
-
 We have n jobs, where every job is scheduled to be done from startTime[i] to endTime[i], obtaining 
 a profit of profit[i].
 
@@ -101,7 +100,7 @@ Method:
 
             int curProfit = dp.floorEntry(job[0]).getValue() + job[2];
 
-            if (cur > dp.lastEntry().getValue())
+            if (curProfit > dp.lastEntry().getValue())
                 dp.put(job[1], curProfit);
         }
 

@@ -56,6 +56,7 @@ Method:
 	  algorithm becomes O(n^2). 
 	  In worst case, we always have (n-1) elements in one side and 0 elements in other side and if the 
 	  finding minimum takes O(n) time, we get the recurrence similar to worst case of Quick Sort.
+
 	- How to find the minimum efficiently? 
 		we can use Range Minimum Query using Segment Tree can be used for this. 
 		We build segment tree of the given histogram heights. Once the segment tree is built, all range 
@@ -85,7 +86,6 @@ public class Solution {
 
 
 
-~~~~~~~~~~~~~~~~~~~~~~~     python      ~~~~~~~~~~~~~~~~~~~~~~~~
 
 
 
@@ -94,85 +94,55 @@ method 2:
 
 Stats:
 
-	- 
+	- O(n)
 	- 
 
 
 Method:
 
-	-	
-	- We traverse all bars from left to right, maintain a stack of bars. 
-	  Every bar is pushed to stack once. A bar is popped from stack when a bar of smaller height 
-	  is seen. When a bar is popped, we calculate the area with the popped bar as smallest bar. 
-	  How do we get left and right indexes of the popped bar –-> the current index tells us the 
-	  ‘right index’ and index of previous item in stack is the ‘left index’. 
+用单调递增栈存放柱子索引
 
-		1) Create an empty stack.
+当出现“破坏递增”的柱子时，把栈顶柱子弹出，并计算它作为最矮柱子时的最大矩形面积。
 
-		2) Start from 1st bar, and do following for every bar ‘hist[i]’ where ‘i’ varies from 0 to n-1.
-			a) If stack is empty or cur > bar at top of stack, then push i to stack.
-			b) If this bar < the top of stack, then keep removing the top of stack while top of 
-			   the stack is greater. 
-			   Let the removed bar be hist[top of stack]. 
-			   Calculate area of rectangle with hist[top of stack] as smallest bar. 
-			   For hist[top of stack],‘left index’ = previous top in stack,right index = cur i
-
-		3) If the stack is not empty, then one by one remove all bars from stack and do step 2.b 
-		   for every removed bar.
+因为：栈内柱子高度递增，当遇到一个更矮的柱子 h 时，说明栈顶柱子不能再往右扩展了，所以应该在这里结算它的最大面积
 
 
-static int getMaxArea(int hist[], int n)  
-    { 
-        // Create an empty stack. The stack holds indexes of hist[] array 
-        // The bars stored in stack are always in increasing order of their 
-        // heights. 
-        Stack<Integer> s = new Stack<>(); 
-          
-        int max_area = 0; // Initialize max area 
-        int tp;  // To store top of stack 
-        int area_with_top; // To store area with top bar as the smallest bar 
-       
-        // Run through all bars of given histogram 
-        int i = 0; 
-        while (i < n) 
-        { 
-            // If this bar is higher than the bar on top stack, push it to stack 
-            if (s.empty() || hist[s.peek()] <= hist[i]) 
-                s.push(i++); 
-       
-            // If this bar is lower than top of stack, then calculate area of rectangle  
-            // with stack top as the smallest (or minimum height) bar. 'i' is  
-            // 'right index' for the top & i is unchanged!
-            // element before top in stack is 'left index' 
-            else
-            { 
-                tp = s.peek();  // store the top index 
-                s.pop();  // pop the top 
-       
-                // Calculate the area with hist[tp] stack as smallest bar 
-                area_with_top = hist[tp] * (s.empty() ? i : i - s.peek() - 1); 
-       
-                // update max area, if needed 
-                if (max_area < area_with_top) 
-                    max_area = area_with_top; 
-            } 
-        } 
-       
-        // Now pop the remaining bars from stack and calculate area with every 
-        // popped bar as the smallest bar 
-        while (s.empty() == false) 
-        { 
-            tp = s.peek(); 
-            s.pop(); 
-            area_with_top = hist[tp] * (s.empty() ? i : i - s.peek() - 1); 
-       
-            if (max_area < area_with_top) 
-                max_area = area_with_top; 
-        } 
-       
-        return max_area; 
-  
-    } 
+假设 heights = [2, 1, 5, 6, 2, 3]
+
+我们扫描到 2（i= 4）时，发现：5 和 6 都比 2 高 → 他们右边界遇到限制了 → 必须计算面积
+
+
+例如：
+
+对柱子 6：左右伸展边界是 [5,6] → 宽度=1
+
+对柱子 5：左右伸展边界是 [5,6,2] → 宽度=2
+
+class Solution {
+    public int largestRectangleArea(int[] heights) {
+        int n = heights.length;
+        int[] newHeights = Arrays.copyOf(heights, n + 1);
+        newHeights[n] = 0;  // 添加哨兵
+
+        Stack<Integer> stack = new Stack<>();
+        int maxArea = 0;
+
+        for (int i = 0; i < newHeights.length; i++) {
+            while (!stack.isEmpty() && newHeights[i] < newHeights[stack.peek()]) {
+                int h = newHeights[stack.pop()]; // 当前柱子高度
+
+                int right = i;                   // 右边界（遇到更矮的了）
+                int left = stack.isEmpty() ? -1 : stack.peek();  // 左边界
+
+                int width = right - left - 1;    // 宽度
+                maxArea = Math.max(maxArea, h * width);
+            }
+            stack.push(i);
+        }
+
+        return maxArea;
+    }
+}
 
 
 

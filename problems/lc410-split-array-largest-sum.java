@@ -24,6 +24,13 @@ There are four ways to split nums into two subarrays.
 The best way is to split it into [7,2,5] and [10,8],
 where the largest sum among the two subarrays is only 18.
 
+Example 2:
+
+Input: nums = [1,2,3,4,5], k = 2
+Output: 9
+Explanation: There are four ways to split nums into two subarrays.
+The best way is to split it into [1,2,3] and [4,5], where the largest sum among the two subarrays is only 9.
+
 ******************************************************
 key:
 	- binary search --> on value
@@ -40,9 +47,47 @@ method 1:
 
 method:
 
+🟢 单调性
+
+如果允许的“最大子数组和”上限 cap 很小，可能需要很多段（分得很碎），未必能凑成正好 m 段。
+
+如果允许的 cap 很大，就能用较少的段完成划分。
+
+所以：
+
+cap 越小 → 需要的段数越多
+cap 越大 → 需要的段数越少
+
+
+👉 这是 单调性，可以用 二分搜索。
+
+
+🟢 二分范围
+
+最小值：max(nums) （至少能装下最大的单个元素）。
+
+最大值：sum(nums) （把所有数作为一个子数组）。
+
+
+🟢 检查函数（贪心切分）
+
+给定一个 cap，模拟切分：
+
+从左往右累加，如果超过 cap，就切一刀，新开一段；
+
+统计总段数 count；
+
+如果 count > m，说明 cap 太小；否则可行。
+
+
 	- binary search on value ( find possible min(max subarray) )
     - 
-	- The answer must be btw max of input array numbers (left) & sum of those numbers.(right)
+	- The answer is between maximum value of input array numbers and sum of those numbers.
+
+    = Use binary search to approach the correct answer. 
+      We have l = max number of array; 
+      r = sum of all numbers in the array; Every time we do mid = (l + r) / 2;
+
 	- Use greedy to narrow down left and right boundaries in binary search.
 		3.1 Cut the array from left.
 		3.2 Try our best to make sure that the sum of numbers between each two cuts (inclusive) 
@@ -196,31 +241,6 @@ stats:
 	- 
 	- 
 
-public int splitArray(int[] nums, int m) {
-		int[][] memo = new int[nums.length][m + 1];
-		int[] sum = new int[nums.length];
-		sum[nums.length - 1] = nums[nums.length - 1];
-		for(int i = nums.length - 2; i >= 0; i--){
-			sum[i] = sum[i + 1] + nums[i];
-		}
-	    return findSA(nums, 0, m, sum, memo);
-	}
-
-	public int findSA(int[] nums, int start, int m, int[] sums, int[][] memo){
-		if(m == 1) return sums[start];
-		if(memo[start][m] > 0)
-			return memo[start][m];
-		int min = Integer.MAX_VALUE, sum = 0;
-		for(int i = start; i <= nums.length - m; i++){
-			sum += nums[i];
-			min = Math.min(Math.max(sum, findSA(nums, i + 1, m - 1, sums, memo)), min);
-		}
-		memo[start][m] = min;
-		return memo[start][m];
-	}
-
-
-------
 dfs + memorization
 
 
@@ -250,9 +270,11 @@ class Solution {
         int maxSum = Integer.MAX_VALUE;
         
         for (int i = start; i < nums.length-1; i++) {
-            int l = presum[i+1] - presum[start];
+            //左边的array sum
+            int leftArraySum = presum[i+1] - presum[start];
+
             int rightIntervalMax = dfs(i+1, m-1, nums, presum, visited);
-            maxSum = Math.min(maxSum, Math.max(l, rightIntervalMax));
+            maxSum = Math.min(maxSum, Math.max(leftArraySum, rightIntervalMax));
             
         }
         

@@ -55,7 +55,250 @@ note:
     return dummy.next;
 ```
 
-Sliding Windows:
+### 双指针种类
+
+#### 1.快慢指针
+主要解决链表中的问题，比如典型的判定链表中是否包含环。⼀般都初始化指向链表的头结点 head，前进时快指针 fast 在前，慢指针 slow 在后
+
+经典问题1：找环
+
+- 如果不含有环，跑得快的那个指针最终会遇到null，说明链表不不含环;如果含有环，快指针最终会超慢指针一圈，和慢指针相遇
+
+```java
+    boolean hasCycle(ListNode head) {
+        ListNode fast, slow;
+        fast = slow = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (fast == slow) return true;
+        }
+        return false;
+    }
+```
+
+经典问题2: 已知链表中含有环，返回这个环的起始位置
+
+```java
+    ListNode detectCycle(ListNode head) {
+        ListNode fast, slow;
+        fast = slow = head;
+        while (fast != null && fast.next != null) {
+            fast = fast.next.next;
+            slow = slow.next;
+            if (fast == slow) break;
+        }
+
+        if (fast == null || fast.next == null) {
+        // fast 遇到空指针说明没有环
+                return null;
+            }
+        slow = head;
+        while (slow != fast) {
+                fast = fast.next;
+                slow = slow.next;
+        }
+        return slow;
+    }
+```
+
+经典问题3: 寻找链表的倒数第 k 个元素
+
+让快指针先走 k 步，然后快慢指针开始同速前进。这样当快指针走到链表末尾 null 时，慢指针所在的位置就是倒数第 k 个链表节点(为了简化，假设 k 不会超过链表长度):
+
+```java
+    ListNode slow, fast;
+    slow = fast = head;
+    while (k-- > 0)
+        fast = fast.next;
+    while (fast != null) {
+        slow = slow.next;
+        fast = fast.next;
+    }
+    return slow;
+```
+
+
+#### 2.左右指针
+解决数组(或者字符串串)中的问题，⽐如⼆分查找、反转数组
+
+
+翻转数组
+```java
+    void reverse(int[] nums) {
+        int left = 0;
+        int right = nums.length - 1;
+        while (left < right) {
+            // swap(nums[left], nums[right])
+            int temp = nums[left];
+            nums[left] = nums[right];
+            nums[right] = temp;
+            left++; right--;
+        }
+    } 
+
+```
+
+
+
+
+
+### Sliding Windows:
+1. 框架：
+```java
+    string s, t;
+    // 在 s 中寻找 t 的「最⼩小覆盖⼦子串串」 int left = 0, right = 0; string res = s;
+    // 从右边开始挪动
+    while(right < s.size()) {
+        window.add(s[right]);
+        right++;
+
+        // 如果符合要求，移动 left 缩⼩小窗⼝口 
+        while (window 符合要求) {
+
+            // 如果这个窗口的⼦串更短，则更新 res 
+            res = minLen(res, window); 
+            window.remove(s[left]);
+            left++;
+        } 
+    }
+    return res;
+```
+
+2. Note
+
+1) 可以用hashmap存字符，也可以用int【】，初始为int[128]或者int[256],
+- 128: allocates memory for 128 integers, The ASCII table has 128 standard characters (from code 0 to 127). By creating an array of size 128, you can use a character’s ASCII value as an index
+
+- If you're working with Unicode or extended character sets, you'd need a larger array (e.g., 256 or 65536 for full Unicode BMP).
+
+2) 可以视情况，初始window size。比如可以left = right = 0，如果是找string中特定的permutation p，可以把窗口大小设定为p.length()，然后再往右边挪
+
+3) 可以用两个hashmap，string a存的时候+1，检查string b的时候-1，最后如果all zeros就说明是permutation/包含等等
+
+ex.567. Permutation in String - Medium
+
+Given two strings s1 and s2, write a function to return true if s2 contains the permutation of s1. 
+In other words, one of the first string permutations is the substring of the second string.
+
+
+```java
+public class Solution {
+    public boolean checkInclusion(String s1, String s2) {
+        int len1 = s1.length(), len2 = s2.length();
+        if (len1 > len2) return false;
+        
+        int[] count = new int[26];
+        for (int i = 0; i < len1; i++) {
+            count[s1.charAt(i) - 'a']++;
+            count[s2.charAt(i) - 'a']--;
+        }
+        if (allZero(count)) return true;
+        
+        for (int i = len1; i < len2; i++) {
+            count[s2.charAt(i) - 'a']--;
+            count[s2.charAt(i - len1) - 'a']++;
+            if (allZero(count)) return true;
+        }
+        
+        return false;
+    }
+    
+    private boolean allZero(int[] count) {
+        for (int i = 0; i < 26; i++) {
+            if (count[i] != 0) return false;
+        }
+        return true;
+    }
+}
+```
+
+
+
+3. 例子： lc 76 min window substring
+
+Given a string S and a string T, find the minimum window in S which will contain all the letters
+
+Input: S = "ADOBECODEBANC", T = "ABC"
+Output: "BANC"
+
+```java
+class Solution {
+    public String minWindow(String s, String t) {
+        int[] map= new int[128];
+        for (char c: t.toCharArray()){
+            map[c]++;
+        }
+
+        int left=0, right=0, minStart=0, minLen=Integer.MAX_VALUE, 
+            counter=t.length(); //counter从大往小减
+
+        while(end<s.length()){
+            char c1= s.charAt(right);
+            if (map[c1]>0) counter--;
+
+            map[c1]--;
+            right++;
+
+            while(counter==0){ //all char in t should be mapped to 0
+                if (minLen>right-left){
+                    minLen=right-left;
+                    minStart=left;
+                }
+                // move start pointer, shrink the window
+                char c2= s.charAt(left);
+                map[c2]++;
+
+                // When map[c2]>0, then a char exists in t was deleted
+                // increase counter, break out of the loop, searching for that c2 
+                if (map[c2]>0) counter++;
+                left++;
+            }
+        }
+        return minLen==Integer.MAX_VALUE?"":s.substring(minStart,minStart+minLen);
+    }
+}
+```
+
+4. 用两个deque maintain window
+
+例子：
+1438. Longest Continuous Subarray With Absolute Diff Less Than or Equal to Limit - Medium
+3208. Alternating Groups II - Medium
+
+```java
+    public int longestSubarray(int[] A, int limit) {
+        Deque<Integer> maxd = new ArrayDeque<>();
+        Deque<Integer> mind = new ArrayDeque<>();
+
+        //i是左指针，j是右指针
+        int i = 0, j;
+        for (j = 0; j < A.length; ++j) {
+            //只要当前的比maxd最后的大，就一直从尾部pop，后面maxd.add的时候才是争取的顺序
+            while (!maxd.isEmpty() && A[j] > maxd.peekLast()) maxd.pollLast();
+            while (!mind.isEmpty() && A[j] < mind.peekLast()) mind.pollLast();
+
+            maxd.add(A[j]);
+            mind.add(A[j]);
+
+        /* maxd holds the biggest elements from A[i]...A[j] in decreasing order.
+        # So maxd.peek is the biggest element in the window A[i]...A[j]
+        # mind holds the smallest elements from A[i]...A[j] in increasing order.
+        # So mind.peek is the smallest element in the window A[i]...A[j]
+        # maxd[0]-mind[0] is the biggest difference in the window A[i]...A[j] */
+            if (maxd.peek() - mind.peek() > limit) {
+                if (maxd.peek() == A[i]) maxd.poll();
+                if (mind.peek() == A[i]) mind.poll();
+                ++i;
+            }
+
+        }
+        return j - i;
+    }
+```
+
+
+
 	
 	problem: [lc3 - Longest Substring Without Repeating Characters](problems/lc3_longest_substring_without_repeating_char.java)
 			 [lc 76 - Minimum Window Substring](problems/lc76-min-window-substr.java)
@@ -70,6 +313,8 @@ Sliding Windows:
              lc 727 - interesting 2points
              lc 1423 - take first k or mid k or last k --> make it a circular array and do sliding window
              lc 1031 - max sum of 2 non-overlapping subarrays, prefix sum + sliding window
+
+
 
 
 ### Leetcode
@@ -828,11 +1073,203 @@ For primitives, Arrays.sort() uses dual pivot quicksort algorithms.
             }
 
 
-3. Binary search:
+### Binary search:
 
-            int mid = i + Math.floor((j-i)/2);
+注意：
+1. ”maximize the minimum" or "minimize the maximum“ 就是binary search解法！
 
 
+三种情况不同的只需要改两行： 
+    
+    1. 找到target的时候，左侧边界right = mid - 1;右侧边界left = mid + 1
+    2. 最后的返回条件，左侧边界检查左侧越界情况if (left >= nums.length || nums[left] != target) return -1， 右侧if (right < 0 || nums[right] != target)
+
+if you use while (lo <= hi) you use lo=mid+1 and hi=mid-1
+
+if you use while (lo < hi) you use lo = mid+1 and hi=mid
+
+1) 最基本的二分查找算法
+
+因为我们只需找到⼀一个 target 的索引即可 所以当 nums[mid] == target 时可以⽴立即返回
+
+```java
+    int binary_search(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+
+        while(left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } 
+            else if (nums[mid] > target) {
+                right = mid - 1;
+            } 
+            else if(nums[mid] == target) { // 直接返回
+                return mid; 
+            }
+        }
+    // 直接返回
+    return -1; 
+    }
+```
+
+2) 寻找左侧边界的二分搜索
+
+    因为我们需找到 target 的最右侧索引
+    所以当 nums[mid] == target 时不不要⽴立即返回 
+    ⽽要收紧左侧边界以锁定右侧边界
+
+```java
+
+    int left_bound(int[] nums, int target) { 
+        int left = 0, 
+            right = nums.length - 1; 
+        
+        while (left <= right) {
+                int mid = left + (right - left) / 2;
+                if (nums[mid] < target) {
+                // 搜索区间变为 [mid+1, right]
+                    left = mid + 1;
+                } 
+                else if (nums[mid] > target) {
+                // 搜索区间变为 [left, mid-1]
+                    right = mid - 1;
+                } 
+                else if (nums[mid] == target) {
+                // 收缩右侧边界，找到 target 时不不要⽴立即返回，⽽而是缩⼩小「搜索区间」的上界 right ，在区间 [left, mid) 中 继续搜索，即不不断向左收缩，达到锁定左侧边界的⽬目的
+                    right = mid - 1;
+                }
+        }
+        // 检查出界情况
+        if (left >= nums.length || nums[left] != target)
+            return -1;
+        return left;
+    }
+```
+
+3) 寻找右侧边界的二分查找
+
+```JAVA
+    int right_bound(int[] nums, int target) {
+        int left = 0, right = nums.length - 1;
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            if (nums[mid] < target) {
+                left = mid + 1;
+            } 
+            
+            else if (nums[mid] > target) {
+                right = mid - 1;
+            } 
+
+            else if (nums[mid] == target) { // 这⾥改成收缩左侧边界即可
+                left = mid + 1;
+            } 
+        }
+        // 这⾥改为检查 right 越界的情况，⻅见下图
+        if (right < 0 || nums[right] != target)
+            return -1;
+        
+        return right;
+    }
+```
+
+#### 特殊left & right 的binary search
+
+*凡是符合单调性的，都可以用binary search*
+
+
+left & right为weight，比如left = array里最大的重量，right = 总重，binary search一个合适的重量mid such that满足某个条件，比如五天内运完所有货物
+
+1011. Capacity To Ship Packages Within D Days - Medium
+1482. Minimum Number of Days to Make m Bouquets
+1231. Divide Chocolate 
+
+
+🟢 关键观察
+
+容量 越大，越容易在 D 天内运完；容量 越小，越难。
+👉 符合 单调性，所以可以用 二分搜索。
+
+在算法题里，单调性通常指：
+
+当某个参数 变大/变小 时，问题的可行性结果不会“跳来跳去”，而是保持 单调变化。
+
+也就是说：如果参数满足某个条件，那么更大的参数（或更小的参数）也一定满足（或一定不满足）。
+
+🟢 二分范围
+
+最小容量 = max(weights)（至少能运得动最重的包裹）。
+
+最大容量 = sum(weights)（一次性运完所有包裹）。
+
+🟢 检查函数（贪心模拟）
+
+给一个候选容量 cap，模拟装货过程：
+
+从第一个包裹开始，依次累加重量；
+
+如果加上下一个包裹超出 cap，则开新的一天（day++）；
+
+最后检查天数是否 <= D。
+
+如果 day <= D，说明容量够大，可以尝试减小；
+否则说明容量太小，需要增加。
+
+```java
+public int shipWithinDays(int[] weights, int D) {
+        int beg=0;
+        int end=0;
+
+        for(int w:weights){
+            beg = Math.max(beg,w);
+            end +=w;
+        }
+
+        int ans = 0;
+        while(beg <= end){
+            int mid = beg + (end-beg)/2;
+            int days = findDays(weights,mid);
+
+            // with current mid, use less days then required, can further reduce capacity
+            if(days <= D){
+                end=mid-1;
+                ans = mid;
+            }
+            else{
+                beg=mid+1;
+            }
+        }
+        return ans;
+    }
+ 
+    public int findDays(int a[],int capacity){
+        int days=1;
+        int sum=0;
+        for(int x:a){
+            sum=sum+x;
+            //一天之内装不完，days++ 作为新的单独一天
+            if(sum > capacity){
+                days++;
+                sum=x;
+            }
+        }
+        return days;
+    }
+```
+
+similar question: 
+410. Split Array Largest Sum - Hard
+
+
+Note: binary search can be optimized by setting a close bound for left and right
+```java
+        //最少一小时吃了1个香蕉，最后+1是margin of error
+        int low = (int)((totalBanana-1)/hours) + 1;
+
+        //如果length中每一个pile用一个小时吃，也要用这么多
+        int high = (int)((totalBanana-length)/(hours-length+1)) + 1;
+```
 
 
 

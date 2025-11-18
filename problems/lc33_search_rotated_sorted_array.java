@@ -132,7 +132,7 @@ public int search(int[] nums, int target) {
                 }
 
             //右半段是有序的
-            } else {
+            } else { 
                 if (target > nums[mid] && target <= nums[end]) {
                     start = mid + 1;
                 } else {

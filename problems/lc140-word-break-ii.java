@@ -92,6 +92,7 @@ public class Solution {
         if(map.containsKey(s)) {
             return map.get(s);
         }
+
         if(wordDict.contains(s)) {
             res.add(s);
         }
@@ -127,6 +128,7 @@ method:
 	- early end: check only for max size of word length in dict
 	- ex. s = catsand, wordDict = {cat, cats, and, sand}
 	      starts = [null, null, {0}, {0}, null, null, {3,4}]
+            //index 0,   1,      2    3
 
 	    in dfs, start from starts[6] = {3,4}, and loops through start{3,4}:
 		1. start = 3, then call dfs(result, "sand", s, starts, 3)
@@ -150,10 +152,17 @@ public List<String> wordBreak(String s, Set<String> wordDict) {
     List<Integer>[] starts = new List[s.length() + 1]; 
     starts[0] = new ArrayList<Integer>();
     
-    int maxLen = getMaxLen(wordDict);
+    //find max length of the word dict
+    int maxLen = 0;
+    for (String s : wordDict) {
+        maxLen = Math.max(maxLen, s.length());
+    }
 
 
+    //fills in the dp
     for (int i = 1; i <= s.length(); i++) {
+
+        //j >= i - maxLen: pruning,只检查有可能变成word的间距
         for (int j = i - 1; j >= i - maxLen && j >= 0; j--) {
             if (starts[j] == null) 
             	continue;
@@ -170,7 +179,7 @@ public List<String> wordBreak(String s, Set<String> wordDict) {
     
     List<String> rst = new ArrayList<>();
 
-    // if could reach to the end of the string, then can't be parsed
+    // 如果没有word可以组成到最后一个字符， then can't be parsed
     if (starts[s.length()] == null) {
         return rst;
     }
@@ -182,6 +191,7 @@ public List<String> wordBreak(String s, Set<String> wordDict) {
 
 private void dfs(List<String> rst, String path, String s, List<Integer>[] starts, int end) {
     if (end == 0) {
+        //rst加上从index 1之后的所有，即为没有空格“ ”的path
         rst.add(path.substring(1));
         return;
     }
@@ -192,13 +202,6 @@ private void dfs(List<String> rst, String path, String s, List<Integer>[] starts
     }
 }
 
-private int getMaxLen(Set<String> wordDict) {
-    int max = 0;
-    for (String s : wordDict) {
-        max = Math.max(max, s.length());
-    }
-    return max;
-}
 =======================================================================================================
 method 3:
 

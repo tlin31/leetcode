@@ -90,9 +90,11 @@ stats:
        public static List < List < String >> partition(String s) {
            int len = s.length();
            List < List < String >> [] result = new List[len + 1];
+
            result[0] = new ArrayList < List < String >> ();
            result[0].add(new ArrayList < String > ());
            boolean[][] pair = new boolean[len][len];
+           
            for (int i = 0; i < s.length(); i++) {
                result[i + 1] = new ArrayList < List < String >> ();
 
