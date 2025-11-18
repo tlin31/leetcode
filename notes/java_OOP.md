@@ -1,6 +1,6 @@
 https://www.geeksforgeeks.org/object-oriented-programming-oops-concept-in-java/
 
-## OOP in java
+## Object Oriented Programming in java
 
 
 ✅ 一、总结：什么是 Java 的面向对象编程（OOP）？
@@ -21,33 +21,60 @@ Java 中 OOP 的四大特性是：
 4. 抽象（Abstraction）：只保留本质特征，屏蔽复杂细节
 
 
-✅ 二、Java 面向对象的四大特性（详细 + 示例）
+✅ 二、Java 面向对象的四大特性
 
-1. 封装（Encapsulation）
-- 封装是隐藏内部状态，只通过方法访问对象的属性。
+### 1. 封装（Encapsulation）###
+
+    - 封装是隐藏内部状态，只通过方法访问对象的属性。用户无需知道对象内部的细节，但可以通过对象对外提供的接口来访问该对象。
 
 实现方式：
 - 使用 private 修饰成员变量
 - 提供 getter/setter 方法
 
+
+
 ```java
-class Person {
-    private String name;      // 封装字段
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-}
+    public class Person {
+
+        private String name;
+        private int gender;
+        private int age;
+
+        public String getName() {
+            return name;
+        }
+
+        public String getGender() {
+            return gender == 0 ? "man" : "woman";
+        }
+
+        public void work() {
+            if (18 <= age && age <= 50) {
+                System.out.println(name + " is working very hard!");
+            } else {
+                System.out.println(name + " can't work any more!");
+            }
+        }
+    }
 ```
 
 📌 优势：
-- 隐藏实现细节，防止误操作
-- 更安全、灵活
-- 易于维护
+
+    - 隐藏实现细节，防止误操作
+    - 更安全、灵活
+    - 易于维护:可以更容易被程序员理解，并且在调试的时候可以不影响其他模块
+    - 减少耦合: 可以独立地开发、测试、优化、使用、理解和修改
+    - 有效地调节性能: 可以通过剖析确定哪些模块影响了系统的性能
+    - 提高软件的可重用性
+    - 降低了构建大型系统的风险: 即使整个系统不可用，但是这些独立的模块却有可能是可用的
 
 
+### 2. 继承（Inheritance）### 
 
-2. 继承（Inheritance）
+    Java 使用关键字 extends 实现类继承。继承实现了 IS-A 关系，例如 Dog 和 Animal 就是一种 IS-A 关系，因此 Cat 可以继承自 Animal，从而获得 Animal 非 private 的属性和方法。
 
-Java 使用关键字 extends 实现类继承。
+    继承应该遵循里氏替换原则，子类对象必须能够替换掉所有父类对象。 Dog 可以当做 Animal 来使用，也就是说可以使用 Animal 引用 Dog 对象。父类引用指向子类对象称为 向上转型 。
+
 
 ```java
 class Animal {
@@ -63,7 +90,7 @@ class Dog extends Animal {
 ```
 
 📌 优势：
-- 代码复用
+- 代码复用 reusability
 - 建立类的层次结构（例如：Animal → Dog、Cat）
 
 📌 注意：
@@ -71,21 +98,118 @@ Java 是单继承（一个类只能继承一个父类），但可以实现多个
 
 
 
-3. 多态（Polymorphism）
+### 3. 多态（Polymorphism）### 
 
 多态主要有两种：
 
 ① 编译时多态（方法重载 Overloading）
+
+方法重载 Overloading = 同一个类中存在多个 **方法名相同，但参数列表不同**的方法。
+Java 在编译时（不是运行时）根据参数类型和数量决定调用哪个方法，因此称为“编译时多态”。
+
+要求：
+    只要参数列表不同即可：
+        可以是参数类型不同、参数个数不同、参数顺序不同
+
+    ❗ 与返回类型无关
+    返回值不同不能构成重载：
 ```java
-    void print(int a) {}
-    void print(String s) {}
+    int add(int a) {...}
+    double add(int a) {...}   // ❌ 不合法
+    返回值的type要一样！
+```
+
+
+
+```java
+    class MathUtils {
+
+        // 参数类型不同
+        public int add(int a, int b) {
+            return a + b;
+        }
+
+        public double add(double a, double b) {
+            return a + b;
+        }
+
+        // 参数数量不同
+        public int add(int a, int b, int c) {
+            return a + b + c;
+        }
+
+        // 参数顺序不同
+        public String combine(int a, String b) {
+            return a + b;
+        }
+
+        public String combine(String a, int b) {
+            return a + b;
+        }
+    }
+
+    public class Main {
+        public static void main(String[] args) {
+            MathUtils mu = new MathUtils();
+
+            System.out.println(mu.add(1, 2));         // 调用 add(int, int)
+            System.out.println(mu.add(1.5, 2.5));     // 调用 add(double, double)
+            System.out.println(mu.add(1, 2, 3));      // 调用 add(int, int, int)
+
+            System.out.println(mu.combine(1, "A"));   // 调用 combine(int, String)
+            System.out.println(mu.combine("A", 1));   // 调用 combine(String, int)
+        }
+    }
+
 ```
 
 
 ② 运行时多态（重写 Override + 向上转型）
+
+运行时多态有三个条件:
+- 继承
+- 覆盖(重写)
+- 向上转型
+
 ```java
-    Animal animal = new Dog();
-    animal.eat(); // 调用 Dog 的 eat()
+父类：Animal
+        class Animal {
+            public void makeSound() {
+                System.out.println("Animal makes a sound");
+            }
+        }
+
+
+子类：Dog
+        class Dog extends Animal {
+            @Override
+            public void makeSound() {
+                System.out.println("Dog barks");
+            }
+        }
+
+
+子类：Cat
+        class Cat extends Animal {
+            @Override
+            public void makeSound() {
+                System.out.println("Cat meows");
+            }
+        }
+
+
+调用端（运行时根据对象类型决定执行哪个方法）
+
+    public class Main {
+        public static void main(String[] args) {
+            Animal a1 = new Dog(); // 向上转型
+            Animal a2 = new Cat(); // 向上转型
+
+            a1.makeSound(); // Dog barks
+            a2.makeSound(); // Cat meows
+        }
+    }
+
 ```
 
 📌 原理：Java 根据实际对象类型而非引用类型决定方法调用。
@@ -98,7 +222,7 @@ Java 是单继承（一个类只能继承一个父类），但可以实现多个
 
 
 
-4. 抽象（Abstraction）
+### 4. 抽象（Abstraction）### 
 
 通过抽象类或接口定义抽象行为，让子类实现具体功能。
 
@@ -178,6 +302,8 @@ Java 是单继承（一个类只能继承一个父类），但可以实现多个
 
 5. 可读性好，符合现实世界模型
 
+
+
 🎯 六、面试 30 秒标准回答（你可以直接背）：
 
 Java 的面向对象编程基于类与对象，通过封装、继承、多态和抽象四大特性组织代码。
@@ -194,7 +320,7 @@ Java's strong typing system, interface mechanism, and runtime polymorphism make 
 
 
 
-
+----------------------------------------------------------------------------------------------------
 Object-oriented programming: aims to implement real-world entities like inheritance, hiding, polymorphism etc in programming. The main aim of OOP is to bind together the data and the functions that operate on them so that no other part of the code can access this data except that function.
 
 OOPs Concepts:
