@@ -88,7 +88,7 @@ method:
             max_left [ i ] 代表第 i 列左边最高的墙的高度，
             max_right [ i ] 代表第 i 列右边最高的墙的高度
 
-            !!第 i 列左（右）边最高的墙，是不包括自身的）
+            !!第 i 列左（右）边最高的墙，是不包括自身的
 
 	- 对于 max_left: max_left [ i ] = Max ( max_left [ i - 1] , height [ i - 1]) 
 		它前边的墙的左边的最高高度和它前边的墙的高度选一个较大的，就是当前列左边最高的墙了。
@@ -102,28 +102,28 @@ stats:
 	- Runtime: 1 ms, faster than 98.31% of Java online submissions for Trapping Rain Water.
 	- Memory Usage: 37.7 MB, less than 95.21%
 
-public int trap(int[] height) {
-    int sum = 0;
-    int[] max_left = new int[height.length];
-    int[] max_right = new int[height.length];
+    public int trap(int[] height) {
+        int sum = 0;
+        int[] max_left = new int[height.length];
+        int[] max_right = new int[height.length];
 
-    // boundries are -1 and -2 because 2 edge can't store water
-    for (int i = 1; i < height.length - 1; i++) {
-        max_left[i] = Math.max(max_left[i - 1], height[i - 1]);
-    }
-
-    for (int i = height.length - 2; i >= 0; i--) {
-        max_right[i] = Math.max(max_right[i + 1], height[i + 1]);
-    }
-
-    for (int i = 1; i < height.length - 1; i++) {
-        int min = Math.min(max_left[i], max_right[i]);
-        if (min > height[i]) {
-            sum += min - height[i];
+        // boundries are -1 and -2 because 2 edge can't store water
+        for (int i = 1; i < height.length - 1; i++) {
+            max_left[i] = Math.max(max_left[i - 1], height[i - 1]);
         }
+
+        for (int i = height.length - 2; i >= 0; i--) {
+            max_right[i] = Math.max(max_right[i + 1], height[i + 1]);
+        }
+
+        for (int i = 1; i < height.length - 1; i++) {
+            int min = Math.min(max_left[i], max_right[i]);
+            if (min > height[i]) {
+                sum += min - height[i];
+            }
+        }
+        return sum;
     }
-    return sum;
-}
 
 =======================================================================================================
 method 2:
@@ -157,13 +157,13 @@ stats:
 
             while (left <= right) {
 
-                if (height[left] <= height[right]) {
+                if (height[left] <= height[right]) { //左边存水
                     
                     // update maxleft
                     if (height[left] >= maxleft) 
                         maxleft = height[left];
                     else 
-                        // water accumulate between the max left & current left
+                        // maxLeft高，可以再max left & current left中间存水
                         res += maxleft - height[left];
 
                     left++;
@@ -191,53 +191,137 @@ method 3:
 
 method:
 
-	- stack
+	- monotonic decreasing stack
 	- 每一层算一次
 
-stats:
+思路：
 
-	- 
-	- 
-test case: [2,1,0,1,3], 下图中x代表墙壁，o代表水
+    用一个单调递减栈（存索引）。
+    当我们遇到一个比栈顶大的元素时，就说明可能形成了“水洼”的右边界，
+    从栈中弹出“凹槽”的底部，然后计算可以积多少水。
 
-        x
-x o o o x
-x x o x x
+即：
 
-        // cur = 3
-        // stack: 0 1 \2
-        // h = 0, dist = 3-1-1 = 1, min = min(1,3) = 1, sum = 1*(1-0)=1
+    栈保持 height 递减（相邻越压越低）
 
-        // cur =4
-        // stack: 0 1 \3
-        // h = 1, dist = 4-1-1=2, min=min(1,3)=1， sum=1+0 = 1
+    当出现“更高的墙”，说明中间的低点可以被填水
 
-        // stack: 0 \1
-        // h = 1, dist = 4-0-1 = 3, min = min(2,3)=2,sum = 1+1*3 =4 
+    每次弹出的元素代表“水洼的底”
 
 
-public int trap(int[] height) {
-    int sum = 0;
-    Stack<Integer> stack = new Stack<>();
-    int current = 0;
-    while (current < height.length) {
-        
-        //如果栈不空并且当前的高度大于栈顶高度就一直循环
-        while (!stack.empty() && height[current] > height[stack.peek()]) {
-            int h = height[stack.peek()]; //取出要出栈的元素
-            stack.pop(); //出栈
-            if (stack.empty()) { // 栈空就出去
-                break; 
+举个例子：height = [0,1,0,2,1,0,1,3,2,1,2,1]
+
+高度 3 |               X
+高度 2 |       X       X X   X
+高度 1 |   X   X X   X X X X X X
+高度 0 | 0 1 0 2 1 0 1 3 2 1 2 1
+         
+         0 1 2 3 4 5 6 7 8 9 10 11 （索引）
+
+
+初始：
+index: 0
+value: 0
+stack = [0]
+
+i = 1, height=1（比 0 大）
+
+能形成水洼了吗？栈顶 = 0（高度 0）,当前高度 = 1 > 0 → 可以接水, 弹出 0 作为“底部”：
+
+left boundary = stack new top = empty → 不足以蓄水
+
+压入 1：stack = [1]
+
+
+
+i = 2, height=0
+
+0 < stack.top(1)，递减 → 压栈
+
+stack = [1,2]
+
+
+
+i = 3, height=2（大于 0 和 1）
+
+当前高度 = 2， 栈顶 = 2（底部，height=0）
+
+步骤 1：弹出 2（底部）
+
+左边界：栈弹出之后的栈顶 = 1（高度=1）
+右边界：当前高度=2
+
+可以接水！
+
+计算水量
+height = min(leftBoundary, rightBoundary) - bottom
+       = min(1, 2) - 0
+       = 1
+
+width = rightIndex - leftIndex - 1
+      = 3 - 1 - 1
+      = 1
+
+water = 1 * 1 = 1
+
+
+累计水量 += 1
+
+步骤 2 —— 当前 2 还是比 leftBoundary (height=1) 大
+
+继续弹出 1？
+
+不行，因为 1 是左边界，需要保留
+→ 停止
+
+最后将 3 入栈：
+
+stack = [1,3]
+totalWater = 1
+
+后面继续类似操作，核心思想一致：
+
+当 height[i] > height[stack.top()] 时：
+
+弹出一个底部，计算：
+min(左边界高度, 右边界高度) - 底部高度
+
+
+乘以：
+
+右边界索引 - 左边界索引 - 1
+
+
+最终总水量 = 6
+
+
+class Solution {
+    public int trap(int[] height) {
+        int n = height.length;
+        Deque<Integer> stack = new ArrayDeque<>(); // 单调递减栈
+        int water = 0;
+
+        for (int i = 0; i < n; i++) {
+
+            // 若当前高度 > 栈顶 → 可以接水
+            while (!stack.isEmpty() && height[i] > height[stack.peek()]) {
+
+                int bottom = stack.pop(); // 水洼的底部高度
+
+                if (stack.isEmpty()) break; // 没左边界，不构成水洼
+
+                int left = stack.peek();  // 左边界索引
+
+                int h = Math.min(height[left], height[i]) - height[bottom]; // 高度
+                int w = i - left - 1; // 宽度
+
+                water += h * w;
             }
-            int distance = current - stack.peek() - 1; //两堵墙之前的距离。
-            int min = Math.min(height[stack.peek()], height[current]);
-            sum = sum + distance * (min - h);
-        }
-        
-        stack.push(current); //当前指向的墙入栈
-        current++; //指针后移
-    }
-    return sum;
-}
 
+            stack.push(i);
+        }
+
+        return water;
+    }
+}
 

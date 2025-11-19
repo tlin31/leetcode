@@ -120,24 +120,48 @@ stats:
 
 --------- Or let stack always contain : (top) min, num (bottom)
     
-    // push aj before ai (i < j, ai < aj)
+思路是我们维护一个栈和一个变量third，其中third就是第三个数宇，也是pattern 132中的2，
+
+栈里面按顺序放所有大于third的数字，也是pattern 132中的3
+
+那么我们在遍历的时候，如果当前数字小于third，即pattern 132中的1找到了，我们直接返回true即可，
+注意我们应该从后往前遍历数组。
+
+如果当前数字大于栈顶元素，那么我们按顺序将栈顶数字取出，赋值给third，然后将该数字压入栈，
+这样保证了栈里的元素仍然都是大于third的，我们想要的顺序依旧存在，
+
+进一步来说，栈里存放的都是可以维持second ＞ third的second值，其中的任何一个值都是大于当前的third值，
+
+second越大越好，这样才更容易满足当前的值first比third值小的条件。
+
+public boolean find132pattern(int[] nums) {
+
+    if (nums.length <= 2) return false;
+
+    int third = Integer.MIN_VALUE;
     Stack<Integer> stack = new Stack<>(); 
-    int min = Integer.MAX_VALUE;
-    for (int num : nums) {
-        if (num <= min) {
-            min = num;
-        } else {
-        	// num > min, it is a potential '3'
-            while (!stack.empty()) {
-                if (stack.peek() >= num) break;
-                stack.pop();
-                if (stack.pop() > num) return true;
+
+    for (int i = nums.length-1; i>=0; i--){
+        int cur = nums[i];
+
+        //例子中的 1<2
+        if (cur<third)
+            return true;
+
+        else{
+            //将更大的数变为third，然后把cur当做second
+            while(!stack.isEmpty() && nums[i]>stack.peek()){
+                third = stack.pop();
             }
-            stack.push(num);
-            stack.push(min);
         }
+        stack.push(cur);
+
+
     }
+
     return false;
+}
+
 
 
 =======================================================================================================
@@ -159,6 +183,22 @@ stats:
 
 	- Runtime: 2 ms, faster than 100.00% of Java online submissions for 132 Pattern.
 	- Memory Usage: 42.5 MB, less than 14.29% 
+
+
+public boolean find132pattern(int[] nums) {
+    int n = nums.length, top = n, third = Integer.MIN_VALUE;
+
+    for (int i = n - 1; i >= 0; i--) {
+        if (nums[i] < third) return true;
+        while (top < n && nums[i] > nums[top]) third = nums[top++];
+        nums[--top] = nums[i];
+    }
+    
+    return false;
+}
+
+
+
 
 
 public class Solution {

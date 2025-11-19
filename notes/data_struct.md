@@ -293,14 +293,25 @@ output:
 
 ### 单调栈 Monotonic Stack
 
-当你遇到 **“找临近比它大/小的元素”、“下一次更大/更小”、“区间扩展到不能扩展为止”** 时，就应该立刻想到：
+当你遇到 **“找临近比它大/小的元素”、“下一次更大/更小”、“区间扩展到不能扩展为止”**
 
 单调栈（Monotonic Stack）是处理 **“局部与周围关系”** 的神器
 
-key：要找下一个更大的元素就用decreasing stack（小数靠上），条件是cur > stack.peek()就pop，pop出来的数字的next greater element就是cur
+✅ 一、最核心规律
+
+当想找“下一个更大”或“上一个更大” → 用**单调递减栈,条件是cur > stack.peek()就pop**，pop出来的数字的next greater element就是cur
+单调递减栈 = 栈顶最大 → 当遇到更大的元素时才会 Pop
+
+当想找“下一个更小”或“上一个更小” → 用单调递增栈
+单调递增栈 = 栈顶最小 → 当遇到更小的元素时才会 Pop
+
+栈里永远保持你不想被 Pop 的元素。
 
 
-模式1：Next Greater Element / Next Smaller Element
+
+
+✅ 二、例子
+**模式1：Next Greater Element / Next Smaller Element**
 
 给定数组，每个元素要找到：
 
@@ -351,14 +362,32 @@ ex. LC 496 Next Greater Element I
     }
 ```
 
+变形：根据单调stack构建suffix array，比如lc 2104
 
-模式 2：连续区间向左右延伸，直到遇到更大/更小的阻碍
 
-比如：
+
+```java
+
+//根据范围和的定义，可以推出范围和 sum 等于所有子数组的最大值之和 sumMax 减去所有子数组的最小值之和 sumMin。
+
+//minLeft[i] 表示 nums[i] 左侧最近的比它小的数的下标，minRight[i] 表示 nums[i] 右侧最近的比它小的数的下标。
+
+        for (int i = 0; i < n; i++) {
+            while (!minStack.isEmpty() && nums[minStack.peek()] > nums[i]) {
+                minStack.pop();
+            }
+            minLeft[i] = minStack.isEmpty() ? -1 : minStack.peek();
+            minStack.push(i);
+```
+
+
+
+**模式 2：连续区间向左右延伸，直到遇到更大/更小的阻碍**
+
 
 求以当前元素为中心，向两侧能够延伸多远
 
-求“最大矩形”、“最大面积”等区间类问题
+求“最大矩形”、“最大面积”等区间类问题 （柱状图、可以拍扁成柱状图的3x3图）
 
 求滑动窗口中最大/最小（但更常用双端队列）
 
@@ -376,7 +405,21 @@ ex.
 
 
 ex. Largest Rectangle in Histogram — LC 84, 存increasing
+
 stack，因为一旦碰到小的，就不把他算到面积里，直接结算他之前的
+  
+```
+Input: heights = [2,1,5,6,2,3]
+Output: 10
+
+	  x  
+    x x  
+    x x
+    x x   x
+x   x x x x
+x x x x x x
+```
+
 
 ```java
         for (int i = 0; i < newHeights.length; i++) {
