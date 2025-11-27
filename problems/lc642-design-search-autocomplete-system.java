@@ -134,7 +134,7 @@ stats:
 
 class TrieNode {
     Map<Character, TrieNode> children = new HashMap<>();
-    Map<String, Integer> countMap = new HashMap<>();
+    Map<String, Integer> countMap = new HashMap<>(); //记录该前缀下所有句子及其出现次数
 }
 
 class AutocompleteSystem {

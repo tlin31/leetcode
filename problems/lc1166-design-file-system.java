@@ -68,6 +68,15 @@ Method:
     - airbnb full class Solution
     - input entire path
 
+watchMap 是一个用于路径监听的回调注册表。每个路径可以注册一个监听器，当该路径或其子路径发生创建事件时，
+监听器会被触发执行。
+它实现类似文件系统或 Zookeeper 的 层级 Watch 机制：不仅监听当前节点，也监听所有祖先节点。
+
+给某条路径注册一个回调（Runnable），当该路径下发生 create 操作时触发。
+
+也就是：当文件系统中某个路径发生变化时自动触发对应的监听器。
+
+类似 Zookeeper watch 或 文件系统事件监听。
 
 class Solution {
     public static void main(String[] args) {
@@ -103,18 +112,20 @@ public class AFileSystem {
 
         // if doesn't have 分隔符 "/"
         // if don't contain previous path
-        // if 
         if (index == -1 || !map.containsKey(path.substring(0, index)) && index != 0) {
             return false;
         }
 
         map.put(path, val);
+
+        //1. 创建新节点   2.向上不断截断路径     3. 只要某个路径被注册了 watcher，就执行它
         while (path.length() > 0) {
             if (watchMap.containsKey(path)) {
                 watchMap.get(path).run();
             }
             path = path.substring(0, path.lastIndexOf("/"));
         }
+
         return true;
     }
 

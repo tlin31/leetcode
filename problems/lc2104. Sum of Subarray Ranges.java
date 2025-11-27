@@ -63,10 +63,44 @@ Method 1: monotonic stack
 
 Method:
 
-根据范围和的定义，可以推出范围和 sum 等于所有子数组的最大值之和 sumMax 减去所有子数组的最小值之和 sumMin。
+核心思想：
 
-minLeft[i] 表示 nums[i] 左侧最近的比它小的数的下标，minRight[i] 表示 nums[i] 右侧最近的比它小的数的下标。
+    所有子数组的 max - min
+    =（每个元素作为 max 时贡献的总和） -（每个元素作为 min 时贡献的总和）
 
+也就是：
+    数组中每个元素 nums[i]，
+    会在若干个子数组中充当“最大值”和“最小值”。
+    要做的是 算它出现多少次。
+
+① 如何算 “nums[i] 在多少个子数组里是最大值”？
+
+    用 单调递减栈 找：
+
+    左侧第一个比它大的元素距离 L
+
+    右侧第一个比它大的元素距离 R
+
+    当 j 左边没有更大的（或更小的）元素时，左边的边界就是索引 -1，所以左边距离是 j - (-1) = j + 1。
+    这表示：从 0 到 j 之间的所有子数组，都可以让 nums[j] 充当最大/最小值。
+
+    则它作为最大值的子数组个数：
+
+    count_max = L * R
+    贡献 = nums[i] * count_max
+
+② 如何算 “nums[i] 在多少个子数组里是最小值”？
+
+    用 单调递增栈 找：
+
+    左侧第一个比它小的元素距离 L
+
+    右侧第一个比它小的元素距离 R
+
+    则它作为最小值的子数组个数：
+
+    count_min = L * R
+    贡献 = nums[i] * count_min
 
 Stats:
 
@@ -80,6 +114,7 @@ class Solution {
         int[] minRight = new int[n];
         int[] maxLeft = new int[n];
         int[] maxRight = new int[n];
+
         Deque<Integer> minStack = new ArrayDeque<Integer>();
         Deque<Integer> maxStack = new ArrayDeque<Integer>();
 
@@ -87,6 +122,8 @@ class Solution {
             while (!minStack.isEmpty() && nums[minStack.peek()] > nums[i]) {
                 minStack.pop();
             }
+            //如果minStack是空的说明当前就是最小的了，左边比他更小的在index-1，这样算长度/有几个数字比他更小时
+            //算的i-(-1)=i+1个，才是对的
             minLeft[i] = minStack.isEmpty() ? -1 : minStack.peek();
             minStack.push(i);
             

@@ -1,4 +1,4 @@
-716. Max Stack - Easy
+716. Max Stack - HARD
 
 
 Design a max stack that supports push, pop, top, peekMax and popMax.
@@ -39,6 +39,119 @@ key:
 ******************************************************
 
 
+解法 2（最优）：双向链表 + TreeMap（全部操作 O(log n)）
+
+1. 一个 双向链表 保存栈顺序，栈顶就是链表尾部。
+
+bottom <-> ... <-> ... <-> top
+
+
+2. 一个 TreeMap<Integer, List<Node>> 保存每个值对应的链表节点们
+
+key 是值，value 是一组链表节点（同值可能有很多）
+
+TreeMap 自动给我们：
+
+O(log n) 找最大值 (lastKey())，可以快速定位到最大值对应的节点（List 最后一个）
+
+3. 删除操作只需要 O(1) on node（因为双向链表可以 O(1) 删除节点）
+
+
+面试问题：
+2. 为什么选 TreeMap？
+
+	自动排序 → O(log n) 找 max & 可以按 value 聚合多个 Node & 支持并发扩展（ConcurrentSkipListMap）
+
+	像 Redis ZSet（skiplist + hash）有类似结构。
+
+3. 为什么用双向链表？
+
+	可以 O(1) 删除任意节点（知道 Node 引用）
+
+	保持 push/pop 顺序 → 这是“栈”的本质
+
+	双向链表 + Map = 常见工程结构（例如 LRU Cache）。
+
+4. 工程中的应用场景是什么？
+
+	实时任务调度：快速删除最大优先级任务
+
+	实时流计算：按最大权重取出元素
+
+	实时风控：栈式结构 + 最大值监控
+
+	面试官听到这些会直接感觉你“有工程视角”。
+
+
+
+class MaxStack {
+
+    class Node {
+        int val;
+        Node prev, next;
+        Node(int v) { val = v; }
+    }
+
+    Node head, tail; //sentinel node
+    TreeMap<Integer, List<Node>> map;
+
+    public MaxStack() {
+        head = new Node(0);
+        tail = new Node(0);
+        head.next = tail;
+        tail.prev = head;
+        map = new TreeMap<>();
+    }
+
+    private Node addNode(int x) {
+        Node n = new Node(x);
+        n.prev = tail.prev;
+        n.next = tail;
+        tail.prev.next = n;
+        tail.prev = n;
+        return n;
+    }
+
+    private void removeNode(Node n) {
+        n.prev.next = n.next;
+        n.next.prev = n.prev;
+    }
+
+    public void push(int x) {
+        Node n = addNode(x);
+        map.computeIfAbsent(x, k -> new ArrayList<>()).add(n);
+    }
+
+    public int pop() {
+        Node n = tail.prev;
+        removeNode(n);
+
+        List<Node> nodes = map.get(n.val);
+        nodes.remove(nodes.size() - 1);
+        if (nodes.isEmpty()) map.remove(n.val);
+
+        return n.val;
+    }
+
+    public int top() {
+        return tail.prev.val;
+    }
+
+    public int peekMax() {
+        return map.lastKey();
+    }
+
+    public int popMax() {
+        int max = peekMax();
+        List<Node> nodes = map.get(max);
+        Node n = nodes.remove(nodes.size() - 1);
+        if (nodes.isEmpty()) map.remove(max);
+
+        removeNode(n);
+        return max;
+    }
+}
+
 
 =======================================================================================================
 Method 1:  Two Stacks
@@ -51,7 +164,16 @@ Stats:
 
 	- Space Complexity: O(N), the maximum size of the stack.
 
+push: O(1)
 
+pop: O(1)
+
+peekMax: O(1)
+
+popMax: O(n)（最坏）
+
+优点：简单，面试写得完。
+缺点：右边很深的栈会退化到 O(n)。
 
 Method:
 

@@ -55,6 +55,7 @@ key:
 =======================================================================================================
 
 method 0:
+
 	- Used TreeMap to avoid sorting the list as insertion takes O(logN).
 	- best solution
 	- treat directory & file as the same

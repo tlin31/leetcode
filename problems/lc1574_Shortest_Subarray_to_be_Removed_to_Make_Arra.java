@@ -50,33 +50,38 @@ Method 1:
 
 Method:
 
-	-	We should look for any parts of the array that are already sorted and try to retain as much 
-	of that as possible.
-	If we have a long sorted prefix (from the start) and a long sorted suffix (from the end), we 
-	might only need to remove a small subarray in between to make the entire array sorted.
+思路：
 
-Steps:
+	找最长的 从左到右非递减前缀
 
-	Find the longest non-decreasing prefix from the beginning of the array. 
-	Let's call this left. This gives us the starting part of the array that’s already sorted.
+	找最长的 从右到左非递减后缀
 
-	Find the longest non-decreasing suffix from the end of the array. 
-	Let's call this right. This gives us the ending part of the array that’s already sorted.
+	尝试把前缀和后缀“拼接”起来，看能否保持有序
 
-	Check if the entire array is sorted by verifying if left spans the whole array. 
-	If so, the answer is 0 because we don't need to remove anything.
+	在所有删除方案中取最短
 
-	Calculate minimum removal:
+	为什么可行？
+	因为你最终剩下的数组必然形如：
 
-	  Initially, consider removing either the entire suffix (n - left - 1 elements) or the 
-	  entire prefix (right elements).
-	
-	  Use a two-pointer technique to see if we can merge parts of the prefix and suffix by 
-	  skipping the smallest possible middle section. This allows us to explore shorter subarrays 
-	  to remove.
-	
-	Return the result which is the minimum number of elements we need to remove.
+	[非递减前缀] + [非递减后缀]
 
+
+	中间被删除的部分是连续的一段。
+
+尝试“拼接前缀 + 后缀”
+
+	对于前缀每个位置 i，我们尝试匹配右边一个位置 j，使：
+
+	arr[i] <= arr[j]
+
+
+	这样保留 [0..i] + [j..n-1] 是有序的。
+
+	删除长度是：delete = j - i - 1
+
+	移动两个指针 i（从左 prefix）和 j（从右 suffix）。
+
+	找最小的 delete。
 
 
 Stats:
@@ -105,7 +110,7 @@ class Solution {
             right--;
         }
         
-        // Step 3: Find the minimum length to remove by comparing prefix and suffix
+        // Step 3: Find the minimum length if remove entire prefix or suffix
         int result = Math.min(n - left - 1, right);
         
         // Step 4: Use two pointers to find the smallest middle part to remove
