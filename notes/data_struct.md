@@ -101,11 +101,11 @@ Deque<Integer> dq = new ArrayDeque<>();
 
 - 队尾：offerLast, pollLast, peekLast
 
-常用于：
-✔ 单调队列
-✔ BFS
-✔ 滑动窗口最大值（239）
-✔ 双端操作
+- 常用于：
+  * 单调队列
+  * BFS
+  * 滑动窗口最大值（239）
+  * 双端操作
 
 ④ 使用 PriorityQueue 声明（最小堆，常用于贪心/TopK）
 Queue<Integer> pq = new PriorityQueue<>();
