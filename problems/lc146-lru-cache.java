@@ -77,7 +77,7 @@ stats:
 		class DLinkedNode {
 		  int key;
 		  int value;
-		  DLinkedNode pre;
+		  DLinkedNode prev;
 		  DLinkedNode post;
 		}
 
@@ -91,13 +91,13 @@ stats:
 		    this.capacity = capacity;
 
 		    head = new DLinkedNode();
-		    head.pre = null;
+		    head.prev = null;
 
 		    tail = new DLinkedNode();
 		    tail.post = null;
 
 		    head.post = tail;
-		    tail.pre = head;
+		    tail.prev = head;
 		}
 
 		
@@ -105,22 +105,22 @@ stats:
 		private void addNode(DLinkedNode node) {
 		    
 			// add node's front & back link
-		  	node.pre = head;
+		  	node.prev = head;
 		  	node.post = head.post;
 
 		  	// change head & next element's front & back link
 		  	DLinkedNode next = head.post;
-		  	next.pre = node;
+		  	next.prev = node;
 		  	head.post = node;
 		}
 
 		// Remove an existing node from the linked list.
 		private void removeNode(DLinkedNode node){
-		  DLinkedNode before = node.pre;
+		  DLinkedNode before = node.prev;
 		  DLinkedNode next = node.post;
 
 		  before.post = next;
-		  next.pre = before;
+		  next.prev = before;
 		}
 		
 		//Move certain node in between to the head.
@@ -131,7 +131,7 @@ stats:
 
 		// pop the current tail. 
 		private DLinkedNode popTail(){
-		  DLinkedNode res = tail.pre;
+		  DLinkedNode res = tail.prev;
 		  this.removeNode(res);
 		  return res;
 		}

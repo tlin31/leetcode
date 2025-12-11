@@ -40,6 +40,60 @@ key:
 
 
 =======================================================================================================
+
+DP 定义：
+
+dp[j] = 是否能组成和为 j 的子集
+
+
+状态转移：
+
+dp[j] = dp[j] OR dp[j - nums[i]]
+
+
+注意：
+必须 从右往左 更新，避免一个元素被重复使用。
+
+
+
+class Solution {
+    public boolean canPartition(int[] nums) {
+        int sum = 0;
+        for (int x : nums) sum += x;
+        
+        // 总和为奇数，无解
+        if (sum % 2 == 1) return false;
+
+        int target = sum / 2;
+
+        boolean[] dp = new boolean[target + 1];
+        dp[0] = true;  // 什么都不选可以组成 0
+
+        for (int num : nums) {
+            // 从右向左遍历，避免重复使用 num
+            for (int j = target; j >= num; j--) {
+                dp[j] = dp[j] || dp[j - num];
+            }
+        }
+
+        return dp[target];
+    }
+}
+
+Q1：为什么从右向左更新？
+为了避免一个 num 在同一轮被使用多次，否则会变成完全背包。
+
+Q2：能用 DFS + 剪枝吗？
+可以，但会 TLE，属于指数级。DP 更稳定。
+
+Q3：能否优化到 Bitset？
+可以（C++ 常用），Java 也有 BitSet 实现，但 DP 更直观。
+
+
+
+
+
+=======================================================================================================
 Method 1:
 
 

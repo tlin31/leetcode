@@ -33,6 +33,58 @@ key:
 
 ******************************************************
 
+(nums1[0], nums2[0]) 一定是最小的 pair
+
+之后只可能从：
+
+(nums1[1], nums2[0])
+
+(nums1[0], nums2[1])
+扩展到更大的 pair
+
+这就是 k-way merge + 小根堆（优先级队列） 思想。
+
+复杂度：
+只扩展 k 次，每次 push/pop O(log k)，Total O(k log k)
+时间：O(k log k)
+
+空间：O(k)
+
+class Solution {
+    public List<List<Integer>> kSmallestPairs(int[] nums1, int[] nums2, int k) {
+        List<List<Integer>> res = new ArrayList<>();
+        if (nums1.length == 0 || nums2.length == 0 || k == 0) return res;
+
+        PriorityQueue<int[]> pq = new PriorityQueue<>(
+                (a, b) -> (nums1[a[0]] + nums2[a[1]]) - (nums1[b[0]] + nums2[b[1]])
+        );
+
+        pq.offer(new int[]{0, 0});
+
+        boolean[][] visited = new boolean[nums1.length][nums2.length];
+        visited[0][0] = true;
+
+        while (k-- > 0 && !pq.isEmpty()) {
+            int[] cur = pq.poll();
+            int i = cur[0], j = cur[1];
+
+            res.add(Arrays.asList(nums1[i], nums2[j]));
+
+            if (i + 1 < nums1.length && !visited[i + 1][j]) {
+                pq.offer(new int[]{i + 1, j});
+                visited[i + 1][j] = true;
+            }
+
+            if (j + 1 < nums2.length && !visited[i][j + 1]) {
+                pq.offer(new int[]{i, j + 1});
+                visited[i][j + 1] = true;
+            }
+        }
+
+        return res;
+    }
+}
+
 
 
 =======================================================================================================
@@ -66,6 +118,7 @@ public class Solution {
         	return res;
 
         // add num1, num2, position of num2 in the num2[]
+        // 固定nums2的第一个，把nums1的所有+nums2【0】加到queue里面
         for(int i=0; i<nums1.length && i<k; i++) 
         	que.offer(new int[]{nums1[i], nums2[0], 0});
 

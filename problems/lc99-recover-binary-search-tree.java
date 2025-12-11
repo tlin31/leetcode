@@ -55,7 +55,68 @@ key:
 
 ******************************************************
 
+中序遍历: 让BST sorted
 
+我们需要存:
+prev node：第一个错的，第一次逆序的前一个节点 
+root/最后一次逆序的当前节点
+然后交换
+
+✔ O(h) space（递归栈）
+✔ O(n) time
+
+public class Solution {
+    
+    TreeNode firstElement = null;
+    TreeNode secondElement = null;
+    TreeNode prevElement = null;
+    
+    public void recoverTree(TreeNode root) {
+        
+        // In order traversal to find the two elements
+        traverse(root);
+        
+        // Swap the values of the two nodes
+        int temp = firstElement.val;
+        firstElement.val = secondElement.val;
+        secondElement.val = temp;
+    }
+    
+    private void traverse(TreeNode root) {
+        
+        if (root == null)
+            return;
+            
+        traverse(root.left);
+
+        if (prevElement != null && root.val < prevElement.val) {
+            secondElement = root;
+            if (firstElement == null) 
+              firstElement = prevElement;
+            else return;
+        }
+      
+        prevElement = root;
+
+        // End of "do some business"
+
+        traverse(root.right);
+      }
+}
+
+工程视角怎么说（重要加分）
+
+你可以说：
+
+这是数据结构中的 Invariant 修复问题。BST 的有序性保证我们只需局部修复，不需要重建结构。
+
+类似的技术在工程中应用：
+
+repair corrupted indexes
+
+rebalancing binary tree
+
+LSM-Tree compaction
 
 =======================================================================================================
 method 1:

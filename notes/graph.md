@@ -183,7 +183,6 @@ class Test {
 
 
 
-
 ### Implementation (use adjacency list)
 
 1. Iterative approach:
@@ -653,49 +652,129 @@ class Graph
 ```
 ## Topological Sorting
 
-- - key: in-degrees, dfs, stack
+- key: in-degrees, dfs, stack
 
 - Topological sorting for Directed Acyclic Graph (DAG) is a linear ordering of vertices such that for every directed edge uv, vertex u comes before v in the ordering. 
 
+- 拓扑排序（Topological Sorting）是一种对 有向无环图（DAG） 的所有节点按依赖顺序排序的方法，使得每条边 u -> v 中，u 一定出现在 v 之前。
+
+换句话说：它给出了一种“满足依赖关系的合法执行顺序”。
+
 - not possible if the graph is not a DAG!!!
 
-- For example, a topological sorting of the following graph is “5 4 2 3 1 0”. There can be more than one topological sorting for a graph. For example, another topological sorting of the following graph is “4 5 2 3 1 0”. The first vertex in topological sorting is always a vertex with in-degree as 0 (a vertex with no incoming edges).
-
 - Theorem : A DAG G has at least one vertex with in-degree 0 and one vertex with out-degree 0.
-	- Proof: There’s a simple proof to the above fact is that a DAG does not contain a cycle which means that all paths will be of finite length. Now let S be the longest path from u(source) to v(destination). Since S is the longest path there can be no incoming edge to u and no outgoing edge from v, if this situation had occurred then S would not have been the longest path => indegree(u) = 0 and outdegree(v) = 0
 
-- Algo:
-```python
-	L ← Empty list that will contain the sorted elements
-	S ← Set of all nodes with no incoming edge
-	while S is non-empty do
-	    remove a node n from S
-	    add n to tail of L
-	    for each node m with an edge e from n to m do
-	        remove edge e from the graph
-	        if m has no other incoming edges then
-	            insert m into S
-	if graph has edges then
-	    return error   (graph has at least one cycle)
-	else 
-	    return L   (a topologically sorted order)
-```
+### 现实生活中的应用
+1. 课程安排（Course Schedule）
 
-### Algorithm 1: modify DFS
-1. create a temporary stack.
-2. Mark all the vertices as not visited
-3. recursively call topological sorting for all its adjacent vertices, then push it to a stack. 
-	 3.1 Mark the current node as visited. 
-     3.2 Recur for all the unvisited vertices adjacent to this vertex 
-     3.3 Push current vertex to stack which stores result 
-4. print contents of stack. 
+    “要先上课 A 才能上课 B” → 拓扑排序给出完整的选课顺序
+
+    （leetcode 207, 210）
+
+2. 任务调度 / 工作流系统
+
+    比如：Hadoop YARN、Spark DAG Scheduler、Airflow DAG 调度
+
+    工作流中任务必须按依赖执行 → 拓扑排序是核心
+
+3. 编译器构建
+
+    例如 C/C++ builds：
+
+    A.cpp 依赖 B.h
+
+    B.h 依赖 C.h
+
+    编译器用拓扑排序决定编译顺序。
+
+4. 微服务的启动顺序
+
+    某服务依赖另一个 API 或配置中心，必须按顺序启动系统。
+
+5. 容器 / K8s 的启动顺序
+
+    Pod 之间的依赖、InitContainer 等都遵循 DAG 原则。
+
+### Algorithm 1: modify DFS （基于后序遍历 post-order）
+
+1. 对每个节点 DFS
+2. 当一个节点所有子节点 DFS 完毕以后，将它加入结果
+3. 最后反转结果，就是拓扑序
+4. 使用 visited + onPath 检测环
 
 - no in-degree involved 
 
-
-- Note that a vertex is pushed to stack only when all of its adjacent vertices (and their adjacent vertices and so on) are already in stack.
-
 ![Example](https://media.geeksforgeeks.org/wp-content/cdn-uploads/20190704153933/TopologicalSorting1.png)
+
+
+```java
+    public List<Integer> topoSortDFS(int n, int[][] edges) {
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) 
+            graph.add(new ArrayList<>());
+
+        for (int[] e : edges) 
+            graph.get(e[0]).add(e[1]);
+
+        //visited[node] = true：表示“这个点已经被 DFS 完整处理过”
+        //onPath[node] = true：表示“这个点正在当前 DFS 递归路径上” 如果 DFS 遇到一个“当前路径上已经出现过的点”，说明存在环。
+        boolean[] visited = new boolean[n];
+        boolean[] onPath = new boolean[n];
+
+        List<Integer> res = new ArrayList<>();
+
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
+                if (!dfs(i, visited, onPath, graph, res))
+                    return new ArrayList<>(); // cycle found
+            }
+        }
+
+        Collections.reverse(res);
+        return res;
+    }
+
+    private boolean dfs(int node, boolean[] visited, boolean[] onPath,
+                        List<List<Integer>> graph, List<Integer> res) {
+
+        if (onPath[node]) return false;
+        if (visited[node]) return true;
+
+        visited[node] = true;
+        onPath[node] = true;
+
+        for (int next : graph.get(node)) {
+            if (!dfs(next, visited, onPath, graph, res))
+                return false;
+        }
+
+        onPath[node] = false;
+        res.add(node);
+        return true;
+    }
+
+```
+
+#### 关于On Path：
+
+1. 为什么仅靠 visited 不够？
+
+例子：B → C → D → B  （环）
+
+当 DFS 到达 D 时，B 可能已经 visited = true（被处理过）
+
+但是：👉 你无法区分是“之前处理的”，还是“当前路径上的”。没有 onPath，你根本不知道它是回到 当前路径，还是回到 另一个 DFS 的结果。
+
+
+2. 🧩 引入 onPath 解决所有问题
+
+每次 DFS 进入一个节点：onPath[node] = true
+
+每次 DFS 退出一个节点：onPath[node] = false
+
+
+因此 onPath 等价于：👉 当前 DFS 的递归栈（recursion stack）中有哪些节点
+
 
 Easier ver:
 
@@ -708,7 +787,7 @@ public List<Integer> topologicalSort(int start) {
     return result;
 }
  
-private void topologicalSortRecursive(int current, boolean[] isVisited, LinkedList<Integer> result{
+private void topologicalSortRecursive(int current, boolean[] isVisited, LinkedList<Integer> result) {
     isVisited[current] = true;
     for (int dest : adjVertices.get(current)) {
         if (!isVisited[dest])
@@ -724,209 +803,83 @@ private void topologicalSortRecursive(int current, boolean[] isVisited, LinkedLi
 
 
 
-
-```java
-class Graph 
-{ 
-    // No. of vertices 
-    private int V;   
-
-    // Adjacency List of all edges
-    private LinkedList<Integer> adj[];
-  
-    //Constructor 
-    Graph(int v) { 
-        V = v; 
-        adj = new LinkedList[v]; 
-        for (int i=0; i<v; ++i) 
-            adj[i] = new LinkedList(); 
-    } 
-  
-    // Function to add an edge into the graph 
-    void addEdge(int v,int w) { 
-        adj[v].add(w); 
-    } 
-  
-    // The function to do Topological Sort. It uses recursive topologicalSortUtil() 
-    void topologicalSort() { 
-        Stack stack = new Stack(); 
-  
-        // Mark all the vertices as not visited 
-        boolean visited[] = new boolean[V]; 
-        for (int i = 0; i < V; i++) 
-            visited[i] = false; 
-  
-        // Call the recursive helper function for all unvisited vertices 
-        for (int i = 0; i < V; i++) 
-            if (visited[i] == false) 
-                topoRecursive(i, visited, stack); 
-  
-        // Print contents of stack 
-        while (stack.empty()==false) 
-            System.out.print(stack.pop() + " "); 
-    } 
-
-    // A recursive function used by topologicalSort 
-    void topoRecursive(int v, boolean visited[], Stack stack) 
-    { 
-        // Mark the current node as visited. 
-        visited[v] = true; 
-        Integer i; 
-  
-        // Recur for all the vertices adjacent to this vertex 
-        Iterator<Integer> it = adj[v].iterator(); 
-        while (it.hasNext()) 
-        { 
-            i = it.next(); 
-            if (!visited[i]) 
-                topoRecursive(i, visited, stack); 
-        } 
-  
-        // Push current vertex to stack which stores result 
-        stack.push(new Integer(v)); 
-    } 
-
-// driver method 
-    public static void main(String args[]) 
-    { 
-        // Create a graph given in the above diagram 
-        Graph g = new Graph(6); 
-        g.addEdge(5, 2); 
-        g.addEdge(5, 0); 
-        g.addEdge(4, 0); 
-        g.addEdge(4, 1); 
-        g.addEdge(2, 3); 
-        g.addEdge(3, 1); 
-  
-        System.out.println("Following is a Topological " + 
-                           "sort of the given graph"); 
-        g.topologicalSort(); 
-    } 
-
-```
-Example lc 207 course schedule
-```java
-    - dfs
-    - 也需要建立有向图，还是用二维数组来建立，和 BFS 不同的是，我们像现在需要一个一维数组 visit 来记录访问状态
-    - 三种状态:
-        0表示还未访问过，
-        1表示已经访问了
-        -1 表示有冲突
-    - 大体思路是，先建立好有向图，然后从第一门课开始，找其可构成哪门课，暂时将当前课程标记为已访问，然后对新得到的课程
-        调用 DFS 递归，直到出现新的课程已经访问过了，则返回 false，没有冲突的话返回 true，然后把标记为已访问的课程
-        改为未访问
-
-stats:
-
-    - Runtime: 4 ms, faster than 75.85% of Java online submissions for Course Schedule.
-    - Memory Usage: 44.3 MB, less than 96.15%
-
-
-public boolean canFinish(int numCourses, int[][] prerequisites) {
-    if(prerequisites == null){
-        throw new IllegalArgumentException("illegal prerequisites array");
-    }
- 
-    int len = prerequisites.length;
- 
-    if(numCourses == 0 || len == 0){
-        return true;
-    }
- 
-    //track visited courses
-    int[] visit = new int[numCourses];
- 
-    // use the map to store what courses depend on a course 
-    HashMap<Integer,ArrayList<Integer>> map = new HashMap<Integer,ArrayList<Integer>>();
-    for(int[] a: prerequisites){
-        if(map.containsKey(a[1])){
-            map.get(a[1]).add(a[0]);
-        }else{
-            // new class never seen before
-            ArrayList<Integer> l = new ArrayList<Integer>();
-            l.add(a[0]);
-            map.put(a[1], l);
-        }
-    }
- 
-    for(int i=0; i<numCourses; i++){
-        if(!canFinishDFS(map, visit, i))
-            return false;
-    }
- 
-    return true;
-}
- 
-private boolean canFinishDFS(HashMap<Integer,ArrayList<Integer>> map, int[] visit, int i){
-    if(visit[i]==-1) 
-        return false;
-    if(visit[i]==1) 
-        return true;
- 
-    visit[i]=-1;
-    if(map.containsKey(i)){
-
-        // check if there's clash
-        for(int j: map.get(i)){
-            if(!canFinishDFS(map, visit, j)) 
-                return false;
-        }
-    }
- 
-    visit[i]=1;
- 
-    return true;
-}
-```
-
-
 #### Time complexity
 
 - Time Complexity: The above algorithm is simply DFS with an extra stack. So time complexity is the same as DFS which is O(V+E).
 
 - Note : can use vector instead of stack. If the vector is used then print the elements in reverse order to get the topological sorting.
 
+### Algorithm 2: Kahn’s Algorithm（基于 BFS + 入度 in-degree）
 
-#### Use DFS's finish time
-- run DFS(G) & output node in decreasing finishing time
+思想：
 
+1. 计算每个节点的入度 in degree
 
-### Algorithm 2: modify bfs (use queue), aka Kahn's algorithm
+2. 将所有入度为 0 的节点放进队列
 
-		Map<Integer, List<Integer>> map = new HashMap<>();
+3. 不断取出队头、加入结果，并减少相邻节点入度
 
+4. 新入度为 0 的加入队列
 
-1. Compute in-degree (number of incoming edges) for each of the vertex present in the DAG and initialize the count of visited nodes as 0.
+5. 直到队列空
 
-2. Pick all the vertices with in-degree as 0 and add them into a queue (Enqueue operation)
+如果最后结果节点数 < 图的节点数 → 有环
 
-3. Remove a vertex from the queue (Dequeue operation) and then:
-	- Increment count of visited nodes by 1.
-	- Decrease in-degree by 1 for all its neighboring nodes.
-	- If in-degree of a neighboring nodes is reduced to zero, then add that to the queue.
-
-4. Repeat Step 3 until the queue is empty.
-
-5. If count of visited nodes is not equal to the number of nodes in the graph then the topological sort is not possible for the given graph.
 
 #### How to find in-degree of each node?
 
-1. Take an in-degree array，traverse the array of edges and simply increase the counter of the destination node by 1. --> Time Complexity: O(V+E)
+- 算的是destination node，有几个指向他的
+
+- Take an in-degree array，traverse the array of edges and simply increase the counter of the destination node by 1 --> Time Complexity: O(V+E)
 
 ```java
-for each node in Nodes
-    indegree[node] = 0;
+    for each node in Nodes
+        indegree[node] = 0;
 
-for each edge(src,dest) in Edges
-    indegree[dest]++
+    for each edge(src,dest) in Edges
+        indegree[dest]++
 ```
 
-2) Traverse the list for every node and then increment the in-degree of all the nodes connected to it by 1.
+#### 代码
+```java
+    public List<Integer> topoSort(int n, int[][] edges) {
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) graph.add(new ArrayList<>());
 
-    for each node in Nodes
-        If (list[node].size()!=0) then
-        for each dest in list
-            indegree[dest]++;
+        int[] indegree = new int[n];
+
+        // create graph & in degree array
+        for (int[] e : edges) {
+            graph.get(e[0]).add(e[1]);
+            indegree[e[1]]++;
+        }
+
+        Queue<Integer> q = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            if (indegree[i] == 0) 
+                q.offer(i);
+        }
+
+        List<Integer> res = new ArrayList<>();
+
+        while (!q.isEmpty()) {
+            int cur = q.poll();
+            res.add(cur);
+
+            for (int next : graph.get(cur)) {
+                indegree[next]--;
+                if (indegree[next] == 0) 
+                    q.offer(next);
+            }
+        }
+
+        if (res.size() != n) 
+            return new ArrayList<>(); // has cycle
+
+        return res;
+    }
+```
+
 
 ```java
 class Graph 
@@ -1018,10 +971,6 @@ class Graph
 #### Time Complexity
 - The outer for loop will be executed V number of times and the inner for loop will be executed E number of times, Thus overall time complexity is O(V+E).
 
-### Applications:
-1. scheduling jobs from the given dependencies among jobs
-2. instruction scheduling, ordering of formula cell evaluation when recomputing formula values in spreadsheets, logic synthesis, determining the order of compilation tasks to perform in makefiles, data serialization, and resolving symbol dependencies in linkers
-
 ### Sample questions
 
 1. lc269. Alien Dictionary - hard
@@ -1030,6 +979,81 @@ class Graph
 4. lc329.  Longest Increasing Path in a Matrix - Hard  (not done)  
 5. lc444. Sequence Reconstruction -Medium  (not done)  
 
+
+Example lc 207 course schedule
+```java
+    - dfs
+    - 也需要建立有向图，还是用二维数组来建立，和 BFS 不同的是，我们像现在需要一个一维数组 visit 来记录访问状态
+    - 三种状态:
+        0表示还未访问过，
+        1表示已经访问了
+        -1 表示有冲突
+    - 大体思路是，先建立好有向图，然后从第一门课开始，找其可构成哪门课，暂时将当前课程标记为已访问，然后对新得到的课程
+        调用 DFS 递归，直到出现新的课程已经访问过了，则返回 false，没有冲突的话返回 true，然后把标记为已访问的课程
+        改为未访问
+
+stats:
+
+    - Runtime: 4 ms, faster than 75.85% of Java online submissions for Course Schedule.
+    - Memory Usage: 44.3 MB, less than 96.15%
+
+
+public boolean canFinish(int numCourses, int[][] prerequisites) {
+    if(prerequisites == null){
+        throw new IllegalArgumentException("illegal prerequisites array");
+    }
+ 
+    int len = prerequisites.length;
+ 
+    if(numCourses == 0 || len == 0){
+        return true;
+    }
+ 
+    //track visited courses
+    int[] visit = new int[numCourses];
+ 
+    // use the map to store what courses depend on a course 
+    HashMap<Integer,ArrayList<Integer>> map = new HashMap<Integer,ArrayList<Integer>>();
+    for(int[] a: prerequisites){
+        if(map.containsKey(a[1])){
+            map.get(a[1]).add(a[0]);
+        }else{
+            // new class never seen before
+            ArrayList<Integer> l = new ArrayList<Integer>();
+            l.add(a[0]);
+            map.put(a[1], l);
+        }
+    }
+ 
+    for(int i=0; i<numCourses; i++){
+        if(!canFinishDFS(map, visit, i))
+            return false;
+    }
+ 
+    return true;
+}
+ 
+private boolean canFinishDFS(HashMap<Integer,ArrayList<Integer>> map, int[] visit, int i){
+    if(visit[i]==-1) 
+        return false;
+    if(visit[i]==1) 
+        return true;
+ 
+    visit[i]=-1;
+    if(map.containsKey(i)){
+
+        // check if there's clash
+        for(int j: map.get(i)){
+            if(!canFinishDFS(map, visit, j)) 
+                return false;
+        }
+    }
+ 
+    visit[i]=1;
+ 
+    return true;
+}
+```
 
 
 ## Dijkstra’s shortest path algorithm 

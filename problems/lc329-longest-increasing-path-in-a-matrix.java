@@ -59,44 +59,53 @@ method:
 
 stats:
 
-	- Time complexity: O(n * m) where (n, m) are dimensions of the given matrix.
-		Since, if we ve already run starting from a grid-cell, we would be simply returning 
-		the value in subsequent calls.
-	- Runtime: 7 ms, faster than 93.24% of Java online submissions for Longest Increasing Path in a Matrix.
-	- Memory Usage: 39.4 MB, less than 97.96%
+每个 cell 的 DFS 最多执行一次,每次 DFS 访问 4 个方向
 
+时间复杂度：O(m·n)
+空间复杂度：O(m·n)（递归栈 + memo）
 
-	public class Solution {
-		int[][] dis = {{1,0},{-1,0},{0,1},{0,-1}};
+class Solution {
 
-		public int longestIncreasingPath(int[][] matrix) {
-		  if(matrix.length == 0 ){
-		        return 0;
-		  }
-		  int[][] state = new int[matrix.length][matrix[0].length];
-		  int res = 0;
-		  for(int i = 0; i < matrix.length; i++){
-		      for(int j = 0; j < matrix[0].length; j++){
-		         res = Math.max(res,dfs(i,j,matrix,state));
-		      }
-		  }
-		  return res;
-		}
-		public int dfs(int i, int j, int[][] matrix, int[][] state){
-		      if(state[i][j] > 0) return state[i][j];
-		      int max = 0;
-		      for(int m = 0; m < dis.length; m++){
-		          if(i + dis[m][0] >= 0 && i + dis[m][0] < matrix.length && j + dis[m][1] >= 0 
-		          	 && j + dis[m][1] < matrix[0].length 
-		          	 && matrix[i+dis[m][0]][j+dis[m][1]] > matrix[i][j]){
+    // directions: up, down, left, right
+    private static final int[][] DIRS = {{1,0},{-1,0},{0,1},{0,-1}};
+    
+    public int longestIncreasingPath(int[][] matrix) {
+        int m = matrix.length, n = matrix[0].length;
+        int[][] memo = new int[m][n];
 
-		              max = Math.max(max,dfs(i + dis[m][0],j + dis[m][1],matrix,state));
-		          }
-		      }
-		      state[i][j] = 1 + max;
-		      return state[i][j];
-	    }
+        int ans = 0;
+
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                ans = Math.max(ans, dfs(matrix, i, j, memo));
+            }
+        }
+
+        return ans;
     }
+
+    private int dfs(int[][] mat, int i, int j, int[][] memo) {
+    		//如果已经visit过这个点
+        if (memo[i][j] != 0) return memo[i][j];
+
+        int best = 1; // minimum path length is 1 (itself)
+
+        for (int[] d : DIRS) {
+            int ni = i + d[0];
+            int nj = j + d[1];
+
+            // bounds + strictly increasing condition
+            if (ni >= 0 && nj >= 0 && ni < mat.length && nj < mat[0].length 
+                && mat[ni][nj] > mat[i][j]) {
+
+                best = Math.max(best, 1 + dfs(mat, ni, nj, memo));
+            }
+        }
+
+        memo[i][j] = best;
+        return best;
+    }
+}
 
 =======================================================================================================
 method 2:

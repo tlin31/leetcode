@@ -59,13 +59,76 @@ Method:
 	-	use 2 dequeues
 	- 记住最大和最小值就行
 
+    为了快速得到窗口的最大/最小值，我们使用两个 Monotonic Queue：
+
+    maxDeque：维护单调递减队列 → 队头是当前最大值
+
+    minDeque：维护单调递增队列 → 队头是当前最小值
+
+    通过滑动窗口：
+
+    每次加入 nums[r]
+
+    检查窗口是否满足 max - min <= limit
+
+    如果超出 limit，就移动左指针 l
 
 
+if (nums[l] == maxDeque.peekFirst()) maxDeque.pollFirst();
 
-Stats:
+    当我们移动左指针时，旧的窗口左端元素 nums[l] 会被移出窗口。
 
-	- 
-	- 
+    但我们维护了两个 deque：
+
+    maxDeque：维护窗口最大值（递减队列）
+
+    minDeque：维护窗口最小值（递增队列）
+
+    如果即将划出窗口的 nums[l] 恰好是当前的最大值（maxDeque.first），那么它必须从 maxDeque 去掉。
+
+    因为它离开窗口了，就不能继续作为窗口的最大值了。
+
+
+    时间复杂度：O(N)
+    空间复杂度：O(N)（最坏情况队列存 N 个）
+
+
+class Solution {
+    public int longestSubarray(int[] nums, int limit) {
+        Deque<Integer> maxDeque = new ArrayDeque<>();
+        Deque<Integer> minDeque = new ArrayDeque<>();
+
+        int l = 0, res = 0;
+
+        for (int r = 0; r < nums.length; r++) {
+            int x = nums[r];
+
+            // Maintain max deque (decreasing)
+            while (!maxDeque.isEmpty() && maxDeque.peekLast() < x) {
+                maxDeque.pollLast();
+            }
+            maxDeque.addLast(x);
+
+            // Maintain min deque (increasing)
+            while (!minDeque.isEmpty() && minDeque.peekLast() > x) {
+                minDeque.pollLast();
+            }
+            minDeque.addLast(x);
+
+            // Shrink window if condition violated,  左指针右移缩小窗口
+            while (maxDeque.peekFirst() - minDeque.peekFirst() > limit) {
+                if (nums[l] == maxDeque.peekFirst()) maxDeque.pollFirst();
+                if (nums[l] == minDeque.peekFirst()) minDeque.pollFirst();
+                l++;
+            }
+
+            res = Math.max(res, r - l + 1);
+        }
+
+        return res;
+    }
+}
+
 
 
 

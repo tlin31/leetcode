@@ -46,84 +46,62 @@ key:
 
 ******************************************************
 
-解法一： DP， 时间复杂度 O(N^2)
+Dynamic programming:
 
- 	dp[i] 表示以 nums[i] 这个数结尾的最长递增子序列的长度。
-	比如nums = [1,4,3,4,2,3], 则dp【5】 = 3，因为index 5结尾的最长递增子序列是【1，2,3】
-	既然是递增子序列，我们只要找到前面那些结尾⽐3 小的⼦序列，然后把 3 接到最后，就是一个新的递增子序列
-	显然，可能形成很多种新的子序列，但是我们只选择最长的那⼀个，把最⻓子序列的长度作为 dp[5] 的值即可。
+dp[i][j] 表示 text1 前 i 个字符与 text2 前 j 个字符的 LCS 长度
 
-	for (int j = 0; j < i; j++) {
-	    if (nums[i] > nums[j])
-	    	dp[i] = Math.max(dp[i], dp[j] + 1);
+if text1[i-1] == text2[j-1]:
+    dp[i][j] = dp[i-1][j-1] + 1
+else:
+    dp[i][j] = max(dp[i-1][j], dp[i][j-1])
+
+✔ Why not greedy?（加分点🌟）
+因为决策依赖未来，不能只看当前字符匹配与否，所以必须 DP。
+
+
+	class Solution {
+	    public int longestCommonSubsequence(String t1, String t2) {
+	        int n = t1.length(), m = t2.length();
+	        int[][] dp = new int[n+1][m+1];
+
+	        for (int i = 1; i <= n; i++) {
+	            for (int j = 1; j <= m; j++) {
+	                if (t1.charAt(i-1) == t2.charAt(j-1)) {
+	                    dp[i][j] = dp[i-1][j-1] + 1;
+	                } else {
+	                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
+	                }
+	            }
+	        }
+	        return dp[n][m];
+	    }
 	}
 
 
+空间优化写法: 二维 DP 只依赖左、上、左上，所以只需要一行：
 
-public int lengthOfLIS(int[] nums) { 
-	int[] dp = new int[nums.length]; 
+	public int longestCommonSubsequence(String s1, String s2) {
+	    int n=s1.length(), m=s2.length();
+	    int[] dp = new int[m+1];
 
-	// base case:dp 数组全都初始化为 1 
-	Arrays.fill(dp, 1);
-	
-	for (int i = 0; i < nums.length; i++) {
-		for (int j = 0; j < i; j++) {
-	        if (nums[i] > nums[j])
-	            dp[i] = Math.max(dp[i], dp[j] + 1);
-		} 
+	    for(int i=1;i<=n;i++){
+	        int pre = 0; // dp[i-1][j-1]
+	        
+	        for(int j=1;j<=m;j++){
+	            int temp = dp[j];
+	            if(s1.charAt(i-1)==s2.charAt(j-1)){
+	                dp[j] = pre + 1;
+	            } else {
+	                dp[j] = Math.max(dp[j], dp[j-1]);
+	            }
+	            pre = temp;
+	        }
+	    }
+	    return dp[m];
 	}
-    int res = 0;
-    for (int i = 0; i < dp.length; i++) {
-        res = Math.max(res, dp[i]);
-    }
-	return res; 
-}
 
 
-解法二： binary search， 时间复杂度 O(N*log N)
-
-labuladong+的算法小抄（零一二）.pdf @ Page 215
-
-	patience sorting(耐心排序)
-	假设数组是一堆纸牌：
-	只能把点数小的牌压到点数比它大的牌上;如果当前牌点数较大没有可以放置的堆，则新建一个堆，把
-	这张牌放进去;如果当前牌有多个堆可供选择，则选择最左边的那一堆放置。
-
-	因为牌堆顶的牌是有序的，所以能用二分查找来搜索当前牌应放置的位置。
-
-	按照上述规则执行，可以算出最长递增子序列，牌的堆数就是最长递增子序列的长度
-
-public int lengthOfLIS(int[] nums) { 
-	int[] top = new int[nums.length]; 
-	// 牌堆数初始化为 0
-	int piles = 0;
-
-	for (int i = 0; i < nums.length; i++) { 
-		// 要处理的扑克牌
-        int poker = nums[i];
-		/***** 搜索左侧边界的⼆分查找 *****/ 
-		int left = 0, right = piles; 
-		while (left < right) {
-            int mid = (left + right) / 2;
-            if (top[mid] > poker) {
-                right = mid;
-            } else if (top[mid] < poker) {
-                left = mid + 1;
-            } else {
-				right = mid; 
-			}
-		}
-        /*********************************/
-		// 没找到合适的牌堆，新建⼀一堆 
-		if (left == piles) piles++; 
-			// 把这张牌放到牌堆顶 
-			top[left] = poker;
-	}
-	// 牌堆数就是 LIS ⻓长度
-	return piles;
-}
-
-
+空间从 O(n*m) → O(m)。
 
 
 =======================================================================================================

@@ -93,7 +93,7 @@ class Solution {
 		//所有最大值，取其中最大的
 		for (int i : nums) {
 			TrieNode node = root;
-			int XOR = 0;// 异或结果,的累加。按位累加也是牛逼
+			int XOR = 0;// 异或结果,的累加。
 			for (int j = 31; j >= 0; j--) {
 				int bit = (i >> j) & 1;
 				//如果这一位是1，为了异或最大，最好使用0，这样异或出来是1

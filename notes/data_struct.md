@@ -69,49 +69,67 @@ ConcurrentSkipListMap | O(log n) |   O(log n)  | O(1)     | Skip List
 
 ## Queue
 
-1. add()和offer()区别:
+### ✅ 1. Queue 的常见声明方式（Interface vs Implementation）
 
-- add()和offer()都是向队列中添加一个元素。
-	- 一些队列有大小限制，因此如果想在一个满的队列中加入一个新项，调用 add() 方法就会抛出一个 unchecked 异常，而调用 offer() 方法会返回 false。因此就可以在程序中进行有效的判断！
+Java 中 Queue 是接口（java.util.Queue）。
+常见的声明方式有：
 
-2. poll()和remove()区别：
-
-- remove() 和 poll() 方法都是从队列中删除第一个元素。
-	- 如果队列元素为空，调用remove() 的行为与 Collection 接口的版本相似会抛出异常，但是新的 poll() 方法在用空集合调用时只是返回 null。因此新的方法更适合容易出现异常条件的情况。
-
- 
-3. element() 和 peek() 区别：
-
-- element() 和 peek() 用于在队列的头部查询元素。
-	- 与 remove() 方法类似，在队列为空时， element() 抛出一个异常，而 peek() 返回 null。
-
-### declare
-1. import java.util.* and directly use Queue
-
-	Queue < TreeNode > queue = new LinkedList <> ();
-
-2. use a linkedlist to store the queue, which supports add(), poll(), size(), etc.
-
-    LinkedList<Integer> queue = new LinkedList<Integer>(); 
+① 使用 Queue 接口声明（最推荐）
+Queue<Integer> q = new LinkedList<>();
 
 
-### Java中Queue的一些常用方法：
-add         增加一个元索                  如果队列已满，则抛出一个IIIegaISlabEepeplian异常
+✔ 代码灵活，可切换底层实现
+✔ 面试中最推荐
 
-remove   	移除并返回队列头部的元素     	如果队列为空，则抛出一个NoSuchElementException异常
+② 使用具体类声明
+LinkedList<Integer> q = new LinkedList<>();
 
-element  	返回队列头部的元素             如果队列为空，则抛出一个NoSuchElementException异常
 
-offer       添加一个元素并返回true        	如果队列已满，则返回false
+不推荐，因为限制多态性（无法轻松换成 PriorityQueue）。
 
-poll        移除并返问队列头部的元素     	如果队列为空，则返回null
+③ 使用 Deque 声明（特别是单调队列、滑动窗口常用）
+Deque<Integer> dq = new ArrayDeque<>();
 
-peek       	返回队列头部的元素             如果队列为空，则返回null
 
-put         添加一个元素                  如果队列满，则阻塞
+Deque 同时继承了 Queue，方法更完整：
 
-take        移除并返回队列头部的元素    
+队头：offerFirst, pollFirst, peekFirst
 
+队尾：offerLast, pollLast, peekLast
+
+常用于：
+✔ 单调队列
+✔ BFS
+✔ 滑动窗口最大值（239）
+✔ 双端操作
+
+④ 使用 PriorityQueue 声明（最小堆，常用于贪心/TopK）
+Queue<Integer> pq = new PriorityQueue<>();
+
+
+默认是 min-heap。
+大顶堆写法：
+
+Queue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
+
+⑤ 使用 BlockingQueue（并发队列）
+
+适用于多线程生产者/消费者模型。
+
+BlockingQueue<Integer> bq = new ArrayBlockingQueue<>(100);
+
+
+常见子类：
+
+ArrayBlockingQueue
+
+LinkedBlockingQueue
+
+PriorityBlockingQueue
+
+DelayQueue
+
+SynchronousQueue（零容量）
 
 ## Priority Queue
 
@@ -244,54 +262,272 @@ output:
 - Maximize array sum after K negations
 
 
+### 单调队列 Monotonic Queue
+单调队列是一种保持元素单调（递增或递减）的双端队列结构，用来**解决滑动窗口最大值/最小值**
+
+不是heap！heap是所以元素都排序，单调队列保持元素的先后顺序
+
+「单调队列」的核⼼思路和「单调栈」类似。单调队列的 push ⽅法依然在队尾添加元素，但是要把前 ⾯比新元素⼩的元素都删掉
+
+1. 特点：
+- 队列中的元素按某种顺序单调（如从队头到队尾递减）
+- 新元素入队时，会“挤掉”队尾不符合单调性的元素
+- 队头永远是窗口最优解（最大/最小值）
+- 每个元素最多入队、出队一次 → O(n)
+
+2. 单调队列的两种形式
+① 单调递减队列：队头最大，常用于找滑动窗口最大值。队列从前到后：大 → 小
+
+② 单调递增队列：队头最小，常用于滑动窗口最小值、最短子数组、最短窗口问题。队列从前到后：小 → 大
+
+
+3. “单调队列的黄金公式”（必须记住）
+
+以单调递减队列为例：
+
+1) 入队（push x）保证从队头到队尾递减 → 队头永远是最大值。
+
+```java
+	while (!dq.isEmpty() && dq.back() < x)
+	    dq.pop_back();
+	dq.push_back(x);
+```
+
+2) 出队（pop x）
+
+```java
+	如果 x == dq.front()：dq.pop_front();
+	否则不动。
+
+	也要记住左右指针中，如果要把左指针右移，记得在queue中检查是否需要删除：
+
+    if (nums[l] == maxDeque.peekFirst()) 
+    	maxDeque.pollFirst();
+
+```
+
+3) 最大值
+dq.front();
+
+
+4. 如何知道某题是否适合用单调队列？
+
+✔ 条件 1：滑动窗口内求最大/最小值
+	→ 一定是单调队列（LC 239, 1438）
+
+✔ 条件 2：窗口内求 max/min 的 DP
+
+→ 单调队列优化
+（LC 1696）
+
+✔ 条件 3：用 prefix sum + 单调性判断最短/最长窗口
+
+→ 单调队列 find boundary
+（LC 862）
+
+✔ 条件 4：窗口扩张/收缩的过程中，需要维护最值
+
+→ 单调队列 / 双单调队列
+
+⭐ 题 1：239. Sliding Window Maximum（滑动窗口最大值）
+
+（典型单调递减队列题）
+
+要找每个窗口的最大值
+
+使用单调递减队列
+
+每个元素最多进出队一次 → O(n)
+
+⭐ 题 2：862. Shortest Subarray with Sum ≥ K
+
+（单调递增队列 + 前缀和）
+
+使用方式：
+
+prefix 数组保持单调递增
+
+当 prefix[j] - prefix[i] ≥ K 时，更新答案
+
+利用单调递增队列维护 “最小 prefix”，从而能最早满足条件
+
+这是非常典型的用法。
+
+⭐ 题 3：剑指 Offer 59、LCR 170
+
+其实是 239 的变种。
+
+⭐ 题 4：1438. Longest Continuous Subarray With Absolute Diff ≤ Limit
+
+（双单调队列）
+
+用法：
+
+一个单调递减队列跟踪最大值
+
+一个单调递增队列跟踪最小值
+
+当 max - min > limit 时移动左指针缩窗口
+
+这是“单调队列维护窗口有界性”的经典题。
+
+⭐ 题 5：480. Sliding Window Median
+
+虽然不是纯单调队列，但可以用双堆解决，方式相似。
+
+⭐ 题 6：1004. Max Consecutive Ones III
+
+移动窗口，但不需要单调队列（用计数即可）
+（面试中常被误用单调队列，实际上不需要）
+
+⭐ 题 7：1696. Jump Game VI
+
+（单调队列优化 DP）
+
+dp[i] = nums[i] + max(dp[i-k ... i-1])
+
+单调队列维护 "max dp in window" → O(n)
+
+⭐ 题 8：2397, 1499 等
+
+很多“窗口优化 DP”的题目几乎都是单调队列。
+
+#### 例子
+1. LeetCode 239：Sliding Window Maximum（滑动窗口最大值）
+- 给定数组 nums 和窗口大小 k，要求在每次窗口滑动后输出窗口内的最大值。
+
+解法：
+- 	使用一个 递减单调队列（Deque），队首是当前窗口最大值
+- 	当滑动窗口移动时：把不在窗口范围的值弹出队首 --> 把所有小于当前值的元素从队尾删掉，保持递减性
+
+```java
+
+class Solution {
+    public int[] maxSlidingWindow(int[] nums, int k) {
+        if (nums == null || nums.length == 0) return new int[0];
+
+        int n = nums.length;
+        int[] res = new int[n - k + 1];
+
+        Deque<Integer> deque = new LinkedList<>();//存index
+
+        for (int i = 0; i < n; i++) {
+
+            // ① 移除不在窗口范围内的元素（i-k）
+            while (!deque.isEmpty() && deque.peekFirst() <= i - k) {
+                deque.pollFirst();
+            }
+
+            // ② 删除队列中所有小于当前 nums[i] 的元素
+            while (!deque.isEmpty() && nums[deque.peekLast()] < nums[i]) {
+                deque.pollLast();
+            }
+
+            // ③ 将当前元素下标加入队尾
+            deque.offerLast(i);
+
+            // ④ 当窗口大小达到 k 时，记录窗口最大值
+            if (i >= k - 1) {
+                res[i - k + 1] = nums[deque.peekFirst()];
+            }
+        }
+        return res;
+    }
+}
+```
+
+2. LeetCode 1438 — Longest Continuous Subarray With Absolute Diff ≤ Limit
+
+为了快速得到窗口的最大/最小值，我们使用两个 Monotonic Queue：
+- maxDeque：维护单调递减队列 → 队头是当前最大值
+- minDeque：维护单调递增队列 → 队头是当前最小值
+
+通过滑动窗口：
+- 每次加入 nums[r]
+- 检查窗口是否满足 max - min <= limit
+- 如果超出 limit，就移动左指针 l
+
+
+```java
+class Solution {
+    public int longestSubarray(int[] nums, int limit) {
+        Deque<Integer> maxDeque = new ArrayDeque<>();
+        Deque<Integer> minDeque = new ArrayDeque<>();
+
+        int l = 0, res = 0;
+
+        for (int r = 0; r < nums.length; r++) {
+            int x = nums[r];
+
+            // Maintain max deque (decreasing)
+            while (!maxDeque.isEmpty() && maxDeque.peekLast() < x) {
+                maxDeque.pollLast();
+            }
+            maxDeque.addLast(x);
+
+            // Maintain min deque (increasing)
+            while (!minDeque.isEmpty() && minDeque.peekLast() > x) {
+                minDeque.pollLast();
+            }
+            minDeque.addLast(x);
+
+            // Shrink window if condition violated,  左指针右移缩小窗口
+            while (maxDeque.peekFirst() - minDeque.peekFirst() > limit) {
+                if (nums[l] == maxDeque.peekFirst()) maxDeque.pollFirst();
+                if (nums[l] == minDeque.peekFirst()) minDeque.pollFirst();
+                l++;
+            }
+
+            res = Math.max(res, r - l + 1);
+        }
+
+        return res;
+    }
+}
+```
 
 
 
 
 ## Stack
 
-### java
+用deque创建更好！stack已经过时&syntax不好用
+
+
+### java syntax
 1. initialize + import:
 
 ```java
 	import java.util.*; 
 		Stack<Integer> stack = new Stack<Integer>(); 
-		Deque<TreeNode> stack = new ArrayDeque<>(); //deque
+		Deque<TreeNode> stack = new ArrayDeque<>(); 
+		Deque<TreeNode> stack = new LinkedList<>(); 
 ```
+插入元素: 使用 push()，将元素压入栈顶。
+移除元素: 使用 pop()，从栈顶弹出元素。
+查看元素: 使用 peek()，查看栈顶元素而不弹出。 
 
-2. push to the stack:
-
-		stack.push(i); 
-
-3. pop from stack:
-
-		Integer y = (Integer) stack.pop();
-
-4. look at the top, but don't pop it		
-
-		Integer element = (Integer) stack.peek();
-		
-5. search in the stack:
-
-		Integer pos = (Integer) stack.search(element); 
+isEmpty(): 检查 Deque 是否为空。
+size(): 返回 Deque 中的元素数量。
+contains(Object o): 检查 Deque 是否包含特定元素。
 
 
-6. print stack from bottom up:
+作为双端队列 (两端都可操作)
 
-	ex. stack: (top) a b c d (bottom)
+从头部插入: addFirst() 或 offerFirst()
+从尾部插入: addLast() 或 offerLast()
+从头部移除: removeFirst() 或 pollFirst()
+从尾部移除: removeLast() 或 pollLast()
+查看头部元素: peekFirst()
+查看尾部元素: peekLast()
 
-		for (String dir : stack) {
-            result.append("/");
-            result.append(dir);
-        }
-
-    output: /d/c/b/a
-
-===== or use deque:
-	    Deque < TreeNode > stack = new LinkedList < > ();
-
+常用实现类
+在大多数情况下，应优先使用 ArrayDeque。 
+ArrayDeque: 基于可变大小的数组实现，高效且内存占用少。不支持存储 null 值。
+LinkedList: 基于双向链表实现，支持 null 值，但在性能上通常不如 ArrayDeque。 
 
 ### 单调栈 Monotonic Stack
+
 
 当你遇到 **“找临近比它大/小的元素”、“下一次更大/更小”、“区间扩展到不能扩展为止”**
 
@@ -299,16 +535,32 @@ output:
 
 ✅ 一、最核心规律
 
-当想找“下一个更大”或“上一个更大” → 用**单调递减栈,条件是cur > stack.peek()就pop**，pop出来的数字的next greater element就是cur
-单调递减栈 = 栈顶最大 → 当遇到更大的元素时才会 Pop
+🔥 规律 1：
+
+当想找“下一个更大”或“上一个更大” → 用**单调递减栈（栈顶最小）,条件是cur > stack.peek()就pop**，pop出来的数字的next greater element就是cur
+
+保持栈顶最小，栈底最大 → 栈中存放的都是“还没找到更大值”的候选元素。
+
+	当你看到一个新元素 x 时：
+
+	1、如果 x > 栈顶：
+	→ x 就是栈顶元素的“下一个更大元素”
+	→ 栈顶弹出并记录答案
+
+	2、重复 1 直到栈空或 x ≤ 栈顶
+
+	3、将 x 入栈（等待未来有人比它更大）
 
 当想找“下一个更小”或“上一个更小” → 用单调递增栈
-单调递增栈 = 栈顶最小 → 当遇到更小的元素时才会 Pop
-
-栈里永远保持你不想被 Pop 的元素。
 
 
+🔥 规律 2：
 
+往左找元素，只要把遍历方向反过来
+
+往右找 → 正序
+往左找 → 倒序
+循环数组 → 遍历两遍（i % n）
 
 ✅ 二、例子
 **模式1：Next Greater Element / Next Smaller Element**
@@ -321,14 +573,14 @@ output:
 
 
 例子：
-- ① Next Greater Element I — LC 496: 用decreasing stack, 条件是cur > stack.peek()就pop，越小的数越靠上
+- ① Next Greater Element I — LC 496: 用decreasing stack, 条件是cur > stack.peek()就pop
 - ② Next Greater Element II — LC 503
 - ③ Daily Temperatures — LC 739 → 找下一天更高温度
-- ④ Online Stock Span — LC 901 → 找连续小于等于当前的天数（我们刚讲过）
+- ④ Online Stock Span — LC 901 → 找连续小于等于当前的天数
 
 
 ex. LC 739,Daily Temperatures
-
+- 找下一天更高温度
 ```java 
 public int[] dailyTemperatures(int[] temperatures) {
     Stack<Integer> stack = new Stack<>();
@@ -364,8 +616,6 @@ ex. LC 496 Next Greater Element I
 
 变形：根据单调stack构建suffix array，比如lc 2104
 
-
-
 ```java
 
 //根据范围和的定义，可以推出范围和 sum 等于所有子数组的最大值之和 sumMax 减去所有子数组的最小值之和 sumMin。
@@ -378,12 +628,12 @@ ex. LC 496 Next Greater Element I
             }
             minLeft[i] = minStack.isEmpty() ? -1 : minStack.peek();
             minStack.push(i);
+        }
 ```
 
 
 
 **模式 2：连续区间向左右延伸，直到遇到更大/更小的阻碍**
-
 
 求以当前元素为中心，向两侧能够延伸多远
 
@@ -406,7 +656,10 @@ ex.
 
 ex. Largest Rectangle in Histogram — LC 84, 存increasing
 
-stack，因为一旦碰到小的，就不把他算到面积里，直接结算他之前的
+给定 n 个非负整数，用来表示柱状图中各个柱子的高度。每个柱子彼此相邻，且宽度为 1 。
+求在该柱状图中，能够勾勒出来的矩形的最大面积。
+
+解法：stack，因为一旦碰到小的，就不把他算到面积里，直接结算他之前的
   
 ```
 Input: heights = [2,1,5,6,2,3]
@@ -435,6 +688,179 @@ x x x x x x
             stack.push(i);
         }
 ```
+
+ex. 907. 子数组的最小值之和
+
+给定一个整数数组 arr，找到 min(b) 的总和，其中 b 的范围为 arr 的每个（连续）子数组。
+由于答案可能很大，因此 返回答案模 10^9 + 7 。
+
+示例 1：
+输入：arr = [3,1,2,4]
+输出：17
+解释：
+子数组为 [3]，[1]，[2]，[4]，[3,1]，[1,2]，[2,4]，[3,1,2]，[1,2,4]，[3,1,2,4]。 
+最小值为 3，1，2，4，1，1，2，1，1，1，和为 17。
+
+解答：
+每个元素 arr[i] 对多少个子数组贡献它自己作为“最小值”？计算它作为“子数组最小值”出现的次数，并乘以 arr[i]，再累加即可。
+
+要计算贡献次数，必须知道：
+
+	左边有多少个连续比它 严格大 的元素
+
+	右边有多少个连续比它 大或等于 的元素
+
+	再用：
+
+	贡献=arr[i]×left[i]×right[i]
+
+这可用 单调递增栈（Monotonic Stack） 在 O(n) 完成。
+
+```java
+
+class Solution {
+    public int sumSubarrayMins(int[] arr) {
+        int n = arr.length;
+        int MOD = 1_000_000_007;
+
+        int[] left = new int[n];
+        int[] right = new int[n];
+
+        // 计算 left：上一个更小元素（严格小）
+        Deque<Integer> stack = new ArrayDeque<>();
+        for (int i = 0; i < n; i++) {
+            while (!stack.isEmpty() && arr[stack.peek()] > arr[i]) {
+                stack.pop();
+            }
+            //stack is empty说明左边没有比他小的，		
+            //若不存在更小元素，则 preSmallIndex = -1 → left[i] = i-(-1)=i + 1
+            //如果stack里面有，算i到左边那个数字的距离
+            left[i] = stack.isEmpty() ? i + 1 : i - stack.peek();
+            stack.push(i);
+        }
+
+        // 清空栈，计算 right：下一个小于等于元素
+        stack.clear();
+        for (int i = n - 1; i >= 0; i--) {
+            while (!stack.isEmpty() && arr[stack.peek()] >= arr[i]) {
+                stack.pop();
+            }
+            //right[i]=rleIndex−i
+			// 若不存在更小或等值元素，则 rleIndex = n, 变成n-i
+            right[i] = stack.isEmpty() ? n - i : stack.peek() - i;
+            stack.push(i);
+        }
+
+        long ans = 0;
+        for (int i = 0; i < n; i++) {
+            ans = (ans + (long) arr[i] * left[i] * right[i]) % MOD;
+        }
+
+        return (int) ans;
+    }
+}
+
+```
+
+
+ex. 1504. Count Submatrices With All Ones - Medium
+
+Given an m x n binary matrix mat, return the number of submatrices that have all ones.
+
+Example 1:
+Input: mat = [[1,0,1],[1,1,0],[1,1,0]]
+Output: 13
+
+Explanation: 
+There are 6 rectangles of side 1x1.
+There are 2 rectangles of side 1x2.
+There are 3 rectangles of side 2x1.
+There is 1 rectangle of side 2x2. 
+There is 1 rectangle of side 3x1.
+Total number of rectangles = 6 + 2 + 3 + 1 + 1 = 13.
+
+
+解法：
+
+Step 1：先求 height 数组（和 85 一样）
+
+	对每一行 i：height[j] = 当前行向上连续 1 的高度
+
+	例：
+
+	1 0 1
+	1 1 1
+
+	第二行 height = 2 1 2
+
+Step 2：对每一行的 height[j]，统计“以该点为右下角”的矩形数量
+
+	如果 height = [h1, h2, h3 ...]
+	对于每个位置 j：
+
+	向左扩展，最小高度 minH, 每次扩展能生成 minH 个矩形
+
+
+```java
+
+
+	public int numSubmat(int[][] mat) {
+	        
+		int M = mat.length, N = mat[0].length;
+
+		int res = 0;
+
+		int[] h = new int[N];
+		for (int i = 0; i < M; ++i) {
+			for (int j = 0; j < N; ++j) {
+				h[j] = (mat[i][j] == 1 ? h[j] + 1 : 0);
+			}
+			res += helper(h);
+		}
+
+		return res;
+	}
+
+	private int helper(int[] A) {
+
+		int[] sum = new int[A.length];
+		Stack<Integer> stack = new Stack<>();
+
+		for (int i = 0; i < A.length; ++i) {
+			//单调递增栈找 “左边第一个比我小的数”
+			while (!stack.isEmpty() && A[stack.peek()] >= A[i]) stack.pop();
+
+			// 情况 1：左边存在比 A[i] 小的高度 preIndex,栈顶元素就是 preIndex。
+			// ... preIndex ... i
+			// 从 preIndex+1 到 i 都是 ≥ A[i] 的高度区间，可以延伸的宽度为：i - preIndex
+			// 此时矩形数：新形成的矩形 = A[i] * (i - preIndex)
+			// 但注意：在 preIndex 之前的那些以 preIndex 为右端点的矩形，也可以延伸到 i，因此应该加上：sum[preIndex]
+			if (!stack.isEmpty()) {
+				int preIndex = stack.peek();
+				sum[i] = sum[preIndex];
+				sum[i] += A[i] * (i - preIndex);
+			} 
+			else {
+				// 情况2： stack is empty: 左边没有比 A[i] 小的
+				// 说明 A[i] 是左侧最小高度，可以往左扩到最左端 0。
+				// 宽度 = i - (-1) = i+1
+				// 矩形总数 = 高度 * 宽度 = A[i] * (i+1)
+				sum[i] = A[i] * (i + 1);
+			}
+
+			stack.push(i);
+		}
+
+		int res = 0;
+		for (int s : sum) res += s;
+
+		return res;
+	}
+
+
+
+```	
+
 
 
 
@@ -561,6 +987,8 @@ class Solution {
 
 ### Usage
 ![Usage](https://www.geeksforgeeks.org/wp-content/uploads/Selection_034.png)
+
+
 
 
 

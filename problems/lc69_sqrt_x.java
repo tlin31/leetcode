@@ -12,19 +12,24 @@ Input: 4
 Output: 2
 **/
 
+// binary search
 class Solution {
     public int mySqrt(int x) {
-        if (x == 0) return 0;
-        int start = 1, end = x;
-        while (start < end) { 
-            int mid = start + (end - start) / 2;
-            if (mid <= x / mid && (mid + 1) > x / (mid + 1))    // Found the result
-                return mid; 
-            else if (mid > x / mid)                             // Keep checking the left part
-                end = mid;
-            else
-                start = mid + 1;                                // Keep checking the right part
+        if (x < 2) return x;
+
+        long num;
+        int pivot, left = 2, right = x / 2;
+        while (left <= right) {
+            pivot = left + (right - left) / 2;
+            num = (long) pivot * pivot;
+            if (num > x) 
+                right = pivot - 1;
+            else if (num < x) 
+                left = pivot + 1;
+            else 
+                return pivot;
         }
-        return start;
+
+        return right;
     }
 }

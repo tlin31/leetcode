@@ -24,16 +24,16 @@ https://leetcode.com/problems/combination-sum/discuss/16502/A-general-approach-t
   
 
 ```java
-递归{
-    递归出口；
-    update result; (add sth.)
+    递归{
+        递归出口；
+        update result; (add sth.)
 
-    for(int i = 1;i<=n;i++){
-        add(i);
-        进入递归；
-        remove(i);
+        for(int i = 1;i<=n;i++){
+            add(i);
+            进入递归；
+            remove(i);
+        }
     }
-}
 ```
 
 
@@ -62,6 +62,60 @@ https://leetcode.com/problems/combination-sum/discuss/16502/A-general-approach-t
 
     // recover 
     sb.setLength(len); 
+
+```
+
+### add array
+
+因为 board 是一个共享的可变对象，回溯还会继续修改它。如果直接 add(board)，最终 result 中存放的全是同一个 board 的引用，后续回溯会把它改坏。
+
+result.add(new ArrayList<>(board));
+这是 深复制（至少一层深复制）：每次找到一个解就复制当前 board 内容，保证后续回溯不会影响已经保存的结果。
+
+Note: 如果 board 是不可变结构还需要深拷贝吗？不需要，例如 Strings 本身不可变。
+
+ex. N queens
+```java
+        if (row == n) {
+            result.add(new ArrayList<String>(board));
+        }
+```
+原本的全部是：
+```java
+
+private void backtack(List<List<String>> result, List<String> board, int row, 
+        boolean[] cols, boolean[] d1, boolean[] d2, int n){
+
+        if (row == n) {
+            result.add(new ArrayList<String>(board));
+        }
+        
+        for (int col=0; col<n; col++){
+            int id1 = col - row + n;
+            int id2 = col + row;
+
+            // if valid to place it here
+            if (!cols[col] && !d1[id1] && !d2[id2]){
+                char[] r = new char[n];
+                Arrays.fill(r, '.');
+                r[col] = 'Q';
+                board.add(new String(r));
+                //take up the space accordingly
+                cols[col] = true;
+                d1[id1] = true;
+                d2[id2] = true;
+
+                //back track --> condition is row+1 --> move to next row
+                backtack(result, board, row+1, cols, d1, d2, n);
+
+                //reset
+                board.remove(board.size()-1);
+                cols[col] = false;
+                d1[id1] = false;
+                d2[id2] = false;
+            }
+        }
+
 
 ```
 

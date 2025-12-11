@@ -28,6 +28,11 @@ key:
     - edge case: 1) empty string, return empty 2)
 
 ******************************************************
+
+前序负责拿根，中序负责分左右。
+
+
+
 class Solution {
     private int i = 0;
     private int p = 0;
@@ -61,13 +66,14 @@ method 1:
     step above for the left and right subtrees.
 
 class Solution {
-  // start from first preorder element
-  int pre_idx = 0; int[] preorder; 
-  int[] inorder; 
-  HashMap<Integer, Integer> idx_map = new HashMap<Integer, Integer>();
+    // start from first preorder element
+    int pre_idx = 0; 
+    int[] preorder; 
+    int[] inorder; 
+    HashMap<Integer, Integer> idx_map = new HashMap<Integer, Integer>();
 
-  // main function
-  public TreeNode buildTree(int[] preorder, int[] inorder){ 
+    // main function
+    public TreeNode buildTree(int[] preorder, int[] inorder){ 
         this.preorder =preorder; 
         this.inorder = inorder;
 
@@ -79,23 +85,25 @@ class Solution {
         return helper(0, inorder.length); 
     }
 
-  public TreeNode helper(int in_left, int in_right) {
-    // if there is no elements to construct subtrees
-    if (in_left == in_right) return null;
+    public TreeNode helper(int in_left, int in_right) {
+        // if there is no elements to construct subtrees
+        if (in_left == in_right) return null;
 
-    // pick up pre_idx element as a root
-    int root_val = preorder[pre_idx]; 
-    TreeNode root = new TreeNode(root_val);
+        // pick up pre_idx element as a root
+        int root_val = preorder[pre_idx]; 
+        TreeNode root = new TreeNode(root_val);
 
-    // root splits inorder list into left and right subtrees
-    int index = idx_map.get(root_val);
+        // root splits inorder list into left and right subtrees
+        int index = idx_map.get(root_val);
 
-    // recursion 
-    pre_idx++;
-    // build left subtree
-    root.left = helper(in_left, index);
-    // build right subtree
-    root.right = helper(index + 1, in_right); return root; }
+        // recursion 
+        pre_idx++;
+        // build left subtree
+        root.left = helper(in_left, index);
+        // build right subtree
+        root.right = helper(index + 1, in_right); 
+        return root; 
+    }
 
 }
 

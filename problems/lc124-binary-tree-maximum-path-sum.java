@@ -37,6 +37,17 @@ key:
 ******************************************************
 
 
+后序遍历
+
+int ans = INT_MIN;
+int oneSideMax(TreeNode* root) {
+    if (root == null) return 0;
+    int left = max(0, oneSideMax(root->left));
+    int right = max(0, oneSideMax(root->right));
+    ans = max(ans, left + right + root->val);
+    return max(left, right) + root->val;
+}
+
 
 =======================================================================================================
 method 1:

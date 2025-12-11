@@ -120,9 +120,10 @@ method 2:
 
 method:
 
-	- I use three boolean[] array to keep tracking of the position the Queen take in the helper method.
+	- I use three boolean[] array to keep tracking of the position the Queen take in the helper /backtrack method.
 	- boolean[] cols is for check if the certain column is taken.
 	- I use two boolean[2*n] array to keep tracking of two diagonals.
+		
 		for the diagonal in the \ direction (from left up corner to right down corner) 
 			the col - row will always be same e.g. (0,1), (1,2), (2,3) are on the same diagonal, 
 		    the range of col - row can be (0-(n-1)) ~ ((n-1)-0), to make sure we can store the 
@@ -140,13 +141,13 @@ stats:
 	- Runtime: 2 ms, faster than 95.15% of Java online submissions for N-Queens.
 	- Memory Usage: 37.3 MB, less than 100.00% 
 
-	 public List<List<String>> solveNQueens(int n) {
+	public List<List<String>> solveNQueens(int n) {
 	    List<List<String>> result = new ArrayList<List<String>>();
-	    helper(result, new ArrayList<String>(), 0, new boolean[n], new boolean[2*n], new boolean[2*n], n);
+	    backtack(result, , 0, new boolean[n], new boolean[2*n], new boolean[2*n], n);
 	    return result;
 	}
 
-	private void helper(List<List<String>> result, List<String> board, int row, 
+	private void backtack(List<List<String>> result, List<String> board, int row, 
 		boolean[] cols, boolean[] d1, boolean[] d2, int n){
 
 	    if (row == n) {
@@ -169,7 +170,7 @@ stats:
 	            d2[id2] = true;
 
 	            //back track --> condition is row+1 --> move to next row
-	            helper(result, board, row+1, cols, d1, d2, n);
+	            backtack(result, board, row+1, cols, d1, d2, n);
 
 	            //reset
 	            board.remove(board.size()-1);

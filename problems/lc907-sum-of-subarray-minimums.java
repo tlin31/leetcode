@@ -127,7 +127,8 @@ class Solution {
             while (!stack.isEmpty() && arr[stack.peek()] > arr[i]) {
                 stack.pop();
             }
-            //stack is empty说明左边没有比他小的，initialize为i+1
+            //stack is empty说明左边没有比他小的，		
+            //若不存在更小元素，则 preSmallIndex = -1 → left[i] = i-(-1)=i + 1
             //如果stack里面有，算i到左边那个数字的距离
             left[i] = stack.isEmpty() ? i + 1 : i - stack.peek();
             stack.push(i);
@@ -139,6 +140,8 @@ class Solution {
             while (!stack.isEmpty() && arr[stack.peek()] >= arr[i]) {
                 stack.pop();
             }
+            //right[i]=rleIndex−i
+			// 若不存在更小或等值元素，则 rleIndex = n, 变成n-i
             right[i] = stack.isEmpty() ? n - i : stack.peek() - i;
             stack.push(i);
         }
@@ -151,8 +154,6 @@ class Solution {
         return (int) ans;
     }
 }
-
-
 
 =======================================================================================================
 Method 1:

@@ -1,5 +1,63 @@
 ## Binary search tree
 
+
+### 找
+```java
+    void BST(TreeNode root, int target) {
+        if (root.val == target)
+            // 找到⽬目标，做点什什么 
+        if (root.val < target)
+            BST(root.right, target);
+        if (root.val > target)
+            BST(root.left, target);
+    }
+```
+
+### 改 & 删
+⼀旦涉及“改”，函数就要返回 TreeNode 类型，并且对递归调用的返回值进行接收。
+
+```java
+    TreeNode insertIntoBST(TreeNode root, int val) { // 找到空位置插⼊入新节点
+        if (root == null) return new TreeNode(val); 
+        // if (root.val == val)
+        // BST 中⼀一般不不会插⼊入已存在元素 
+        if (root.val < val)
+            root.right = insertIntoBST(root.right, val);
+        if (root.val > val)
+            root.left = insertIntoBST(root.left, val);
+        return root;
+    }
+```
+
+删除： 有3种情况
+- 情况 1: A 恰好是末端节点，两个⼦节点都为空，那么它可以当场去世了。
+- 情况 2: A 只有⼀个⾮空⼦节点，那么它要让这个孩⼦接替⾃己的位置。
+- 情况 3: A 有两个⼦节点，为了不破坏 BST 的性质，A 必须找到左⼦树中最大的那个节点，或 者右子树中最小的那个节点来接替自⼰
+
+```java
+    TreeNode deleteNode(TreeNode root, int key) {
+        if (root == null) return null;
+        if (root.val == key) {
+            // 这两个 if 把情况 1 和 2 都正确处理理了了
+            if (root.left == null) return root.right;
+            if (root.right == null) return root.left;
+            // 处理理情况 3
+            TreeNode minNode = getMin(root.right);
+            root.val = minNode.val;
+            root.right = deleteNode(root.right, minNode.val);
+        } else if (root.val > key) {
+            root.left = deleteNode(root.left, key);
+        } else if (root.val < key) {
+            root.right = deleteNode(root.right, key);
+    }
+        return root;
+    }
+    TreeNode getMin(TreeNode node) {
+    // BST 最左边的就是最⼩小的
+    while (node.left != null) node = node.left; return node;
+    }
+```
+
 ## balanced binary tree
 ### self balancing tree
 - A binary tree is balanced if the height of the tree is O(Log n) where n is the number of nodes. 
@@ -210,7 +268,7 @@ https://leetcode.com/problems/invert-binary-tree
 2. stack
 
 ```java
-	if (root == null) {
+	   if (root == null) {
 	        return null;
 	    }
 	    final Deque < TreeNode > stack = new LinkedList < > ();
@@ -321,6 +379,275 @@ key:
 ### find a swapped pair noeds in BST
 - in-order traversal gives a sorted ascending list, can use this property
 - leetcode #99
+
+### 实现biarny search tree
+
+```java
+// BinarySearchTree.java
+import java.util.*;
+
+public class BinarySearchTree<T extends Comparable<T>> {
+    private static class Node<T> {
+        T key;
+        Node<T> left, right, parent;
+        Node(T key, Node<T> parent) {
+            this.key = key;
+            this.parent = parent;
+        }
+    }
+
+    private Node<T> root;
+    private int size = 0;
+
+    // 插入（递归实现）
+    public void insert(T key) {
+        if (key == null) throw new IllegalArgumentException("Key must not be null");
+
+        //create root
+        if (root == null) {
+            root = new Node<>(key, null);
+            size = 1;
+            return;
+        }
+
+        Node<T> cur = root;
+        Node<T> parent = null;
+        int cmp = 0;
+        //找到插入位置
+        while (cur != null) {
+            parent = cur;
+            cmp = key.compareTo(cur.key);
+            if (cmp < 0) cur = cur.left;
+            else if (cmp > 0) cur = cur.right;
+            else return; // 不允许重复键（若允许，可替换或维护计数）
+        }
+        Node<T> node = new Node<>(key, parent);
+        if (cmp < 0) parent.left = node;
+        else parent.right = node;
+        size++;
+    }
+
+    // 查找（contains）
+    public boolean contains(T key) {
+        return findNode(key) != null;
+    }
+
+    // 返回节点引用（私有）
+    private Node<T> findNode(T key) {
+        Node<T> cur = root;
+        while (cur != null) {
+            int cmp = key.compareTo(cur.key);
+            if (cmp == 0) return cur;
+            else if (cmp < 0) cur = cur.left;
+            else cur = cur.right;
+        }
+        return null;
+    }
+
+    // 删除（BST 删除的三种情况）
+    public boolean delete(T key) {
+        Node<T> node = findNode(key);
+        if (node == null) return false;
+        deleteNode(node);
+        size--;
+        return true;
+    }
+
+	private void deleteNode(Node<T> node) {
+	    // 情形 A: node 有两个子节点 -> 找到后继（右子树的最小节点），复制其 key，
+	    // 并将待删除节点指向后继（后续删除后继节点，后继最多有一个子节点）
+	    if (node.left != null && node.right != null) {
+	        Node<T> succ = minimumNode(node.right); // successor: node.right 的最左节点
+	        node.key = succ.key; // 用后继的值覆盖 node（保留 node 对象以便引用不变）
+	        node = succ; // 现在转而删除 succ 节点（其最多只有一个子节点）
+	    }
+
+	    // 情形 B/C: node 现在最多只有一个子节点
+	    Node<T> replacement = (node.left != null) ? node.left : node.right;
+
+	    if (replacement != null) {
+	        // node 有一个子节点：把 replacement 接到 node 的父节点上
+	        replacement.parent = node.parent;
+	        if (node.parent == null) root = replacement;
+	        else if (node == node.parent.left) node.parent.left = replacement;
+	        else node.parent.right = replacement;
+	        // 帮助 GC：切断被删除节点的指针
+	        node.left = node.right = node.parent = null;
+	    } else {
+	        // node 为叶子节点：直接从父节点断开（或如果是根，则置空 root）
+	        if (node.parent == null) root = null;
+	        else {
+	            if (node == node.parent.left) node.parent.left = null;
+	            else node.parent.right = null;
+	            node.parent = null;
+	        }
+	    }
+	}
+
+
+    // 最小值节点
+    private Node<T> minimumNode(Node<T> start) {
+        if (start == null) return null;
+        Node<T> cur = start;
+        while (cur.left != null) cur = cur.left;
+        return cur;
+    }
+
+    // 最大值节点
+    private Node<T> maximumNode(Node<T> start) {
+        if (start == null) return null;
+        Node<T> cur = start;
+        while (cur.right != null) cur = cur.right;
+        return cur;
+    }
+
+    public T minimum() {
+        Node<T> n = minimumNode(root);
+        return n == null ? null : n.key;
+    }
+
+    public T maximum() {
+        Node<T> n = maximumNode(root);
+        return n == null ? null : n.key;
+    }
+
+    // 后继（successor）
+    public T successor(T key) {
+        Node<T> node = findNode(key);
+        if (node == null) return null;
+        Node<T> succ = successorNode(node);
+        return succ == null ? null : succ.key;
+    }
+
+    private Node<T> successorNode(Node<T> node) {
+        if (node.right != null) return minimumNode(node.right);
+        Node<T> p = node.parent;
+        while (p != null && node == p.right) {
+            node = p;
+            p = p.parent;
+        }
+        return p;
+    }
+
+    // 前驱（predecessor）
+    public T predecessor(T key) {
+        Node<T> node = findNode(key);
+        if (node == null) return null;
+        Node<T> pred = predecessorNode(node);
+        return pred == null ? null : pred.key;
+    }
+
+    private Node<T> predecessorNode(Node<T> node) {
+        if (node.left != null) return maximumNode(node.left);
+        Node<T> p = node.parent;
+        while (p != null && node == p.left) {
+            node = p;
+            p = p.parent;
+        }
+        return p;
+    }
+
+    // 遍历：中序（递归）
+    public List<T> inorder() {
+        List<T> res = new ArrayList<>();
+        inorder(root, res);
+        return res;
+    }
+
+    private void inorder(Node<T> node, List<T> out) {
+        if (node == null) return;
+        inorder(node.left, out);
+        out.add(node.key);
+        inorder(node.right, out);
+    }
+
+    // 前序
+    public List<T> preorder() {
+        List<T> res = new ArrayList<>();
+        preorder(root, res);
+        return res;
+    }
+
+    private void preorder(Node<T> node, List<T> out) {
+        if (node == null) return;
+        out.add(node.key);
+        preorder(node.left, out);
+        preorder(node.right, out);
+    }
+
+    // 后序
+    public List<T> postorder() {
+        List<T> res = new ArrayList<>();
+        postorder(root, res);
+        return res;
+    }
+
+    private void postorder(Node<T> node, List<T> out) {
+        if (node == null) return;
+        postorder(node.left, out);
+        postorder(node.right, out);
+        out.add(node.key);
+    }
+
+    // 树的高度（空树高度为 0，只有根节点高度为 1）
+    public int height() {
+        return height(root);
+    }
+
+    private int height(Node<T> node) {
+        if (node == null) return 0;
+        return 1 + Math.max(height(node.left), height(node.right));
+    }
+
+    // 大小（节点数）
+    public int size() {
+        return size;
+    }
+
+    // 打印（层序）
+    public void printLevelOrder() {
+        if (root == null) {
+            System.out.println("Empty tree");
+            return;
+        }
+        Queue<Node<T>> q = new LinkedList<>();
+        q.add(root);
+        while (!q.isEmpty()) {
+            Node<T> n = q.poll();
+            System.out.print(n.key + " ");
+            if (n.left != null) q.add(n.left);
+            if (n.right != null) q.add(n.right);
+        }
+        System.out.println();
+    }
+
+    // 示例 main
+    public static void main(String[] args) {
+        BinarySearchTree<Integer> bst = new BinarySearchTree<>();
+        int[] values = {50, 30, 70, 20, 40, 60, 80};
+        for (int v : values) bst.insert(v);
+
+        System.out.println("Inorder (sorted): " + bst.inorder());
+        System.out.println("Preorder: " + bst.preorder());
+        System.out.println("Postorder: " + bst.postorder());
+        System.out.println("Min: " + bst.minimum() + ", Max: " + bst.maximum());
+        System.out.println("Contains 40? " + bst.contains(40));
+        System.out.println("Size: " + bst.size() + ", Height: " + bst.height());
+        System.out.print("Level order: "); bst.printLevelOrder();
+
+        System.out.println("Successor of 50: " + bst.successor(50));
+        System.out.println("Predecessor of 50: " + bst.predecessor(50));
+
+        System.out.println("Delete 20 (leaf)."); bst.delete(20);
+        System.out.println("Delete 30 (one child)."); bst.delete(30);
+        System.out.println("Delete 50 (two children)."); bst.delete(50);
+        System.out.println("Inorder after deletes: " + bst.inorder());
+        System.out.println("Size after deletes: " + bst.size());
+    }
+}
+
+```
+
 
 
 ## TreeMap
