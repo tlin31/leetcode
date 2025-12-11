@@ -82,17 +82,46 @@ Java 中 Queue 是接口（java.util.Queue）。
 - 代码灵活，可切换底层实现
 - 面试中最推荐
 
+Methods:
+
+A. 抛异常版本
+| 方法          | 描述               |
+| ----------- | ---------------- |
+| `add(e)`    | 入队，如果队列满了 → 抛异常  |
+| `remove()`  | 出队，如果空 → 抛异常     |
+| `element()` | 返回队首元素，如果空 → 抛异常 |
+
+
+B. 返回特殊值（null/false）版本
+| 方法         | 描述                   |
+| ---------- | -------------------- |
+| `offer(e)` | 入队，如果失败 → 返回 false   |
+| `poll()`   | 出队，如果空 → 返回 null     |
+| `peek()`   | 返回队首元素，如果空 → 返回 null |
+
+
+面试常问区别：
+
+| 功能   | 抛异常版本   | 返回特殊值版本 | 更推荐   |
+| ---- | ------- | ------- | ----- |
+| 入队   | add     | offer   | offer |
+| 出队   | remove  | poll    | poll  |
+| 查看队首 | element | peek    | peek  |
+
+
+
+
 #### ② 使用具体类声明
 
 ```java
-LinkedList<Integer> q = new LinkedList<>();
+		LinkedList<Integer> q = new LinkedList<>();
 ```
 - 不推荐，因为限制多态性（无法轻松换成 PriorityQueue）。
 
 #### ③ 使用 Deque 声明（特别是单调队列、滑动窗口常用）
 
 ```java
-Deque<Integer> dq = new ArrayDeque<>();
+		Deque<Integer> dq = new ArrayDeque<>();
 ```
 
 - Deque 同时继承了 Queue，方法更完整：
@@ -107,33 +136,54 @@ Deque<Integer> dq = new ArrayDeque<>();
   * 滑动窗口最大值（239）
   * 双端操作
 
-④ 使用 PriorityQueue 声明（最小堆，常用于贪心/TopK）
-Queue<Integer> pq = new PriorityQueue<>();
+#### ④ 使用 PriorityQueue 声明（最小堆，常用于贪心/TopK）
 
+默认是 min-heap:
 
-默认是 min-heap。
-大顶堆写法：
+```java
+		Queue<Integer> pq = new PriorityQueue<>();
+```
 
-Queue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
+max heap写法：
+```java
+		Queue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
+```
 
-⑤ 使用 BlockingQueue（并发队列）
+#### ⑤ 使用 BlockingQueue（并发队列）
 
-适用于多线程生产者/消费者模型。
+- 适用于多线程生产者/消费者模型。
 
-BlockingQueue<Integer> bq = new ArrayBlockingQueue<>(100);
-
+```java
+		BlockingQueue<Integer> bq = new ArrayBlockingQueue<>(100);
+```
 
 常见子类：
+  * ArrayBlockingQueue
 
-ArrayBlockingQueue
+  * LinkedBlockingQueue
 
-LinkedBlockingQueue
+  * PriorityBlockingQueue
 
-PriorityBlockingQueue
+  * DelayQueue
 
-DelayQueue
+  * SynchronousQueue（零容量）
 
-SynchronousQueue（零容量）
+
+### ✅ 2. 不同 Queue 实现类的对比表
+
+| 实现类                 | 类型       | 是否线程安全 | 特点                    | 常用场景      |
+| ------------------- | -------- | ------ | --------------------- | --------- |
+| LinkedList          | 普通队列     | ❌      | 双端队列，可用于 BFS          | BFS、简单队列  |
+| ArrayDeque          | Deque    | ❌      | 性能优于 LinkedList，无容量限制 | 单调队列、滑动窗口 |
+| PriorityQueue       | 堆        | ❌      | 默认最小堆                 | TopK、贪心   |
+| ArrayBlockingQueue  | Blocking | ✔      | 数组结构，有界               | 生产者-消费者   |
+| LinkedBlockingQueue | Blocking | ✔      | 链表结构，可无界              | 线程池工作队列   |
+| DelayQueue          | Blocking | ✔      | 支持延时任务                | 定时任务      |
+| SynchronousQueue    | Blocking | ✔      | 零容量，高速handoff         | 线程池       |
+
+
+
+
 
 ## Priority Queue
 
