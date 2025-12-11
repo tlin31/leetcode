@@ -74,28 +74,32 @@ ConcurrentSkipListMap | O(log n) |   O(log n)  | O(1)     | Skip List
 Java 中 Queue 是接口（java.util.Queue）。
 常见的声明方式有：
 
-① 使用 Queue 接口声明（最推荐）
-Queue<Integer> q = new LinkedList<>();
+#### ① 使用 Queue 接口声明（最推荐）
 
+```java
+		Queue<Integer> q = new LinkedList<>();
+```
+- 代码灵活，可切换底层实现
+- 面试中最推荐
 
-✔ 代码灵活，可切换底层实现
-✔ 面试中最推荐
+#### ② 使用具体类声明
 
-② 使用具体类声明
+```java
 LinkedList<Integer> q = new LinkedList<>();
+```
+- 不推荐，因为限制多态性（无法轻松换成 PriorityQueue）。
 
+#### ③ 使用 Deque 声明（特别是单调队列、滑动窗口常用）
 
-不推荐，因为限制多态性（无法轻松换成 PriorityQueue）。
-
-③ 使用 Deque 声明（特别是单调队列、滑动窗口常用）
+```java
 Deque<Integer> dq = new ArrayDeque<>();
+```
 
+- Deque 同时继承了 Queue，方法更完整：
 
-Deque 同时继承了 Queue，方法更完整：
+- 队头：offerFirst, pollFirst, peekFirst
 
-队头：offerFirst, pollFirst, peekFirst
-
-队尾：offerLast, pollLast, peekLast
+- 队尾：offerLast, pollLast, peekLast
 
 常用于：
 ✔ 单调队列
