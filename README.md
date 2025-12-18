@@ -130,12 +130,13 @@ prefixMax, suffixMax, totalSum
 
 Note:
 1. always start with:
-        
+```java   
         ListNode dummy = new ListNode(0);
         ListNode curr = dummy;
         dummy.next = head;
         use curr to go through list and perform actions
         return dummy.next;
+```
 
 2. to delete a node: 不要跳过所求的node，停在那个node之前，才能skip desired node
 3. when change order, always set x.next = y, then change the node before x
@@ -145,6 +146,7 @@ Note:
 
 例子：node:1,2,3,4
 
+```
 head
 1 --> 2 --> 3 --> 4 --> null
 
@@ -174,7 +176,7 @@ head
         head             last
 null <-- 1 <-- 2 <-- 3 <-- 4 
 
-
+```
 
 ```java
     class Solution {
@@ -235,6 +237,7 @@ null  <--   1   -->     2       --> 3  --> 4
         |                    ^
         |                    |
         ----------------------
+
 ```java
     class Solution {
 
