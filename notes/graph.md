@@ -3,6 +3,12 @@
 - isomorphic graph: 2 graph’s nodes & edges are bijection
 - use dictionary of edges (hashtable) of adj list to quickly answer edge queries problem O(e) 
 
+Note: 
+    
+    邻接表表示的图：
+    BFS / DFS / 拓扑排序
+        时间复杂度几乎都是 O(V + E)
+        
 ## Representation of graph
 
 1. Matrix
@@ -456,6 +462,20 @@ class Solution {
 
 ### Implementation
 1. Use recursion:
+
+- ！一个好的 DFS 设计原则是：**递归函数的参数，只包含“会变化的状态”**
+
+- Note: 可以适当把 int[] memo / String s / HashMap<> wordDict 等声明为成员变量，而不是作为方法参数或局部变量
+  * 因为 dfs 是一个递归函数，需要共享同一份状态（memo / s / wordDict），
+把它们声明为成员变量可以：减少参数传递、简化递归、保证 memo 真正生效。
+  * 比如 memo： 因为所有 dfs 调用共享同一份 memo，所以 memo 必须：不是局部变量，而是递归“全局可见”
+  * 比如String s, 在递归过程中被频繁访问，每一层 dfs 都要用 s.substring(...)。如果不放外面，而是
+private List<String> dfs(int start, String s) --> 问题：每层递归都要传 s & 方法签名变复杂 &可读性下降
+  * 因为 s 在整个 DFS 生命周期内 是只读常量→ 非常适合做成员变量
+
+
+
+
 - algorithm: 
     1) start from a given node
     2) Mark current node as visited
@@ -660,6 +680,8 @@ class Graph
 
 换句话说：它给出了一种“满足依赖关系的合法执行顺序”。
 
+- Whenever you see a question with partial ordering (a > b, c >d), you should immediately wonder if topological sort can find a mapping to satisfy that ordering.
+
 - not possible if the graph is not a DAG!!!
 
 - Theorem : A DAG G has at least one vertex with in-degree 0 and one vertex with out-degree 0.
@@ -801,13 +823,16 @@ private void topologicalSortRecursive(int current, boolean[] isVisited, LinkedLi
 
 ```
 
-
-
 #### Time complexity
 
 - Time Complexity: The above algorithm is simply DFS with an extra stack. So time complexity is the same as DFS which is O(V+E).
 
 - Note : can use vector instead of stack. If the vector is used then print the elements in reverse order to get the topological sorting.
+
+
+
+
+
 
 ### Algorithm 2: Kahn’s Algorithm（基于 BFS + 入度 in-degree）
 

@@ -48,9 +48,179 @@ key:
 
 ******************************************************
 
+1️、 DP 状态定义
+    dp[i] = 从 i 走到终点的最小花费
+
+
+    如果 A[i] == -1，dp[i] = INF
+
+    目标是求 dp[0]
+
+2️、 状态转移（从后往前）
+    dp[i] = A[i] + min(dp[j]), j ∈ [i+1, i+B]
+
+
+    ⚠️ 前提：A[i] != -1 && dp[j] != INF
+
+3️、 字典序最小如何保证？
+
+    当 dp 相等时，选择更小的 j
+
+    因为路径是从前往后，先选小 index → 字典序更小
+
+
+时间 & 空间复杂度
+    时间：O(n * B)
+    空间：O(n)
+    若 n=1000, B=1000，完全可接受
+
+class Solution {
+    public List<Integer> cheapestJump(int[] coins, int maxJump) {
+        int n = coins.length;
+        int INF = Integer.MAX_VALUE / 2;
+
+        int[] dp = new int[n];
+        int[] next = new int[n]; // 记录下一跳位置
+
+        Arrays.fill(dp, INF);
+        Arrays.fill(next, -1);
+
+        // 终点
+        if (coins[n - 1] != -1) {
+            dp[n - 1] = coins[n - 1];
+        }
+
+        // 从后往前 DP
+        for (int i = n - 2; i >= 0; i--) {
+            if (coins[i] == -1) continue;
+
+            for (int j = i + 1; j <= Math.min(n - 1, i + maxJump); j++) {
+                if (dp[j] == INF) continue;
+
+                int cost = coins[i] + dp[j];
+                if (cost < dp[i]) {
+                    dp[i] = cost;
+                    next[i] = j;
+                }
+                // cost == dp[i] 不更新 → 保证字典序最小
+            }
+        }
+
+        // 无法到达
+        if (dp[0] == INF) return new ArrayList<>();
+
+        // 还原路径（1-indexed）
+        List<Integer> res = new ArrayList<>();
+        int cur = 0;
+        while (cur != -1) {
+            res.add(cur + 1);
+            cur = next[cur];
+        }
+
+        return res;
+    }
+}
+
+
+现实生活类比（你要求的）
+🎯 1️⃣ 路径规划 / 成本最优跳跃
+
+每个站点有成本
+
+有最大跳跃距离
+
+选最省钱路线
+
+🎯 2️⃣ 分布式系统任务调度
+
+节点不可用（-1）
+
+跳转有最大 hops
+
+优先选成本最小且顺序最稳定的路径
+
+🎯 3️⃣ 游戏设计
+
+地图跳跃点
+
+有些点损坏
+
+选最低代价通关路径
+
+七、面试 Follow-Up（高频）
+❓1. 如何优化到 O(n)？
+
+👉 单调队列 / 最小值滑动窗口
+
+维护 dp[j] 的最小值
+
+类似 LeetCode 239 / 1438
+
+❓2. 如果 B 很大（1e5）？
+
+DP 会 TLE
+
+必须用 deque
+
+❓3. 如果要返回所有最优路径？
+
+dp 存 list
+
+或 DAG + DFS（复杂度高）
+
+❓4. 如果不要求字典序？
+
+任意最小即可
+
+next 更新更自由
 
 
 =======================================================================================================
+
+class Solution {
+    public List<Integer> cheapestJump(int[] coins, int maxJump) {
+        int n = coins.length;
+
+        long[] dp = new long[n];
+        int[] next = new int[n];
+
+        Arrays.fill(next, -1);
+        for (int i = n - 2; i >= 0; i--) {
+
+            long minCost = Integer.MAX_VALUE;
+            for (int j = i + 1; j <= i + maxJump && j < n; j++) {
+
+                if (coins[j] >= 0) {
+                    long cost = coins[i] + dp[j];
+                    if (cost < minCost) {
+                        minCost = cost;
+                        next[i] = j;
+                    }
+                }
+            }
+
+            dp[i] = minCost;
+        }
+        
+        List<Integer> result = new ArrayList();
+        int i = 0;
+        while (i < n && next[i] > 0){
+            result.add(i + 1);
+            i = next[i];
+        }
+
+        if (i == n - 1 && coins[i] >= 0)
+            result.add(n);
+        else 
+            return new ArrayList<Integer>();
+        
+        return result;        
+    }
+}
+
+=======================================================================================================
+
+
 Method 1: memo
 
 

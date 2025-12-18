@@ -32,30 +32,68 @@ Java 中 OOP 的四大特性是：
 - 提供 getter/setter 方法
 
 
-
 ```java
     public class Person {
-
+        // 1. 封装数据：属性设为私有
         private String name;
-        private int gender;
         private int age;
 
+        // 构造方法 (用于初始化对象)
+        public Person(String name, int age) {
+            this.name = name;
+            this.age = age;
+        }
+
+        // 2. 提供公共访问方法 (Getter/Setter)
         public String getName() {
             return name;
         }
 
-        public String getGender() {
-            return gender == 0 ? "man" : "woman";
-        }
-
-        public void work() {
-            if (18 <= age && age <= 50) {
-                System.out.println(name + " is working very hard!");
+        public void setName(String name) {
+            if (name != null && !name.trim().isEmpty()) { // 添加验证
+                this.name = name;
             } else {
-                System.out.println(name + " can't work any more!");
+                System.out.println("姓名不能为null或空!");
             }
         }
+
+        public int getAge() {
+            return age;
+        }
+
+        public void setAge(int age) {
+            if (age > 0 && age < 150) { // 添加年龄验证
+                this.age = age;
+            } else {
+                System.out.println("年龄不合法!");
+            }
+        }
+
+        // 3. 提供行为方法
+        public void displayInfo() {
+            System.out.println("姓名: " + name + ", 年龄: " + age);
+        }
+
+        public static void main(String[] args) {
+            // 创建对象
+            Person person1 = new Person("张三", 30);
+            person1.displayInfo(); // 输出: 姓名: 张三, 年龄: 30
+
+            // 使用Setter修改数据 (受控)
+            person1.setAge(31);
+            person1.setName("李四");
+            person1.displayInfo(); // 输出: 姓名: 李四, 年龄: 31
+
+            // 尝试不合法修改
+            person1.setAge(-5); // 输出: 年龄不合法!
+            person1.setName(""); // 输出: 姓名不能为null或空!
+            person1.displayInfo(); // 状态未改变: 姓名: 李四, 年龄: 31
+
+            // 直接访问被阻止 (如果尝试访问会报错)
+            // System.out.println(person1.age); // 编译错误
+        }
     }
+
 ```
 
 📌 优势：
@@ -100,26 +138,25 @@ Java 是单继承（一个类只能继承一个父类），但可以实现多个
 
 ### 3. 多态（Polymorphism）
 
-多态主要有两种：
-
-① 编译时多态（方法重载 Overloading）
+#### ① 编译时多态（方法重载 Overloading）
 
 方法重载 Overloading = 同一个类中存在多个 **方法名相同，但参数列表不同**的方法。
+
 Java 在编译时（不是运行时）根据参数类型和数量决定调用哪个方法，因此称为“编译时多态”。
 
 要求：
-    只要参数列表不同即可：
-        可以是参数类型不同、参数个数不同、参数顺序不同
+  * 只要参数列表不同即可：
+  * 可以是参数类型不同、参数个数不同、参数顺序不同
+  * ❗ 与返回类型无关
+  * 返回值不同不能构成重载：
 
-    ❗ 与返回类型无关
-    返回值不同不能构成重载：
 ```java
     int add(int a) {...}
     double add(int a) {...}   // ❌ 不合法
     返回值的type要一样！
 ```
 
-
+例子：
 
 ```java
     class MathUtils {
@@ -164,7 +201,7 @@ Java 在编译时（不是运行时）根据参数类型和数量决定调用哪
 ```
 
 
-② 运行时多态（重写 Override + 向上转型）
+#### ② 运行时多态（重写 Override + 向上转型）
 
 运行时多态有三个条件:
 - 继承
@@ -228,11 +265,13 @@ Java 在编译时（不是运行时）根据参数类型和数量决定调用哪
 
 ```java
     抽象类（abstract）：
+
     abstract class Animal {
         abstract void makeSound();
     }
 
     接口（interface）：
+    
     interface Flyable { 
         void fly();
     }

@@ -41,10 +41,8 @@ Method 0:
 public class Solution {
     public boolean wordBreak(String s, Set<String> dict) {
         
-        boolean[] f = new boolean[s.length() + 1];
-        
-        f[0] = true;
-        
+        boolean[] dp = new boolean[s.length() + 1];        
+        dp[0] = true;
         
         /* First DP
         for(int i = 1; i <= s.length(); i++){
@@ -63,14 +61,14 @@ public class Solution {
         //Second DP
         for(int i=1; i <= s.length(); i++){
             for(int j=0; j < i; j++){
-                if(f[j] && dict.contains(s.substring(j, i))){
-                    f[i] = true;
+                if(dp[j] && dict.contains(s.substring(j, i))){
+                    dp[i] = true;
                     break;
                 }
             }
         }
         
-        return f[s.length()];
+        return dp[s.length()];
     }
 }
 
@@ -101,36 +99,41 @@ public class Solution {
         }
     }
     
-    public void addWord(TrieNode t, String w) {
-        for (int i = 0; i < w.length(); i++) {
-            int j = (int)w.charAt(i); 
-            if (t.c[j] == null) 
-            	t.c[j] = new TrieNode();
-            t = t.c[j];
+    public void addWord(TrieNode node, String word) {
+        for (int i = 0; i < word.length(); i++) {
+            int j = (int)word.charAt(i); 
+            if (node.c[j] == null) 
+            	node.c[j] = new TrieNode();
+
+            node = node.c[j];
         }
-        t.isWord = true;
+        node.isWord = true;
     }
     
     public boolean wordBreak(String s, Set<String> wordDict) {
-        TrieNode t = new TrieNode(), cur;
-        for (String i : wordDict) addWord(t, i);
+        TrieNode node = new TrieNode(), cur;
+
+        for (String i : wordDict) 
+            addWord(node, i);
+
         char[] str = s.toCharArray();
         int len = str.length;
-        boolean[] f = new boolean[len + 1];
-        f[len] = true;
+        boolean[] dp = new boolean[len + 1];
+        dp[len] = true;
         
+        //从后往前
         for (int i = len - 1; i >= 0; i--) {
             //System.out.println(str[i]);
-            cur = t;
+            cur = node;
             for (int j = i; cur != null && j < len ; j++) {
                 cur = cur.c[(int)str[j]];
-                if (cur != null && cur.isWord && f[j + 1]) {
-                    f[i] = true;
+                if (cur != null && cur.isWord && dp[j + 1]) {
+                    dp[i] = true;
                     break;
                 }
             }
         }
-        return f[0];
+        return dp[0];
     }
 }
 

@@ -219,7 +219,7 @@ public boolean judgePoint24(int[] nums) {
         // exit condition
         if (available == 1) {
             for (int i=0; i<arr.length; i++) 
-                if (!vis[i]) 
+                if (!vis[i])  // find the last one number and see if it equals 24
                 	return Math.abs(arr[i]-24) < 0.000001 ? true : false;
         } 
 

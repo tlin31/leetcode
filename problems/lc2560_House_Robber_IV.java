@@ -95,7 +95,8 @@ Stats:
 	Space O(n).
 
 
-
+	// right, left, mid are capability of the robber
+	// which is the maximum amount of money stolen from houses
     public int minCapability(int[] A, int k) {
         int left = 1, right = (int)1e9, n = A.length;
         for(int num : nums){

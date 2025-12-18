@@ -34,6 +34,53 @@ key:
 ******************************************************
 
 
+🧠 状态定义
+
+令 dp[i][c] 表示：涂到第 i 个房子，且该房子颜色为 c 的最小花费
+
+🔁 状态转移
+
+	如果当前选择红色：
+
+	dp[i][0] = min(dp[i-1][1], dp[i-1][2]) + cost[i][0]
+
+
+	蓝色：
+
+	dp[i][1] = min(dp[i-1][0], dp[i-1][2]) + cost[i][1]
+
+
+	绿色：
+
+	dp[i][2] = min(dp[i-1][0], dp[i-1][1]) + cost[i][2]
+
+
+最终答案：
+
+	return min(dp[n-1][0], dp[n-1][1], dp[n-1][2]);
+
+
+class Solution {
+    public int minCost(int[][] costs) {
+        if (costs == null || costs.length == 0) return 0;
+
+        int r = costs[0][0]; 
+        int b = costs[0][1];
+        int g = costs[0][2];
+
+        for (int i = 1; i < costs.length; i++) {
+            int newr = Math.min(b, g) + costs[i][0];
+            int newb = Math.min(r, g) + costs[i][1];
+            int newg = Math.min(r, b) + costs[i][2];
+
+            r = newr;
+            b = newb;
+            g = newg;
+        }
+
+        return Math.min(r, Math.min(b, g));
+    }
+}
 
 =======================================================================================================
 Method 1: DP,
@@ -123,7 +170,6 @@ method 3:
 Method:
 
 	-	The code can handle n colors rather than 3.
-	-	I am a guy don't like to mess up original input, so I create a new array called dp.
 
 
 Stats:

@@ -71,10 +71,45 @@ ConcurrentSkipListMap | O(log n) |   O(log n)  | O(1)     | Skip List
 
 ### ✅ 1. Queue 的常见声明方式（Interface vs Implementation）
 
-Java 中 Queue 是接口（java.util.Queue）。
-常见的声明方式有：
+Java 中 Queue 是接口（java.util.Queue）。一般更推荐用arrayDeque
 
-#### ① 使用 Queue 接口声明（最推荐）
+**最推荐用：queue接口 + arrayDeque实现**
+```java
+		Queue<Integer> q = new ArrayDeque<>();
+```
+
+- Method:
+
+| 方法          | 作用       | 队列空时行为     | 备注      |
+| ----------- | -------- | ---------- | ------- |
+| `offer(e)`  | 入队（添加元素） | 返回 `false` | 推荐使用，安全 |
+| `poll()`    | 出队（拿并移除） | 返回 `null`  | 推荐使用    |
+| `peek()`    | 查看队头但不删除 | 返回 `null`  | 推荐使用    |
+| `add(e)`    | 入队       | 抛异常        | 不推荐     |
+| `remove()`  | 出队       | 抛异常        | 不推荐     |
+| `element()` | 查看队头但不删除 | 抛异常        | 不推荐     |
+| `isEmpty()` | 判断是否为空   | —          | 常用      |
+| `size()`    | 返回队列大小   | —          | 常用      |
+
+
+- 👍 优点
+
+  * 更加抽象：你的代码依赖“队列行为”，而不是特定的数据结构。
+
+  * 更易替换实现：如需改为 PriorityQueue 或 LinkedList，只换一行即可。
+
+  * 更符合 Java 编程习惯（尤其在大厂面试中，这是 good practice）。
+
+  * 使用时只关心 Queue 常规方法：offer() / poll() / peek() / isEmpty() / size()
+
+
+
+- 不写 ArrayDeque<Integer> q = new ArrayDeque<>();
+	因为耦合具体实现，不利于扩展、违背 “program to an interface” 原则
+
+
+
+#### ① 使用 Queue 接口声明
 
 ```java
 		Queue<Integer> q = new LinkedList<>();
@@ -84,15 +119,7 @@ Java 中 Queue 是接口（java.util.Queue）。
 
 Methods:
 
-A. 抛异常版本
-| 方法          | 描述               |
-| ----------- | ---------------- |
-| `add(e)`    | 入队，如果队列满了 → 抛异常  |
-| `remove()`  | 出队，如果空 → 抛异常     |
-| `element()` | 返回队首元素，如果空 → 抛异常 |
-
-
-B. 返回特殊值（null/false）版本
+**更推荐！1)返回特殊值（null/false）版本**
 | 方法         | 描述                   |
 | ---------- | -------------------- |
 | `offer(e)` | 入队，如果失败 → 返回 false   |
@@ -100,14 +127,12 @@ B. 返回特殊值（null/false）版本
 | `peek()`   | 返回队首元素，如果空 → 返回 null |
 
 
-面试常问区别：
-
-| 功能   | 抛异常版本   | 返回特殊值版本 | 更推荐   |
-| ---- | ------- | ------- | ----- |
-| 入队   | add     | offer   | offer |
-| 出队   | remove  | poll    | poll  |
-| 查看队首 | element | peek    | peek  |
-
+2)抛异常版本
+| 方法          | 描述               |
+| ----------- | ---------------- |
+| `add(e)`    | 入队，如果队列满了 → 抛异常  |
+| `remove()`  | 出队，如果空 → 抛异常     |
+| `element()` | 返回队首元素，如果空 → 抛异常 |
 
 
 
@@ -118,6 +143,7 @@ B. 返回特殊值（null/false）版本
 ```
 - 不推荐，因为限制多态性（无法轻松换成 PriorityQueue）。
 
+
 #### ③ 使用 Deque 声明（特别是单调队列、滑动窗口常用）
 
 ```java
@@ -126,15 +152,40 @@ B. 返回特殊值（null/false）版本
 
 - Deque 同时继承了 Queue，方法更完整：
 
-- 队头：offerFirst, pollFirst, peekFirst
+- 队头操作
+  * dq.offerFirst(x);
+  * dq.pollFirst();
+  * dq.peekFirst();
 
-- 队尾：offerLast, pollLast, peekLast
+- 队尾操作
+  * dq.offerLast(x);
+  * dq.pollLast();
+  * dq.peekLast();
 
 - 常用于：
   * 单调队列
   * BFS
   * 滑动窗口最大值（239）
   * 双端操作
+  * Palindrome check
+  * stack
+
+
+- ✔ ArrayDeque 的优点：
+  * 无锁，无同步 → 更快
+  * 两端操作都 O(1)
+  * 性能优于 LinkedList： 因为连续内存 Cache locality、无额外节点对象、无指针跳转
+  * 没有容量限制（自动扩容）
+
+- ❌ 相比之下，不建议用 LinkedList 的原因：
+
+  * 额外节点对象，有内存开销
+
+  * CPU cache 不友好（链表）
+
+  * 性能比 ArrayDeque 差（除非你需要大量中间插入）
+
+
 
 #### ④ 使用 PriorityQueue 声明（最小堆，常用于贪心/TopK）
 
@@ -148,6 +199,17 @@ max heap写法：
 ```java
 		Queue<Integer> pq = new PriorityQueue<>((a, b) -> b - a);
 ```
+
+- 常用方法
+  * pq.offer(x);     // add
+  * pq.poll();       // get and remove smallest element
+  * pq.peek();       // get smallest element
+
+- 用于：
+  * TopK elements
+  * Dijkstra 最短路
+  * 合并 K 个排序链表
+
 
 #### ⑤ 使用 BlockingQueue（并发队列）
 

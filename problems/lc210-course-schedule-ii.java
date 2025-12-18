@@ -90,7 +90,7 @@ class Solution {
         }
         
         // BFS队列，存储所有入度为0的课程
-        Queue<Integer> queue = new LinkedList<>();
+        Queue<Integer> queue = new ArrayDeque<>();
         for (int i = 0; i < numCourses; i++) {
             if (indegree[i] == 0) {
                 queue.offer(i);

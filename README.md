@@ -125,32 +125,145 @@ prefixMax, suffixMax, totalSum
 可分治、可分片，支持离线大数据计算（Hadoop/Spark）
 
 
-## Two pointers & sliding windows
 
-note:
+## Node
+
+Note:
 1. always start with:
-		
-		ListNode dummy = new ListNode(0);
+        
+        ListNode dummy = new ListNode(0);
         ListNode curr = dummy;
         dummy.next = head;
         use curr to go through list and perform actions
         return dummy.next;
 
-
 2. to delete a node: 不要跳过所求的node，停在那个node之前，才能skip desired node
 3. when change order, always set x.next = y, then change the node before x
 4. always check, head != null
 
-5. Two pointers: 
+### 反转整个链表 reverse entire list
 
-        while(leftPointer< RightPointer) 
+例子：node:1,2,3,4
 
-6. Peak and valley:
-- when there are a simultaneously increasing or decreasing array
-- ex. lc 135-Candy
-- can use Stack to 
+head
+1 --> 2 --> 3 --> 4 --> null
 
-7. reverse a certain part in linked list
+head
+1 --> reverse(2 --> 3 --> 4 --> null)
+
+**ListNode last = reverseList(head.next);**
+
+  head              last
+    1 --> 2 <-- 3 <-- 4 
+          |           
+          v           
+        null         
+
+
+**head.next.next. = head**
+
+  head              last
+    1 --> 2 <-- 3 <-- 4 
+      <-- x           
+          x           
+        null         
+
+
+**head.next=null;**
+**return last;**
+        head             last
+null <-- 1 <-- 2 <-- 3 <-- 4 
+
+
+
+```java
+    class Solution {
+        public ListNode reverseList(ListNode head) {
+            if(head==null||head.next==null) 
+                return head;
+            ListNode last = reverseList(head.next);
+            head.next.next = head;
+            head.next = null;
+            return last;
+        }
+    }
+```
+
+Iterative:
+
+    ListNode nextTemp = curr.next;
+
+prev    cur、head    nextTemp
+null        1   -->     2     --> 3  --> 4
+
+    curr.next = prev;
+
+prev    cur、head    nextTemp
+null  <--   1   -->     2     --> 3  --> 4
+
+    prev = curr;
+    curr = nextTemp;
+
+           prev    cur、nextTemp
+null  <--   1   -->     2       --> 3  --> 4
+
+
+```java
+    class Solution {
+        public ListNode reverseList(ListNode head) {
+            ListNode prev = null;
+            ListNode curr = head;
+            while (curr != null) {
+                ListNode nextTemp = curr.next;
+                curr.next = prev;
+                prev = curr;
+                curr = nextTemp;
+            }
+            return prev;
+        }
+    }
+```
+
+### 反转链表前 N 个节点
+
+与上一题类似，不同点：
+  * 1、base case 变为 n == 1 ，反转⼀个元素，就是它本身，同时要记录后驱节点。
+  * 2、刚才我们直接把 head.next 设置为 null，因为整个链表反转后原来的 head 变成了整个链表的最后一个节点。但现在 head 节点在递归反转之后不一定是最后一个节点了了，所以要记录后驱successor (第 n + 1 个节点)，反转之后将 head 连接上。
+
+      head        last    successor
+        1 <-- 2 <-- 3        4   --> 5   --> null
+        |                    ^
+        |                    |
+        ----------------------
+```java
+    class Solution {
+
+        ListNode successor = null; // 后驱节点
+
+        public ListNode reverseList(ListNode head, int n) {
+            if(head==null||head.next==null) 
+                return head;
+
+            if(n==1){
+                // 记录第 n+1 个节点 
+                successor = head.next; 
+                return head;
+            }
+            // 以 head.next 为起点，需要反转前 n - 1 个节点 
+            ListNode last = reverseN(head.next, n - 1);
+            head.next.next = head;
+
+            // 让反转之后的 head 节点和后⾯面的节点连起来 
+            head.next = successor;
+            return last;
+        }
+    }
+```
+
+
+
+
+### 反转中间部分链表 reverse a certain part in linked list
 ```java
     dummy.next = head;
     ListNode pre = dummy; // pre来traverse
@@ -176,7 +289,17 @@ note:
     return dummy.next;
 ```
 
-### 双指针种类
+### Two pointers 双指针种类
+note:
+
+5. Two pointers: 
+
+        while(leftPointer< RightPointer) 
+
+6. Peak and valley:
+- when there are a simultaneously increasing or decreasing array
+- ex. lc 135-Candy
+- can use Stack 
 
 #### 1.快慢指针
 主要解决链表中的问题，比如典型的判定链表中是否包含环。⼀般都初始化指向链表的头结点 head，前进时快指针 fast 在前，慢指针 slow 在后
