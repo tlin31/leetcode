@@ -30,56 +30,41 @@ key:
 =======================================================================================================
 Method 1:
 
+If we iterate the nodes in reverse using recursion, and iterate forward at the same time 
+using a variable outside the recursive function, then we can check whether or not we have a
+palindrome.
+
+
 
 Stats:
 
+	- time: O(n), space O(n) b/c recursion stack
 	- 
-	- 
-
-
-Method:
-	- use properties of recursion to do it
-	-  Example :
-
-		1-> 2-> 3-> 4-> 2-> 1
-
-		ref points 1 initially.
-		Make recursive calls until you reach the last element - 1.
-		On returning from each recurssion, check if it is equal to ref values. 
-		ref values are updated to on each recurssion.
-		So first check is ref 1 -  end 1
-		Second ref 2 - second last 2 ...and so on.
 
 
 class Solution {
 
-	public boolean isPalindrome(ListNode head) {
-	    ListNode current = new ListNode(-1);
-	    current.next = head;
-	    return isPalindrome(current, head);
-	}
+    // starts from the begining
+    private ListNode frontPointer;
 
-	public boolean isPalindrome(ListNode curPtr, ListNode end) {
-	    if (end == null) {
-	        return true;
-	    }
-	    
-	    // recursion to go to the last node, store the previous steps
-	    boolean accumulatedEqual = isPalindrome(curPtr, end.next);
+    // currentNode will be at the end of the list at the begining
+    private boolean recursivelyCheck(ListNode currentNode) {
+        if (currentNode != null) {
+            if (!recursivelyCheck(currentNode.next)) return false;
+            if (currentNode.val != frontPointer.val) return false;
+            frontPointer = frontPointer.next;
+        }
+        return true;
+    }
 
-	    // check the head value with the end
-	    boolean isEqual = curPtr.next.val == end.val;
-
-	    // increment current pointer
-	    curPtr.next = curPtr.next.next;
-
-	    return accumulatedEqual && isEqual;
-	}
+    public boolean isPalindrome(ListNode head) {
+        frontPointer = head;
+        return recursivelyCheck(head);
+    }
 }
 
-ex. 1 -> 2 -> 1
 
-after adding pointer:  -1 -> 1 -> 2 -> 1
+
 
 
 isPalindrome(-1, 1)
@@ -108,85 +93,58 @@ Stats:
 
 
 Method:
+Step 1️：用快慢指针找到中点
+	slow 走一步
+	fast 走两步
 
-
-	1. Find the end of the first half.
-	2. Reverse the second half.
-	3. Determine whether or not there is a palindrome.
-	4 .Restore the list.
-	5. Return the result.
-
-	- To do step 1, we could count the number of nodes, calculate how many nodes are in the first half,
-	  and then iterate back down the list to find the end of the first half. Or, we could do it in a 
-	  single parse using the two runners pointer technique. Either is acceptable, however well have a 
-	  look at the two runners pointer technique here.
-
-	- Imagine we have 2 runners one fast and one slow, running down the nodes of the Linked List. 
-	  In each second, the fast runner moves down 2 nodes, and the slow runner just 1 node. By the time
-	  the fast runner gets to the end of the list, the slow runner will be half way. By representing 
-	  the runners as pointers, and moving them down the list at the corresponding speeds, we can use 
-	  this trick to find the middle of the list, and then split the list into two halves.
-
-	- If there is an odd-number of nodes, then the "middle" node should remain attached to the first half.
-
-	- Step 2 uses the algorithm that can be found in the solution article for the Reverse Linked List
-	  problem to reverse the second half of the list.
-
-	- Step 3 is fairly straightforward. Remember that we have the first half, which might also contain a "middle" node at the end, and the second half, which is reversed. We can step down the lists simultaneously ensuring the node values are equal. When the node we're up to in the second list is null, we know we're done. If there was a middle value attached to the end of the first list, it is correctly ignored by the algorithm. The result should be saved, but not returned, as we still need to restore the list.
-
-	- Step 4 requires using the same function you used for step 2, and then for step 5 the saved 
-	  result should be returned.
+Step 2️：反转后半部分链表
+Step 3️：左右两段同时向中间比较
 
 
 
 class Solution {
-
     public boolean isPalindrome(ListNode head) {
+        if (head == null || head.next == null) return true;
 
-        if (head == null) return true;
+        // 1. 找中点
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
 
-        // Find the end of first half and reverse second half.
-        ListNode firstHalfEnd = endOfFirstHalf(head);
-        ListNode secondHalfStart = reverseList(firstHalfEnd.next);
+        // 2. 如果是奇数长度，跳过中点
+        if (fast != null) {
+            slow = slow.next;
+        }
 
-        // Check whether or not there is a palindrome.
-        ListNode p1 = head;
-        ListNode p2 = secondHalfStart;
-        boolean result = true;
-        while (result && p2 != null) {
-            if (p1.val != p2.val) result = false;
-            p1 = p1.next;
-            p2 = p2.next;
-        }        
+        // 3. 反转后半段
+        ListNode l2 = reverse(slow);
+        ListNode l1 = head;
 
-        // Restore the list and return the result.
-        firstHalfEnd.next = reverseList(secondHalfStart);
-        return result;
+        // 4. 比较前后两段
+        while(l2 != null){
+            if(l1.val != l2.val){
+                return false;
+            }
+            l1 = l1.next;
+            l2 = l2.next;
+        }
+        return true;
+
     }
 
-    private ListNode reverseList(ListNode head) {
+    private ListNode reverse(ListNode head) {
         ListNode prev = null;
-        ListNode curr = head;
-        while (curr != null) {
-            ListNode nextTemp = curr.next;
-            curr.next = prev;
-            prev = curr;
-            curr = nextTemp;
+        while (head != null) {
+            ListNode next = head.next;
+            head.next = prev;
+            prev = head;
+            head = next;
         }
         return prev;
     }
-
-    private ListNode endOfFirstHalf(ListNode head) {
-        ListNode fast = head;
-        ListNode slow = head;
-        while (fast.next != null && fast.next.next != null) {
-            fast = fast.next.next;
-            slow = slow.next;
-        }
-        return slow;
-    }
 }
-
 
 =======================================================================================================
 method 3:

@@ -29,65 +29,94 @@ key:
 // Runtime: 0 ms, faster than 100.00% 
 // Memory Usage: 38.8 MB, less than 24.14%
 
- public ListNode reverseKGroup(ListNode head, int k) {
-    ListNode node = head;
-    int count = 0;
+ class Solution {
+    public ListNode reverseKGroup(ListNode head, int k) {
+        ListNode node = head;
+        int count = 0;
 
- 	// check early
-    // 1. test wheather we have more then k node left, if less then k node left we just return head 
-    //    if not, then ends with count = k, and proceed to the recursion
-    while (count < k) { 
-        if(node == null) return head;
-        node = node.next;
-        count++;
+        // check early
+        // 1.if less then k node left we just return head 
+        while (count < k) { 
+            if(node == null) return head;
+            node = node.next;
+            count++;
+        }
+        
+        //pre node point to the the answer of sub-problem 
+        ListNode pre = reverseKGroup(node, k); 
+        
+        // 2.reverse k node at current level 
+        ListNode cur = head;
+        while (count > 0) {  
+            ListNode next = cur.next; 
+            cur.next = pre; 
+            pre = cur; 
+            cur = next;
+            
+            count = count - 1;
+        }
+        return pre;
     }
-    
-    //pre node point to the the answer of sub-problem 
-    ListNode pre = reverseKGroup(node, k); 
-    
-    // 2.reverse k node at current level 
-    while (count > 0) {  
-        ListNode next = head.next; 
-        head.next = pre; 
-        pre = head; 
-        head = next;
-        count = count - 1;
-    }
-    return pre;
+
 }
 
 =========================================================================================================================================================
-method 2:
 
-key:
 
-	- non-recursive
+class Solution {
+    public ListNode reverseKGroup(ListNode head, int k) {
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
 
-// Runtime: 1 ms, faster than 37.44% 
-// Memory Usage: 38.7 MB, less than 24.14% 
+        ListNode pre = dummy;
+        ListNode end = dummy;
 
-public ListNode reverseKGroup(ListNode head, int k) {
-        int n = 0;
+        while (true) {
 
-        //now, n = length of linked list
-        for (ListNode i = head; i != null; n++, i = i.next);
-        
-        ListNode dmy = new ListNode(0);
-        dmy.next = head;
-        
-        for(ListNode prev = dmy, tail = head; n >= k; n -= k) {
-            for (int i = 1; i < k; i++) {
-                ListNode next = tail.next.next;
-                tail.next.next = prev.next;
-                prev.next = tail.next;
-                tail.next = next;
+            ListNode start = pre.next;
+
+            // 1. 找到要反转的sublist的end
+            for (int i = 0; i < k; i++) {
+                if(end == null) 
+                    break;
+                else
+                    end = end.next;
             }
-            
-            prev = tail;
-            tail = tail.next;
+
+             // 不够 k 个，结束
+            if (end == null) break;
+
+            // 2. 标记区间
+            ListNode nextSublist = end.next;
+
+            // 3. 切断 + 反转
+            end.next = null;
+            pre.next = reverse(start);
+
+            // 4. 接回
+            start.next = nextSublist;
+
+            // 5. 移动 pre 和 end到头
+            pre = start;
+            end = start;
+
         }
-        return dmy.next;
+
+        return dummy.next;
     }
+
+    private ListNode reverse(ListNode head) {
+        ListNode prev = null;
+        ListNode cur = head;
+        while (cur != null) {
+            ListNode next = cur.next;
+            cur.next = prev;
+            prev = cur;
+            cur = next;
+        }
+        return prev;
+    }
+}
 
 
     

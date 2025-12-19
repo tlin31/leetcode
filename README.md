@@ -109,20 +109,19 @@ ref to detail solution in chinese: https://leetcode.wang/leetCode-30-Substring-w
 
 3. 为什么选择 Kadane？
 
-一遍扫描
+  - 一遍扫描
 
-常数内存
+  - 常数内存
 
-易扩展到 streaming
+  - 易扩展到 streaming
 
-可以用于实时监控
+  - 可以用于实时监控
 
 4. 系统级优化
 
-对多节点数据可用 中间结果：
-prefixMax, suffixMax, totalSum
+  - 对多节点数据可用 中间结果：prefixMax, suffixMax, totalSum
 
-可分治、可分片，支持离线大数据计算（Hadoop/Spark）
+  - 可分治、可分片，支持离线大数据计算（Hadoop/Spark）
 
 
 
@@ -134,18 +133,22 @@ Note:
         ListNode dummy = new ListNode(0);
         ListNode curr = dummy;
         dummy.next = head;
+
         use curr to go through list and perform actions
+
         return dummy.next;
 ```
 
 2. to delete a node: 不要跳过所求的node，停在那个node之前，才能skip desired node
-3. when change order, always set x.next = y, then change the node before x
+3. when change order, always set tempNode = x.next, then change the node before x
 4. always check, head != null
+5. 虽然时间复杂度都是 O(N)，但是迭代解法的空间复杂度是 O(1)，⽽递归解法需要堆栈，空间复杂度是 O(N),所以平时更推荐用迭代解法
 
 ### 反转整个链表 reverse entire list
 
 例子：node:1,2,3,4
 
+#### recursive
 ```
 head
 1 --> 2 --> 3 --> 4 --> null
@@ -153,7 +156,9 @@ head
 head
 1 --> reverse(2 --> 3 --> 4 --> null)
 
-**ListNode last = reverseList(head.next);**
+
+ListNode last = reverseList(head.next);
+（此时，2.next 指向 null）
 
   head              last
     1 --> 2 <-- 3 <-- 4 
@@ -162,7 +167,7 @@ head
         null         
 
 
-**head.next.next. = head**
+head.next.next = head
 
   head              last
     1 --> 2 <-- 3 <-- 4 
@@ -171,8 +176,9 @@ head
         null         
 
 
-**head.next=null;**
-**return last;**
+head.next=null;
+return last;
+
         head             last
 null <-- 1 <-- 2 <-- 3 <-- 4 
 
@@ -181,7 +187,7 @@ null <-- 1 <-- 2 <-- 3 <-- 4
 ```java
     class Solution {
         public ListNode reverseList(ListNode head) {
-            if(head==null||head.next==null) 
+            if(head==null) 
                 return head;
             ListNode last = reverseList(head.next);
             head.next.next = head;
@@ -191,23 +197,52 @@ null <-- 1 <-- 2 <-- 3 <-- 4
     }
 ```
 
-Iterative:
+#### Iterative:
 
+- 先存cur.next
+- 让cur.next指向prev
+- 让prev和cur都各自向后走一步
+- 最后prev会走到最后一个node （4），return prev
+
+```
     ListNode nextTemp = curr.next;
 
 prev    cur、head    nextTemp
 null        1   -->     2     --> 3  --> 4
 
+    
     curr.next = prev;
 
 prev    cur、head    nextTemp
-null  <--   1   -->     2     --> 3  --> 4
+null  <--   1           2     --> 3  --> 4
 
+    
     prev = curr;
     curr = nextTemp;
 
            prev    cur、nextTemp
-null  <--   1   -->     2       --> 3  --> 4
+null  <--   1            2       --> 3  --> 4
+
+
+====================================================
+    ListNode nextTemp = curr.next;
+
+           prev     cur   nextTemp
+null  <--   1        2   --> 3  --> 4
+
+
+
+    curr.next = prev;
+           prev     cur   nextTemp
+null  <--   1   <--  2       3  --> 4
+
+
+    prev = curr;
+    curr = nextTemp;
+
+                   prev   curr、nextTemp
+null  <--   1   <--  2          3   -----> 4
+```
 
 
 ```java
@@ -232,21 +267,39 @@ null  <--   1   -->     2       --> 3  --> 4
   * 1、base case 变为 n == 1 ，反转⼀个元素，就是它本身，同时要记录后驱节点。
   * 2、刚才我们直接把 head.next 设置为 null，因为整个链表反转后原来的 head 变成了整个链表的最后一个节点。但现在 head 节点在递归反转之后不一定是最后一个节点了了，所以要记录后驱successor (第 n + 1 个节点)，反转之后将 head 连接上。
 
+```
       head        last    successor
         1 <-- 2 <-- 3        4   --> 5   --> null
         |                    ^
         |                    |
         ----------------------
 
+
+递归调用路径：
+
+    reverseN(1,3)
+     → reverseN(2,2)
+       → reverseN(3,1)  // base case
+到达 base case 时：
+
+    head = 3
+    successor = head.next = 4
+
+如果你 不保存 4，回溯后你只能得到：3 → 2 → 1。 但你 不知道 4 在哪，因为链表被“截断”了
+```
+
+
+#### recursive
 ```java
     class Solution {
 
         ListNode successor = null; // 后驱节点
 
         public ListNode reverseList(ListNode head, int n) {
-            if(head==null||head.next==null) 
+            if(head==null) 
                 return head;
 
+            //最后一步，最底层的recursion call
             if(n==1){
                 // 记录第 n+1 个节点 
                 successor = head.next; 
@@ -263,36 +316,281 @@ null  <--   1   -->     2       --> 3  --> 4
     }
 ```
 
+#### iteraive
+- 唯一不同的是，在while loop中 n--， 然后exit loop之后链接
+
+```
+      head        pre     cur、next
+        1 <-- 2 <-- 3        4   --> 5   --> null
+        |                    ^
+        |                    |
+        ----------------------
+```
+
+```java
+    class Solution {
+        public ListNode reverseFirstN(ListNode head, int n) {
+            if (head == null || n <= 1) return head;
+
+            ListNode prev = null;
+            ListNode curr = head;
+
+            while (n > 0 && curr != null) {
+                ListNode next = curr.next;
+                curr.next = prev;
+                prev = curr;
+                curr = next;
+                n--;
+            }
+
+            // head 此时是反转后的尾节点
+            head.next = curr;
+
+            return prev; // prev 是新的头
+        }
+    }
+
+```
 
 
 
 ### 反转中间部分链表 reverse a certain part in linked list
+
+给⼀个索引区间 [m,n] (索引从 1 开始)，仅仅反转区间中的链表元素。
+
+#### recursive:
+
 ```java
-    dummy.next = head;
-    ListNode pre = dummy; // pre来traverse
-    for(int i = 0; i<m-1; i++) pre = pre.next;
-    
-    ListNode start = pre.next; // a pointer to the beginning of a sub-list that will be reversed
-    ListNode then = start.next; // a pointer to a node that will be reversed
-    
-    // 1 - 2 -3 - 4 - 5 ; m=2; n =4 ---> pre = 1, start = 2, then = 3
-    // dummy-> 1 -> 2 -> 3 -> 4 -> 5
-    
-    for(int i=0; i<n-m; i++)
-    {
-        start.next = then.next;
-        then.next = pre.next;
-        pre.next = then;
-        then = start.next;
+class Solution {
+    ListNode reverseBetween(ListNode head, int m, int n) {
+        // base case，反转前N个，和上一题一样，套用reverseListN
+        if (m == 1) {
+            return reverseListN(head, n);
+        }
+
+        // 前进到反转的起点触发 base case
+        head.next = reverseBetween(head.next, m - 1, n - 1); 
+        return head;
     }
-    
-    // first reversing : dummy->1 - 3 - 2 - 4 - 5; pre = 1, start = 2, then = 4
-    // second reversing: dummy->1 - 4 - 3 - 2 - 5; pre = 1, start = 2, then = 5 (finish)
-    
-    return dummy.next;
+
+        ListNode successor = null; // 后驱节点
+
+        public ListNode reverseListN(ListNode head, int n) {
+            if(head==null||head.next==null) 
+                return head;
+
+            if(n==1){
+                // 记录第 n+1 个节点 
+                successor = head.next; 
+                return head;
+            }
+            // 以 head.next 为起点，需要反转前 n - 1 个节点 
+            ListNode last = reverseListN(head.next, n - 1);
+            head.next.next = head;
+
+            // 让反转之后的 head 节点和后⾯面的节点连起来 
+            head.next = successor;
+            return last;
+        }
+}
 ```
 
-### Two pointers 双指针种类
+#### iterative：
+
+- 理论：不断把 first 后面的节点，摘下来，插到 pre 后面
+
+- pre（反转区间前一个节点）：pre一直不变，pre.next 就是反转区间的第一个节点
+
+- first（反转区间“尾巴”）：注意！first 在整个循环中指到的node不变，但是位置上它会被“不断往后顶”
+
+- second（待搬运的节点）：second 是“要被搬到前面的节点”
+
+- 为什么 for 循环是 right - left 次？
+  * 因为反转区间长度是：right - left + 1。 但：第一个节点（first）不用动，后面每个节点都要被“搬”一次。👉 所以循环次数是：(right - left)
+
+
+```
+dummy ->  1 -> 2  ->  3 -> 4 -> 5
+          ↑    ↑      ↑
+         pre  first second
+
+
+Step 1️⃣：first.next = second.next之后： 
+
+dummy -> 1  -> 2 -> 4 -> 5
+         ↑     ↑
+        pre   second(3) 已被摘下来
+
+
+Step 2️⃣：second.next = pre.next （3.next = 2）
+        被搬动的节点second插在pre后面
+
+dummy -> 1    ->    2 -> 4 -> 5
+         ↑        ↗ ↑
+        pre      3  1st
+                2nd 
+
+
+Step 3️⃣：pre.next = second  （1.next = 3）
+        把pre和second连起来
+
+dummy -> 1 ->  3 -> 2 -> 4 -> 5
+         ↑     ↑    ↑
+        pre   2nd  1st
+
+✔️ 完成一次“头插”
+
+
+
+Step 4️⃣：second = first.next (second = 4)
+        update second到first后面的一个
+        准备下一轮, 也就是把second （4） 查到prev的后面
+
+dummy -> 1 ->  3 -> 2 -> 4 -> 5
+         ↑          ↑    ↑
+        pre        1st  2nd 
+
+
+```
+
+Note:
+
+- 为什么一定要 pre = dummy，而不能 pre = head?
+  - 因为 pre 的语义是：反转区间前一个节点, 而当 left = 1 时，这个节点并不存在，只能用 dummy 人工创造出来
+  - 比如例子：1 → 2 → 3 → 4 → 5，left = 1, right = 3。 你希望反转的是：[1 → 2 → 3]
+  - 如果你写：ListNode pre = head;  那么：pre 指向 1，pre.next 指向 2
+  - 但逻辑上你需要的是：pre 指向 1 前面的那个节点 ⚠️ 问题：1 前面根本没有节点
+  - ❌ 会直接导致这行代码出现问题 pre.next = second; --> 把反转后的节点插到 pre 后面。但如果 pre = head，你永远无法修改 head 本身 --> 你丢失了对“新头节点”的控制
+
+
+```java
+ public ListNode reverseBetween(ListNode head, int left, int right) {
+        if(head == null) return null;
+        ListNode dummy = new ListNode(0); 
+    
+        dummy.next = head;
+
+        // pre来traverse，直到pre的下一个是需要反转的第一个即first
+        ListNode pre = dummy; 
+        for(int i = 0; i<left-1; i++) 
+            pre = pre.next;
+        
+        ListNode first = pre.next; 
+        ListNode second = first.next; 
+        
+        for(int i=0; i<right-left; i++){
+            first.next = second.next;
+            second.next = pre.next;
+            pre.next = second;
+            second = first.next;
+        }
+
+        return dummy.next;
+    }
+```
+
+
+### 判断单链表是否是回文结构Palindrome
+
+1. recursion:
+
+- If we iterate the nodes in reverse using recursion, and iterate forward at the same time 
+using a variable outside the recursive function, then we can check whether or not we have a
+palindrome.
+
+- use frontPointer to point at the begining, currentNode to traverse the list and find the last node
+
+```java
+Stats:
+    - time: O(n), space O(n) b/c recursion stack
+
+
+    class Solution {
+
+        // starts from the begining
+        private ListNode frontPointer;
+
+        // currentNode will be at the end of the list at the begining
+        private boolean recursivelyCheck(ListNode currentNode) {
+            if (currentNode != null) {
+                if (!recursivelyCheck(currentNode.next)) return false;
+                if (currentNode.val != frontPointer.val) return false;
+                frontPointer = frontPointer.next;
+            }
+            return true;
+        }
+
+        public boolean isPalindrome(ListNode head) {
+            frontPointer = head;
+            return recursivelyCheck(head);
+        }
+    }
+```
+
+2. O(1) space, 快慢指针 + 反转后半段链表 + 双指针比较
+
+- Step 1️：用快慢指针找到中点
+  - slow 走一步
+  - fast 走两步
+
+Step 2：反转后半部分链表
+Step 3️：左右两段同时向中间比较
+
+
+
+```java
+
+class Solution {
+    public boolean isPalindrome(ListNode head) {
+        if (head == null || head.next == null) return true;
+
+        // 1. 找中点
+        ListNode slow = head, fast = head;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        // 2. 如果是奇数长度，跳过中点
+        if (fast != null) {
+            slow = slow.next;
+        }
+
+        // 3. 反转后半段
+        ListNode l2 = reverse(slow);
+        ListNode l1 = head;
+
+        // 4. 比较前后两段
+        while(l2 != null){
+
+            if(l1.val != l2.val){
+                return false;
+            }
+            l1 = l1.next;
+            l2 = l2.next;
+        }
+        return true;
+
+    }
+
+    private ListNode reverse(ListNode head) {
+        ListNode prev = null;
+        while (head != null) {
+            ListNode next = head.next;
+            head.next = prev;
+            prev = head;
+            head = next;
+        }
+        return prev;
+    }
+}
+```
+
+### leetcode 25. Reverse Nodes in k-Group
+
+
+
+## Two pointers 双指针种类
 note:
 
 5. Two pointers: 
@@ -304,7 +602,7 @@ note:
 - ex. lc 135-Candy
 - can use Stack 
 
-#### 1.快慢指针
+### 1.快慢指针
 主要解决链表中的问题，比如典型的判定链表中是否包含环。⼀般都初始化指向链表的头结点 head，前进时快指针 fast 在前，慢指针 slow 在后
 
 经典问题1：找环
@@ -366,7 +664,7 @@ note:
 ```
 
 
-#### 2.左右指针
+### 2.左右指针
 解决数组(或者字符串串)中的问题，⽐如⼆分查找、反转数组
 
 
@@ -389,8 +687,7 @@ note:
 
 
 
-
-### Sliding Windows:
+## Sliding Windows:
 1. 框架：
 ```java
     string s, t;
