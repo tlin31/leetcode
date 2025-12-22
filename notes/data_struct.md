@@ -193,6 +193,9 @@ Methods:
 
 ```java
 		Queue<Integer> pq = new PriorityQueue<>();
+
+		PriorityQueue<ListNode> queue= new PriorityQueue<ListNode>(lists.length, (a,b)-> a.val-b.val);
+
 ```
 
 max heap写法：
@@ -378,7 +381,7 @@ output:
 - Maximize array sum after K negations
 
 
-### 单调队列 Monotonic Queue
+## 单调队列 Monotonic Queue
 单调队列是一种保持元素单调（递增或递减）的双端队列结构，用来**解决滑动窗口最大值/最小值**
 
 不是heap！heap是所以元素都排序，单调队列保持元素的先后顺序

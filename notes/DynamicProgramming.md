@@ -5,6 +5,46 @@
 2. Counting ways using n different resources
 3. optimization 
 
+## 一些注意的点
+
+### dp初始化为n+1还是n？
+
+凡是这种问题：
+- 是否能拆分
+- 是否能到达
+- 是否能匹配前缀
+- 👉 dp[i] 通常表示“前 i 个元素是否可行”
+
+  - 所以：dp 大小 = n + 1， dp[0] = true
+
+ex. leetcode 139 word break： 给一个string s 和一个字典wordDict，判断s是否可以被空格拆分为一个或多个在字典中出现的单词。
+
+- 因为 dp[i] 表示的是：前 i 个字符(不包括i)是否可以被成功拆分。
+- 当 i = 0 时表示“空字符串”，当 i = s.length() 时表示“整个字符串”，所以需要 length + 1 个状态来标记包括s的最后一个char的所有字符
+
+```java
+
+public class Solution {
+    public boolean wordBreak(String s, Set<String> dict) {
+        
+        boolean[] dp = new boolean[s.length() + 1];        
+        dp[0] = true;
+ 
+        for(int i=1; i <= s.length(); i++){
+            for(int j=0; j < i; j++){
+                if(dp[j] && dict.contains(s.substring(j, i))){
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        
+        return dp[s.length()];
+    }
+}
+
+```
+
 ## 要确定的条件
 
 1. 确定 base case

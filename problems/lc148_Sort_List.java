@@ -39,6 +39,173 @@ key:
 
 ******************************************************
 
+🌱 从长度 = 1 的子链表开始
+    4 → 2 → 1 → 3
+
+    step = 1:
+    [4] [2] [1] [3]
+
+    step = 2:
+    [2 → 4] [1 → 3]
+
+    step = 4:
+    [1 → 2 → 3 → 4]
+
+👉 每一轮：
+
+    1、把链表按 step 拆成 左右两段： left | right | curr
+
+    2、两两 merge
+
+    3、step *= 2
+
+
+变量     含义
+dummy   虚拟头，统一操作
+step    当前子链表长度
+curr    扫描未处理部分
+left    左子链表
+right   右子链表
+tail    已合并部分的尾部
+
+例子
+    dummy → 4 → 2 → 1 → 3 → null
+
+第 1 轮：step = 1（每 1 个一组）
+    tail = dummy
+    curr = dummy.next = 4
+
+
+🟢 第一次 merge（处理 4 和 2）
+1️、切分
+    left  = [4]
+    right = [2]
+    curr  = [1 → 3]
+
+（通过 split(left,1) 和 split(right,1)）
+
+2️、 merge(left, right)
+    merge [4] & [2] → [2 → 4]
+
+3️、接回链表
+    dummy → 2 → 4
+                ↑ 
+                tail
+
+    tail 移动到 4
+
+
+🟢 第二次 merge（处理 1 和 3）
+1️、 当前状态
+    curr = 1 → 3
+    tail = 4
+
+2️、 切分
+    left  = [1]
+    right = [3]
+    curr  = null
+
+3️、merge
+    merge [1] & [3] → [1 → 3]
+
+4️、 接回
+    dummy → 2 → 4 → 1 → 3 → null
+                        ↑
+                       tail
+
+✅ step = 1 结束后整体链表
+2 → 4 → 1 → 3
+
+
+（每两个内部是有序的）
+
+五、第 2 轮：step = 2
+    step = 2
+    curr = dummy.next = 2
+    tail = dummy
+
+🟢 第一次 merge（处理 [2,4] 和 [1,3]）
+1️、 切分
+    left  = [2 → 4]
+    right = [1 → 3]
+    curr  = null
+
+2️、 merge（关键动画）
+    比较 2 vs 1 → 取 1
+    比较 2 vs 3 → 取 2
+    比较 4 vs 3 → 取 3
+    剩余 → 4
+
+
+    结果：
+    1 → 2 → 3 → 4
+
+3️、 接回
+    dummy → 1 → 2 → 3 → 4 → null
+
+
+    class Solution {
+        public ListNode sortList(ListNode head) {
+            if (head == null || head.next == null) return head;
+
+            // 1. get length
+            int length = 0;
+            ListNode p = head;
+            while (p != null) {
+                length++;
+                p = p.next;
+            }
+
+            ListNode dummy = new ListNode(0);
+            dummy.next = head;
+
+            // 2. bottom-up merge
+            for (int step = 1; step < length; step <<= 1) {
+                ListNode curr = dummy.next;
+                ListNode tail = dummy;
+
+                while (curr != null) {
+                    ListNode left = curr;
+                    ListNode right = split(left, step);
+                    curr = split(right, step);
+
+                    tail = merge(left, right, tail);
+                }
+            }
+
+            return dummy.next;
+        }
+
+        // split list after step nodes
+        private ListNode split(ListNode head, int step) {
+            for (int i = 1; head != null && i < step; i++) {
+                head = head.next;
+            }
+            if (head == null) return null;
+            ListNode second = head.next;
+            head.next = null;
+            return second;
+        }
+
+        // merge two sorted lists, attach after prev, return new tail
+        private ListNode merge(ListNode l1, ListNode l2, ListNode prev) {
+            ListNode cur = prev;
+            while (l1 != null && l2 != null) {
+                if (l1.val <= l2.val) {
+                    cur.next = l1;
+                    l1 = l1.next;
+                } else {
+                    cur.next = l2;
+                    l2 = l2.next;
+                }
+                cur = cur.next;
+            }
+
+            cur.next = (l1 != null) ? l1 : l2;
+            while (cur.next != null) cur = cur.next;
+            return cur;
+        }
+    }
 
 
 ===================================================================================================

@@ -152,3 +152,13 @@ class Solution {
         }
     }
 }
+
+
+推荐系统：
+
+1. go to database fetch user info, 
+2. gets user past purchase records, elasticsearch?
+2. recommendation algo based on user's past purchase, like category/keyword/price range
+
+
+

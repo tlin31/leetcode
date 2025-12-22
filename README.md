@@ -280,6 +280,7 @@ null  <--   1   <--  2          3   -----> 4
     reverseN(1,3)
      → reverseN(2,2)
        → reverseN(3,1)  // base case
+       
 到达 base case 时：
 
     head = 3
@@ -354,7 +355,7 @@ null  <--   1   <--  2          3   -----> 4
 
 
 
-### 反转中间部分链表 reverse a certain part in linked list
+### lc 92: 反转中间部分链表 reverse a certain part in linked list
 
 给⼀个索引区间 [m,n] (索引从 1 开始)，仅仅反转区间中的链表元素。
 
@@ -588,6 +589,160 @@ class Solution {
 
 ### leetcode 25. Reverse Nodes in k-Group
 
+```java
+key:
+    - tail recursive
+    - first move cur
+    - pre node point to the the answer of sub-problem 
+
+
+ class Solution {
+    public ListNode reverseKGroup(ListNode head, int k) {
+        ListNode node = head;
+        int count = 0;
+
+        // check early
+        // 1.if less then k node left we just return head 
+        while (count < k) { 
+            if(node == null) return head;
+            node = node.next;
+            count++;
+        }
+        
+        //pre node point to the the answer of sub-problem 
+        ListNode pre = reverseKGroup(node, k); 
+        
+        // 2.reverse k node at current level 
+        ListNode cur = head;
+        while (count > 0) {  
+            ListNode next = cur.next; 
+            cur.next = pre; 
+            pre = cur; 
+            cur = next;
+            
+            count = count - 1;
+        }
+        return pre;
+    }
+
+}
+```
+
+#### iterative:
+```
+链表：     1 → 2 → 3 → 4 → 5 → 6 → 7, k = 3
+期望结果：  3 → 2 → 1 → 6 → 5 → 4 → 7
+
+初始状态：
+    dummy → 1 → 2 → 3 → 4 → 5 → 6 → 7
+     pre
+     end
+
+
+Step 1️⃣: start = pre.next =1，通过for loop，找到要反转的list的end = 3, nextSublist = 4
+
+
+    dummy →   1   →   2   →    3   →   4   → 5 → 6 → 7
+     pre     start            end  nextSublist
+     
+
+
+Step 2️⃣ 切断子链表: end.next = null;
+
+    现在链表被切成两段：
+
+    dummy → 1 → 2 → 3 → null
+
+    4 → 5 → 6 → 7
+
+
+
+Step 3️⃣ 反转子链表,然后pre.next = reverse(start); --> dummy.next = 3
+    
+    注意：start 仍然指向 原来的 1, 它现在是反转后这段的尾节点
+
+    dummy → 3 → 2 → 1 → null        4 → 5 → 6 → 7
+     ↑      ↑       ↑               ↑
+     pre   end    start          nextSublist
+
+
+
+Step 4️⃣ 接回后半段:start.next = nextSublist;
+
+
+    dummy → 3 → 2 → 1   →   4   → 5 → 6 → 7
+     ↑      ↑       ↑       ↑
+    pre    end    start  nextSublist
+
+
+
+Step 5️⃣：移动 pre 和 end，为下一轮做准备， pre = end = start = 1;
+
+dummy → 3 → 2 → 1   →   4 → 5 → 6 → 7
+                ↑       ↑
+             pre/end  nextSublist
+
+```
+
+
+```java
+
+class Solution {
+    public ListNode reverseKGroup(ListNode head, int k) {
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+
+        ListNode pre = dummy;
+        ListNode end = dummy;
+
+        while (true) {
+
+            ListNode start = pre.next;
+
+            // 1. 找到要反转的sublist的end
+            for (int i = 0; i < k; i++) {
+                if(end == null) 
+                    break;
+                else
+                    end = end.next;
+            }
+
+             // 不够 k 个，结束
+            if (end == null) break;
+
+            // 2. 标记区间
+            ListNode nextSublist = end.next;
+
+            // 3. 切断 + 反转
+            end.next = null;
+            pre.next = reverse(start);
+
+            // 4. 接回
+            start.next = nextSublist;
+
+            // 5. 移动 pre 和 end到头
+            pre = start;
+            end = start;
+
+        }
+
+        return dummy.next;
+    }
+
+    private ListNode reverse(ListNode head) {
+        ListNode prev = null;
+        ListNode cur = head;
+        while (cur != null) {
+            ListNode next = cur.next;
+            cur.next = prev;
+            prev = cur;
+            cur = next;
+        }
+        return prev;
+    }
+}
+
+```
 
 
 ## Two pointers 双指针种类
@@ -689,9 +844,32 @@ note:
 
 ## Sliding Windows:
 1. 框架：
+
+```java
+    public int fn(int[] arr) {
+        int left = 0, ans = 0, curr = 0;
+
+        for (int right = 0; right < arr.length; right++) {
+            // do logic here to add arr[right] to curr
+
+            while (WINDOW_CONDITION_BROKEN) {
+                // remove arr[left] from curr
+                left++;
+            }
+
+            // update ans
+        }
+
+        return ans;
+    }
+```
+
+例子：
 ```java
     string s, t;
-    // 在 s 中寻找 t 的「最⼩小覆盖⼦子串串」 int left = 0, right = 0; string res = s;
+    // 在 s 中寻找 t 的「最⼩小覆盖⼦子串串」 
+    int left = 0, right = 0; string res = s;
+
     // 从右边开始挪动
     while(right < s.size()) {
         window.add(s[right]);
@@ -925,7 +1103,7 @@ class Solution {
 
 
 
-#Array & Linked list
+## Array & Linked list
 [array-problem summary](https://note.youdao.com/web/#/file/WEBbf5b9176e1667a7087aeca29fcdcb766/note/WEB22425e6d258587db413adefda8979ca4/)
 <br> <br />
 [array-key points](https://note.youdao.com/web/#/file/WEBbf5b9176e1667a7087aeca29fcdcb766/note/WEB040b60a3c8ed07e20ab6b7535d94cd49/)
@@ -1106,11 +1284,6 @@ Redo:
 |36|[1313. Decompress Run-Length Encoded List](https://leetcode.com/problems/decompress-run-length-encoded-list/)|[Java](problems/lc1313-decompress-run-length-encoded-list.java)|  | java- ans.stream().mapToInt(i -> i).toArray()  | Hard
 |37|[80. Remove Duplicates from Sorted Array II](https://leetcode.com/problems/remove-duplicates-from-sorted-array-ii/)|[Java](problems/lc80-remove-duplicates-from-sorted-array-ii.java)|  | 2 pointers  | Medium
 |38|[974. Subarray Sums Divisible by K ](https://leetcode.com/problems/subarray-sums-divisible-by-k/)|[Java](problems/lc974-subarray-sums-divisible-by-k.java)|  | prefix sum, mod array, ~lc523  | Medium
-
-
-
-
-
  
 (刷到 835)
 
@@ -1609,6 +1782,7 @@ For primitives, Arrays.sort() uses dual pivot quicksort algorithms.
     Arrays.binarySearch(array,key)) used to apply binary search on an sorted array.
     Collections.binarySearch() used to apply binary search on a collection based on comparators.
 
+```java
             int i = Arrays.binarySearch(dp, 0, len, num);   // search in entire array
             int i = Arrays.binarySearch(int[] arr, int fromIndex, int toIndex, int key) // in subarray
 
@@ -1616,17 +1790,19 @@ For primitives, Arrays.sort() uses dual pivot quicksort algorithms.
                 i = -(i + 1);
             }
 
+```
 
 ### Binary search:
 
-注意：
+**注意：**
 1. ”maximize the minimum" or "minimize the maximum“ 就是binary search解法！
 
 
-三种情况不同的只需要改两行： 
-    
-    1. 找到target的时候，左侧边界right = mid - 1;右侧边界left = mid + 1
-    2. 最后的返回条件，左侧边界检查左侧越界情况
+2. 三种情况不同的只需要改两行： 
+  - 1. 找到target的时候，左侧边界right = mid - 1;右侧边界left = mid + 1
+  - 2. 最后的返回条件，左侧边界检查左侧越界情况
+```java 
+    左侧
         if (left >= nums.length || nums[left] != target) return -1， 
 
     右侧
@@ -1635,6 +1811,176 @@ For primitives, Arrays.sort() uses dual pivot quicksort algorithms.
 if you use while (lo <= hi) you use lo=mid+1 and hi=mid-1
 
 if you use while (lo < hi) you use lo = mid+1 and hi=mid
+```
+
+
+3. 最后 return left 还是 right，取决于：**循环结束时，哪一个指针“一定满足你要找的条件”**
+
+- 二分不是在找“位置”，而是在找 第一个 / 最后一个满足某个 predicate 的点。
+| 目标        | 最后 return |
+| --------- | --------- |
+| 第一个满足条件的  | `left`    |
+| 最后一个满足条件的 | `right`   |
+
+
+
+🟢 例 1：LeetCode 704（标准找值
+- 在一个已排序（升序）的整数数组 nums 中搜索一个目标值 target，如果找到，返回其索引；如果没找到，返回 -1
+
+```java
+    while (l <= r) {
+        int mid = l + (r - l) / 2;
+        if (nums[mid] == target) return mid;
+        else if (nums[mid] < target) 
+            l = mid + 1;
+        else 
+            r = mid - 1;
+    }
+    return -1;
+```
+
+👉 这是“精确命中”，找不到就 -1，不涉及 return left/right
+
+
+🟡 例 2：第一个 ≥ target（Lower Bound）
+nums = [1,2,4,4,5],target = 4,答案是 index = 2
+
+```java
+    while (l <= r) {
+        int mid = l + (r - l) / 2;
+        if (nums[mid] >= target) {
+            r = mid - 1;
+        } else {
+            l = mid + 1;
+        }
+    }
+    return l;
+```
+
+
+循环结束时,l 指向第一个满足条件的：
+```
+         r | l
+           ↓
+[ < target ][ >= target ]
+```
+ 
+
+🟡 例 3：最后一个 ≤ target（Upper Bound）
+
+- return r？
+
+结束状态：
+```
+[ <= target ][ > target ]
+           ↑
+           r
+
+```
+👉 r 是 最后一个合法的
+
+
+🔴 例 4：二分答案（最重要的面试场景）
+
+典型题：
+- Capacity To Ship Packages
+
+- Koko Eating Bananas
+
+- Minimum Speed / Maximum Value
+
+
+
+**LeetCode 875 — Koko Eating Bananas**
+
+问题：
+- piles = [3, 6, 7, 11]， h = 8 小时，每小时吃 k 根香蕉，问：最小的 k 是多少？
+
+🔍 我们二分的不是数组，而是「答案空间」
+k = 1  → 吃得太慢 ❌
+k = 2  → ❌
+k = 3  → ❌
+k = 4  → ✅
+k = 5  → ✅
+k = 6  → ✅
+
+👉 明显单调，所以可以二分：
+
+false false false true true true
+
+1️⃣ 搜索区间
+- left = 1
+- right = max(piles) = 11
+
+2️⃣ 判定函数
+```java
+    boolean canEat(int k) {
+        int hours = 0;
+        for (int p : piles) {
+            hours += (p + k - 1) / k; // 向上取整
+        }
+        return hours <= h;
+    }
+```
+
+完整二分过程（逐步动画）
+
+🟢 Step 1
+- l = 1, r = 11
+- mid = 6
+- 算 canEat(6)：总 = 6 ≤ 8 ✅
+
+👉 mid 可行 → 向左找更小的： r = mid - 1 = 5
+
+🟢 Step 2
+- l = 1, r = 5
+- mid = 3
+
+3/3=1
+6/3=2
+7/3=3
+11/3=4
+总 = 10 > 8 ❌
+
+👉 不可行 → 速度太慢 → 向右： l = mid + 1 = 4
+
+🟢 Step 3
+- l = 4, r = 5
+- mid = 4
+
+3/4=1
+6/4=2
+7/4=2
+11/4=3
+总 = 8 ≤ 8 ✅
+
+
+👉 可行 → 再试更小
+
+r = mid - 1 = 3
+
+🛑 结束条件
+l = 4, r = 3
+l > r → loop ends
+
+为什么最后 return left？
+
+```
+    k: 1  2  3  4  5  6 ...
+       ❌ ❌ ❌ ✅ ✅ ✅
+               ↑
+             left
+
+
+    right = 3 → 最后一个 ❌
+
+    left = 4 → 第一个 ✅
+```
+
+👉 题目要的是：最小可行解, 所以 return left; // 4
+
+
+
 
 1) 最基本的二分查找算法
 

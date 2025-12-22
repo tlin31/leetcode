@@ -48,96 +48,134 @@ key:
 ******************************************************
 
 
+核心数据结构（3 个）
+	key → Node
+	freq → DoublyLinkedList
+	minFreq： 永远指向当前最小频率
 
-=======================================================================================================
-method 1:
+Node 结构
+	key, value, freq
+	prev, next
 
-method:
-	- use 3 hashmaps
-	- the least recently+frequently used value to be removed is the first element in LinkedHashSet 
-	  with the lowest count/frequency.
-	- min is used to track the group of elements with least frequency
-	- lists maps frequency to groups, each element in same group has the same count.
-	- countToLRUKeys = <count, {set of keys with this count}>
+总体结构图
+	freq = 1  →  [k2, k5, k7]
+	freq = 2  →  [k3, k1]
+	freq = 3  →  [k4]
 
-stats:
-
-	- Runtime: 59 ms, faster than 18.29% of Java online submissions for LFU Cache.
-	- Memory Usage: 59.2 MB, less than 60.00% of Java online submissions for LFU Cache.
-
+	每个 freq 对应一个双向链表，链表内：LRU
 
 
-public class LFUCache {
-    
-    private int min;
+class LFUCache {
 
-    private final int capacity;
-    private final HashMap<Integer, Integer> keyToVal;
-    private final HashMap<Integer, Integer> keyToCount;
-    private final HashMap<Integer, LinkedHashSet<Integer>> countToLRUKeys;
-    
-    public LFUCache(int capacity) {
-        this.min = -1;
-        this.capacity = capacity;
-        this.keyToVal = new HashMap<>();
-        this.keyToCount = new HashMap<>();
-        this.countToLRUKeys = new HashMap<>();
-    }
-    
-    public int get(int key) {
-        if (!keyToVal.containsKey(key)) return -1;
-        
-        int count = keyToCount.get(key);
-
-        // remove key from current count (since we will inc count)
-        countToLRUKeys.get(count).remove(key); 
-
-        if (count == min && countToLRUKeys.get(count).size() == 0) 
-        	min++; 
-        
-        putCount(key, count + 1);
-        return keyToVal.get(key);
-    }
-    
-    public void put(int key, int value) {
-
-    	// can't put any more
-        if (capacity <= 0) return;
-        
-        // update key's value & update key's count
-        if (keyToVal.containsKey(key)) {
-            keyToVal.put(key, value); 
-            get(key); 
-            return;
-        } 
-        
-        // evict LRU from this min count bucket
-        if (keyToVal.size() >= capacity){
-            evict(countToLRUKeys.get(min).iterator().next()); 
+    class Node {
+        int key, value, freq;
+        Node prev, next;
+        Node(int k, int v) {
+            key = k;
+            value = v;
+            freq = 1;
         }
-        
-        // if key doesn't exist before
-        min = 1;
-        putCount(key, min); // adding new key and count
-        keyToVal.put(key, value); // adding new key and value
     }
-    
-    private void evict(int key) {
-        countToLRUKeys.get(min).remove(key);
-        keyToVal.remove(key);
+
+    class DoublyLinkedList {
+        Node head, tail;
+        int size;
+
+        DoublyLinkedList() {
+            head = new Node(0, 0);
+            tail = new Node(0, 0);
+            head.next = tail;
+            tail.prev = head;
+            size = 0;
+        }
+
+        void addFirst(Node node) {
+            node.next = head.next;
+            node.prev = head;
+            head.next.prev = node;
+            head.next = node;
+            size++;
+        }
+
+        void remove(Node node) {
+            node.prev.next = node.next;
+            node.next.prev = node.prev;
+            size--;
+        }
+
+        Node removeLast() {
+            if (size > 0) {
+                Node node = tail.prev;
+                remove(node);
+                return node;
+            }
+            return null;
+        }
     }
+
+/** -------------------------------------------------
+ * 
+ * 			主逻辑
+ * 
+ * ---------------------------------------------------**/
     
-    private void putCount(int key, int count) {
-        keyToCount.put(key, count);
-        countToLRUKeys.computeIfAbsent(count, ignore -> new LinkedHashSet<>());
-        countToLRUKeys.get(count).add(key);
+    int capacity, minFreq;
+    Map<Integer, Node> nodeMap;
+    Map<Integer, DoublyLinkedList> freqMap;
+
+    public LFUCache(int capacity) {
+        this.capacity = capacity;
+        this.minFreq = 0;
+        nodeMap = new HashMap<>();
+        freqMap = new HashMap<>();
+    }
+
+    public int get(int key) {
+        if (!nodeMap.containsKey(key)) return -1;
+        Node node = nodeMap.get(key);
+        updateFreq(node);
+        return node.value;
+    }
+
+    public void put(int key, int value) {
+        if (capacity == 0) return;
+
+        if (nodeMap.containsKey(key)) {
+            Node node = nodeMap.get(key);
+            node.value = value;
+            updateFreq(node);
+        } else {
+            if (nodeMap.size() == capacity) {
+                DoublyLinkedList minList = freqMap.get(minFreq);
+                Node toRemove = minList.removeLast();
+                nodeMap.remove(toRemove.key);
+            }
+            Node node = new Node(key, value);
+            nodeMap.put(key, node);
+            freqMap.computeIfAbsent(1, k -> new DoublyLinkedList()).addFirst(node);
+            minFreq = 1;
+        }
+    }
+
+    private void updateFreq(Node node) {
+        int freq = node.freq;
+        DoublyLinkedList list = freqMap.get(freq);
+        list.remove(node);
+
+        if (freq == minFreq && list.size == 0) {
+            minFreq++;
+        }
+
+        node.freq++;
+        freqMap.computeIfAbsent(node.freq, k -> new DoublyLinkedList()).addFirst(node);
     }
 }
 
-=======================================================================================================
-method 2:
 
-method:
+
+=======================================================================================================
+
+method 2:
 
 	- Java O(1) Solution Using Two HashMap and One DoubleLinkedList
 	- cache: key to Node mapping, storing all nodes by their keys
@@ -296,6 +334,94 @@ public class LFUCache {
 	    }
 	}
 }
+
+
+=======================================================================================================
+method 1:
+
+method:
+	- use 3 hashmaps
+	- the least recently+frequently used value to be removed is the first element in LinkedHashSet 
+	  with the lowest count/frequency.
+	- min is used to track the group of elements with least frequency
+	- lists maps frequency to groups, each element in same group has the same count.
+	- countToLRUKeys = <count, {set of keys with this count}>
+
+stats:
+
+	- Runtime: 59 ms, faster than 18.29% of Java online submissions for LFU Cache.
+	- Memory Usage: 59.2 MB, less than 60.00% of Java online submissions for LFU Cache.
+
+
+
+public class LFUCache {
+    
+    private int min;
+
+    private final int capacity;
+    private final HashMap<Integer, Integer> keyToVal;
+    private final HashMap<Integer, Integer> keyToCount;
+    private final HashMap<Integer, LinkedHashSet<Integer>> countToLRUKeys;
+    
+    public LFUCache(int capacity) {
+        this.min = -1;
+        this.capacity = capacity;
+        this.keyToVal = new HashMap<>();
+        this.keyToCount = new HashMap<>();
+        this.countToLRUKeys = new HashMap<>();
+    }
+    
+    public int get(int key) {
+        if (!keyToVal.containsKey(key)) return -1;
+        
+        int count = keyToCount.get(key);
+
+        // remove key from current count (since we will inc count)
+        countToLRUKeys.get(count).remove(key); 
+
+        if (count == min && countToLRUKeys.get(count).size() == 0) 
+        	min++; 
+        
+        putCount(key, count + 1);
+        return keyToVal.get(key);
+    }
+    
+    public void put(int key, int value) {
+
+    	// can't put any more
+        if (capacity <= 0) return;
+        
+        // update key's value & update key's count
+        if (keyToVal.containsKey(key)) {
+            keyToVal.put(key, value); 
+            get(key); 
+            return;
+        } 
+        
+        // evict LRU from this min count bucket
+        if (keyToVal.size() >= capacity){
+            evict(countToLRUKeys.get(min).iterator().next()); 
+        }
+        
+        // if key doesn't exist before
+        min = 1;
+        putCount(key, min); // adding new key and count
+        keyToVal.put(key, value); // adding new key and value
+    }
+    
+    private void evict(int key) {
+        countToLRUKeys.get(min).remove(key);
+        keyToVal.remove(key);
+    }
+    
+    private void putCount(int key, int count) {
+        keyToCount.put(key, count);
+        countToLRUKeys.computeIfAbsent(count, ignore -> new LinkedHashSet<>());
+        countToLRUKeys.get(count).add(key);
+    }
+}
+
+
 =======================================================================================================
 method 3:
 

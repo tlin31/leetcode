@@ -33,28 +33,46 @@ key:
 ====================================================================================================
 method 1:
 
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode rotateRight(ListNode head, int k) {
+        if(head==null||head.next==null) return head;
+        ListNode dummy = new ListNode();
+        dummy.next = head;
 
-public ListNode rotateRight(ListNode head, int n) {
-    if (head==null||head.next==null) return head;
-    ListNode dummy=new ListNode(0);
-    dummy.next=head;
-    ListNode fast=dummy,slow=dummy;
+        int size = 0;
+        ListNode cur = head;
+        for (size = 1; cur.next != null; size++)
+            cur = cur.next;
 
-    int total;
-    for (total=0;fast.next!=null;total++)//Get the total length 
-    	fast=fast.next;
-    
-    for (int j=total-n%total;j>0;j--) //Get the i-n%i th node
-    	slow=slow.next;
-    
-    fast.next=dummy.next; //Do the rotation
-    dummy.next=slow.next;
-    slow.next=null;
-    
-    return dummy.next;
+        // make the list circular
+        cur.next = head;
+
+        k = k%size; 
+
+        // find new tail : (n - k - 1)th node
+        // and new head : (n - k)th node
+        ListNode new_tail = head;
+        for (int i = 0; i < size - k - 1; i++) 
+            new_tail = new_tail.next;
+
+        ListNode new_head = new_tail.next;
+        new_tail.next = null;
+        return new_head;
+
+
+        
+    }
 }
-
-
 
 
 

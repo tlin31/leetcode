@@ -43,16 +43,16 @@ key:
 
 1. 一个 双向链表 保存栈顺序，栈顶就是链表尾部。
 
-bottom <-> ... <-> ... <-> top
+	bottom <-> ... <-> ... <-> top
 
 
 2. 一个 TreeMap<Integer, List<Node>> 保存每个值对应的链表节点们
 
-key 是值，value 是一组链表节点（同值可能有很多）
+	key 是值，value 是一组链表节点（同值可能有很多）
 
-TreeMap 自动给我们：
+	TreeMap 自动给我们：
 
-O(log n) 找最大值 (lastKey())，可以快速定位到最大值对应的节点（List 最后一个）
+	O(log n) 找最大值 (lastKey())，可以快速定位到最大值对应的节点（List 最后一个）
 
 3. 删除操作只需要 O(1) on node（因为双向链表可以 O(1) 删除节点）
 
@@ -60,7 +60,9 @@ O(log n) 找最大值 (lastKey())，可以快速定位到最大值对应的节�
 面试问题：
 2. 为什么选 TreeMap？
 
-	自动排序 → O(log n) 找 max & 可以按 value 聚合多个 Node & 支持并发扩展（ConcurrentSkipListMap）
+	自动排序 → O(log n) 找 max 
+	可以按 value 聚合多个 Node 
+	支持并发扩展（ConcurrentSkipListMap）
 
 	像 Redis ZSet（skiplist + hash）有类似结构。
 
@@ -151,6 +153,86 @@ class MaxStack {
         return max;
     }
 }
+
+
+=======================================================================================================
+
+Method: 两个balanced tree （tree set）
+
+一个 in pushing order (stack), 另一个 sorted by values (values). 
+同时要给每个element一个unique id，这里用global var cnt，每加一个element就cnt++
+
+
+Exampls:
+["MaxStack", "push", "push", "push", "top", "popMax", "top", "peekMax", "pop", "top"]
+[[], [5], [1], [5], [], [], [], [], [], []]
+
+After the first three push calls, our stack and values are sorted as:
+
+stack = [(id:0, val:5), (id:1, val:1), (id:2, val:5)]
+values = [(id:1, val:1), (id:0, val:5), (id:2, val:5)]
+
+Then, top returns the last element in stack, whose value is 5;
+
+popMax is about to remove the last element in values, (id:2, val:5), in both stack and values. So after popMax returns 5, the two balanced trees are:
+
+stack = [(id:0, val:5), (id:1, val:1)]
+values = [(id:1, val:1), (id:0, val:5)]
+
+Then, top returns the last element in stack, whose value is 1; Similar, the following peekMax returns the last element in values, whose value is 5.
+
+After pop is called, we remove (id:1, val:1) and return the value 5, so:
+
+stack = [(id:0, val:5)]
+values = [(id:0, val:5)]
+
+Finally, the last call of top gives the only element (id:0, val:5), whose value is 5.
+
+
+class MaxStack {
+
+    private TreeSet<int[]> stack;
+    private TreeSet<int[]> values;
+    private int cnt;
+
+    public MaxStack() {
+        Comparator<int[]> comp = (a, b) -> {
+            return a[0] == b[0] ? a[1] - b[1] : a[0] - b[0];
+        };
+        stack = new TreeSet<>(comp);
+        values = new TreeSet<>(comp);
+        cnt = 0;
+    }
+
+    public void push(int x) {
+        stack.add(new int[] { cnt, x });
+        values.add(new int[] { x, cnt });
+        cnt++;
+    }
+
+    public int pop() {
+        int[] pair = stack.pollLast();
+        values.remove(new int[] { pair[1], pair[0] });
+        return pair[1];
+    }
+
+    public int top() {
+        return stack.last()[1];
+    }
+
+    public int peekMax() {
+        return values.last()[0];
+    }
+
+    public int popMax() {
+        int[] pair = values.pollLast();
+        stack.remove(new int[] { pair[1], pair[0] });
+        return pair[0];
+    }
+}
+
+
+
 
 
 =======================================================================================================

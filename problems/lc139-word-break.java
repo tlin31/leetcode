@@ -111,7 +111,8 @@ public class Solution {
     }
     
     public boolean wordBreak(String s, Set<String> wordDict) {
-        TrieNode node = new TrieNode(), cur;
+        TrieNode node = new TrieNode(), 
+                 cur;
 
         for (String i : wordDict) 
             addWord(node, i);

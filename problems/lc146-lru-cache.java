@@ -40,6 +40,39 @@ key:
 ******************************************************
 
 
+！！ Note
+❌ Bug 2：moveToFront() 少了 remove（逻辑 bug）
+	你的 moveToFront：
+	private void moveToFront(ListNode target){
+	    target.pre = head;
+	    target.next = head.next;
+	    head.next.pre = target;
+	    head.next = target;
+	}
+
+❗问题是什么？
+
+	👉 如果这个 node 已经在链表中：
+
+	它原来的 pre / next 没断
+
+	又被强行插到 head 后
+
+	链表会形成环或断链
+
+✅ 正确逻辑（LRU 核心）
+
+	移动 = 先删除 + 再插入
+
+	private void moveToFront(ListNode node) {
+	    removeNode(node);
+	    addNode(node);
+	}
+
+
+
+
+
 1. hash map holds iterators to linked list
 2. linked list holds key and value, key to access hash map items
 3. when item is accessed, it is promoted - moved to the tail of the list - O(1) operation
@@ -47,141 +80,94 @@ key:
 5. when item is not promoted long time, it is moved to the head of the list automatically
 6. get() - O(1) performance, set() - O(1) performance
 
+class LRUCache {
 
-=======================================================================================================
-method 1:
+    int capacity;
+    int count;
+    ListNode head, tail;
+    HashMap<Integer, ListNode> map = new HashMap<>();
 
-method:
+    class ListNode {
+        int key, value;
+        ListNode pre, next;
+    }
 
-	- implement the queue by using a doubly linked list --> head is old, tail is new
-	- a hashtable that keeps track of the keys and its values in the double linked list. 
-	- One interesting property about double linked list is that the node can remove itself 
-	  	without other reference &  constant time to add and remove nodes from the head or tail.
-	-  + create a pseudo head and tail to mark the boundary, so that we dont need to check the NULL
-		node during the update. --> code concise and clean + good performance
+    public LRUCache(int capacity) {
+        this.capacity = capacity;
+        count = 0;
 
-	- actual implementation:
-		-> get: after get the value, move this element to the head
+        head = new ListNode();
+        tail = new ListNode();
 
-stats:
+        head.next = tail;
+        tail.pre = head;
+    }
 
-	- 
-	- Runtime: 58 ms, faster than 83.90% of Java online submissions for LRU Cache.
-	- Memory Usage: 57.6 MB, less than 60.74% 
+    public int get(int key) {
+        ListNode node = map.get(key);
+        if (node == null) return -1;
 
+        moveToFront(node);
+        return node.value;
+    }
 
+    public void put(int key, int value) {
+        ListNode node = map.get(key);
 
-	import java.util.Hashtable;
-	public class LRUCache {
+        if (node == null) {
+            node = new ListNode();
+            node.key = key;
+            node.value = value;
 
-		class DLinkedNode {
-		  int key;
-		  int value;
-		  DLinkedNode prev;
-		  DLinkedNode post;
-		}
+            map.put(key, node);
+            addNode(node);
+            count++;
 
-		private HashMap<Integer, DLinkedNode>  cache = new HashMap<Integer, DLinkedNode>();
-		private int count;
-		private int capacity;
-		private DLinkedNode head, tail;
+            if (count > capacity) {
+                ListNode removed = popTail();
+                map.remove(removed.key);
+                count--;
+            }
+        } else {
+            node.value = value;
+            moveToFront(node);
+        }
+    }
 
-		public LRUCache(int capacity) {
-		    this.count = 0;
-		    this.capacity = capacity;
+    // ===== 双向链表操作 =====
 
-		    head = new DLinkedNode();
-		    head.prev = null;
+    private void addNode(ListNode node) {
+        node.pre = head;
+        node.next = head.next;
+        head.next.pre = node;
+        head.next = node;
+    }
 
-		    tail = new DLinkedNode();
-		    tail.post = null;
+    private void removeNode(ListNode node) {
+        node.pre.next = node.next;
+        node.next.pre = node.pre;
+    }
 
-		    head.post = tail;
-		    tail.prev = head;
-		}
+    private void moveToFront(ListNode node) {
+        removeNode(node);
+        addNode(node);
+    }
 
-		
-		// add the new node right after head
-		private void addNode(DLinkedNode node) {
-		    
-			// add node's front & back link
-		  	node.prev = head;
-		  	node.post = head.post;
-
-		  	// change head & next element's front & back link
-		  	DLinkedNode next = head.post;
-		  	next.prev = node;
-		  	head.post = node;
-		}
-
-		// Remove an existing node from the linked list.
-		private void removeNode(DLinkedNode node){
-		  DLinkedNode before = node.prev;
-		  DLinkedNode next = node.post;
-
-		  before.post = next;
-		  next.prev = before;
-		}
-		
-		//Move certain node in between to the head.
-		private void moveToHead(DLinkedNode node){
-		  this.removeNode(node);
-		  this.addNode(node);
-		}
-
-		// pop the current tail. 
-		private DLinkedNode popTail(){
-		  DLinkedNode res = tail.prev;
-		  this.removeNode(res);
-		  return res;
-		}
+    private ListNode popTail() {
+        ListNode node = tail.pre;
+        removeNode(node);
+        return node;
+    }
+}
 
 
-		public int get(int key) {
+/**
+ * Your LRUCache object will be instantiated and called as such:
+ * LRUCache obj = new LRUCache(capacity);
+ * int param_1 = obj.get(key);
+ * obj.put(key,value);
+ */
 
-		  DLinkedNode node = cache.get(key);
-		  if(node == null){
-		    return -1; // should raise exception here.
-		  }
-
-		  // move the accessed node to the head;
-		  this.moveToHead(node);
-
-		  return node.value;
-		}
-
-
-		public void put(int key, int value) {
-		  DLinkedNode node = cache.get(key);
-
-		  if(node == null){
-
-		  	// insert new node
-		    DLinkedNode newNode = new DLinkedNode();
-		    newNode.key = key;
-		    newNode.value = value;
-
-		    this.cache.put(key, newNode);
-		    this.addNode(newNode);
-
-		    ++count;
-
-		    if(count > capacity){
-		      // pop the tail
-		      DLinkedNode tail = this.popTail();
-		      this.cache.remove(tail.key);
-		      --count;
-		    }
-		  }
-
-		  else{
-		    // update the value.
-		    node.value = value;
-		    this.moveToHead(node);
-		  }
-		}
-
-	}
 
 
 

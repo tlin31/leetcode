@@ -26,6 +26,7 @@ key:
 	- first move cur
     - pre node point to the the answer of sub-problem 
 
+
 // Runtime: 0 ms, faster than 100.00% 
 // Memory Usage: 38.8 MB, less than 24.14%
 
@@ -61,6 +62,60 @@ key:
 }
 
 =========================================================================================================================================================
+
+
+链表：     1 → 2 → 3 → 4 → 5 → 6 → 7, k = 3
+期望结果：  3 → 2 → 1 → 6 → 5 → 4 → 7
+
+初始状态：
+    dummy → 1 → 2 → 3 → 4 → 5 → 6 → 7
+     pre
+     end
+
+
+Step 1️: start = pre.next =1，通过for loop，找到要反转的list的end = 3, nextSublist = 4
+
+
+    dummy →   1   →   2   →    3   →   4   → 5 → 6 → 7
+     pre     start            end  nextSublist
+     
+
+
+Step 2️ 切断子链表: end.next = null;
+
+    现在链表被切成两段：
+
+    dummy → 1 → 2 → 3 → null
+
+    4 → 5 → 6 → 7
+
+
+
+Step 3️ 反转子链表,然后pre.next = reverse(start); --> dummy.next = 3
+    
+    注意：start 仍然指向 原来的 1, 它现在是反转后这段的尾节点
+
+    dummy → 3 → 2 → 1 → null        4 → 5 → 6 → 7
+     ↑      ↑       ↑               ↑
+     pre   end    start          nextSublist
+
+
+
+Step 4️ 接回后半段:start.next = nextSublist;
+
+
+    dummy → 3 → 2 → 1   →   4   → 5 → 6 → 7
+     ↑      ↑       ↑       ↑
+    pre    end    start  nextSublist
+
+
+
+Step 5️：移动 pre 和 end，为下一轮做准备， pre = end = start = 1;
+
+dummy → 3 → 2 → 1   →   4 → 5 → 6 → 7
+                ↑       ↑
+             pre/end  nextSublist
+
 
 
 class Solution {
