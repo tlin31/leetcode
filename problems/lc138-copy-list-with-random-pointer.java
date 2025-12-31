@@ -61,75 +61,6 @@ class Node {
     }
 }
 
-=======================================================================================================
-method 1: https://leetcode.com/problems/copy-list-with-random-pointer/discuss/43491/A-solution-with-constant-space-complexity-O(1)-and-linear-time-complexity-O(N)
-
-method:
-
-	- The idea is to associate the original node with its copy node in a single linked list. 
-
-	- The algorithm is composed of the follow three steps which are also 3 iteration rounds.
-		1. Iterate the original list and duplicate each node. The duplicate of each node 
-		   follows its original immediately.
-		2. Iterate the new list and assign the random pointer for each duplicated node.
-		3. Restore the original list and extract the duplicated nodes.
-
-	- 
-
-stats:
-
-	- Time: O(n)
-	- Space: O(1)
-
-
-public RandomListNode copyRandomList(RandomListNode head) {
-  RandomListNode iter = head, next;
-
-  // First round: make copy of each node,and link them together side-by-side in a single list.
-  while (iter != null) {
-    next = iter.next;
-
-    RandomListNode copy = new RandomListNode(iter.label);
-    iter.next = copy;
-    copy.next = next;
-
-    iter = next;
-  }
-
-  // Second round: assign random pointers for the copy nodes.
-  iter = head;
-  while (iter != null) {
-    if (iter.random != null) {
-      iter.next.random = iter.random.next;
-    }
-    iter = iter.next.next;
-  }
-
-  // Third round: restore the original list, and extract the copy list.
-  iter = head;
-  RandomListNode pseudoHead = new RandomListNode(0);
-  RandomListNode copy, copyIter = pseudoHead;
-
-  while (iter != null) {
-    next = iter.next.next;
-
-    // extract the copy
-    copy = iter.next;
-    copyIter.next = copy;
-    copyIter = copy;
-
-    // restore the original list
-    iter.next = next;
-
-    iter = next;
-  }
-
-  return pseudoHead.next;
-}
-
-
-=======================================================================================================
-method 2:
 
 method:
 
@@ -141,35 +72,77 @@ stats:
 	- 
 	- 
 
-public RandomListNode copyRandomList(RandomListNode head) {
-  if (head == null) return null;
-  
-  Map<RandomListNode, RandomListNode> map = new HashMap<RandomListNode, RandomListNode>();
-  
-  // loop 1. copy all the nodes
-  RandomListNode node = head;
-  while (node != null) {
-    map.put(node, new RandomListNode(node.label));
-    node = node.next;
-  }
-  
-  // loop 2. assign next and random pointers
-  node = head;
-  while (node != null) {
-    map.get(node).next = map.get(node.next);
-    map.get(node).random = map.get(node.random);
-    node = node.next;
-  }
-  
-  return map.get(head);
+public Node copyRandomList(Node head) {
+    if (head == null) return null;
+
+    Map<Node, Node> map = new HashMap<>();
+
+    // 1. 复制所有节点
+    Node cur = head;
+    while (cur != null) {
+        map.put(cur, new Node(cur.val));
+        cur = cur.next;
+    }
+
+    // 2. 处理 next 和 random
+    cur = head;
+    while (cur != null) {
+        Node copy = map.get(cur);
+        copy.next = map.get(cur.next);
+        copy.random = map.get(cur.random);
+        cur = cur.next;
+    }
+
+    return map.get(head);
 }
+
+
+
 =======================================================================================================
-method 3:
+method O(1) 空间
 
 method:
 
-	- 
-	- 
+Step 1：在原节点后插入拷贝节点
+  原：A → B → C
+  变：A → A' → B → B' → C → C'
+
+  Node cur = head;
+  while (cur != null) {
+      Node copy = new Node(cur.val);
+      copy.next = cur.next;
+      cur.next = copy;
+      cur = copy.next;
+  }
+
+Step 2：设置 random 指针（最妙的一步）
+  关键观察
+
+  如果 A.random = C
+  那么 A'.random = C.next
+
+  cur = head;
+  while (cur != null) {
+      if (cur.random != null) {
+          cur.next.random = cur.random.next;
+      }
+      cur = cur.next.next;
+  }
+
+Step 3：拆分新旧链表
+  Node dummy = new Node(0);
+  Node copyCur = dummy;
+  cur = head;
+
+  while (cur != null) {
+      copyCur.next = cur.next;
+      cur.next = cur.next.next;
+
+      copyCur = copyCur.next;
+      cur = cur.next;
+  }
+
+  return dummy.next;
 
 stats:
 

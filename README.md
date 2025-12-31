@@ -1817,10 +1817,8 @@ if you use while (lo < hi) you use lo = mid+1 and hi=mid
 3. 最后 return left 还是 right，取决于：**循环结束时，哪一个指针“一定满足你要找的条件”**
 
 - 二分不是在找“位置”，而是在找 第一个 / 最后一个满足某个 predicate 的点。
-| 目标        | 最后 return |
-| --------- | --------- |
-| 第一个满足条件的  | `left`    |
-| 最后一个满足条件的 | `right`   |
+- 第一个满足条件的, return left
+- 最后一个满足条件的, return right
 
 
 
@@ -1897,13 +1895,14 @@ nums = [1,2,4,4,5],target = 4,答案是 index = 2
 - piles = [3, 6, 7, 11]， h = 8 小时，每小时吃 k 根香蕉，问：最小的 k 是多少？
 
 🔍 我们二分的不是数组，而是「答案空间」
+```
 k = 1  → 吃得太慢 ❌
 k = 2  → ❌
 k = 3  → ❌
 k = 4  → ✅
 k = 5  → ✅
 k = 6  → ✅
-
+```
 👉 明显单调，所以可以二分：
 
 false false false true true true
@@ -1980,11 +1979,11 @@ l > r → loop ends
 👉 题目要的是：最小可行解, 所以 return left; // 4
 
 
-
+#### 几类binary search
 
 1) 最基本的二分查找算法
 
-因为我们只需找到⼀个 target 的索引即可 所以当 nums[mid] == target 时可以⽴立即返回
+因为我们只需找到⼀个 target 的索引即可 所以当 nums[mid] == target 时可以立即返回
 
 ```java
     int binary_search(int[] nums, int target) {
@@ -2010,8 +2009,8 @@ l > r → loop ends
 2) 寻找左侧边界的二分搜索
 
     因为我们需找到 target 的最右侧索引
-    所以当 nums[mid] == target 时不不要立即返回 
-    ⽽要收紧左侧边界以锁定右侧边界
+    所以当 nums[mid] == target 时不要立即返回 
+    ⽽要收紧左侧边界 以锁定右侧边界
 
 ```java
 

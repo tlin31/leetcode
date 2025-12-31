@@ -84,7 +84,7 @@ class Solution {
             last.right = node;
             node.left = last;
         } else {
-            first = node;  // 最左节点 = 链表头
+            first = node;  // 还没设置last，这个是第一个节点/最左节点 = 链表头
         }
         last = node;
 
@@ -93,6 +93,7 @@ class Solution {
     }
 }
 
+========================================================================================
 
 class Solution {
     public Node treeToDoublyList(Node root) {

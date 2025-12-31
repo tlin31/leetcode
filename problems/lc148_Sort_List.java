@@ -159,7 +159,7 @@ tail    已合并部分的尾部
             ListNode dummy = new ListNode(0);
             dummy.next = head;
 
-            // 2. bottom-up merge
+            // 2. bottom-up merge，step = step*2
             for (int step = 1; step < length; step <<= 1) {
                 ListNode curr = dummy.next;
                 ListNode tail = dummy;

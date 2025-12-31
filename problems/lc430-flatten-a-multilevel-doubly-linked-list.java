@@ -77,12 +77,51 @@ Number of Nodes will not exceed 1000.
 
 ******************************************************
 key:
-	- 
+	- dfs
 	- edge case:
 		1) empty string, return empty
 		2)
 
 ******************************************************
+
+
+class Solution {
+    public Node flatten(Node head) {
+        if (head == null) return null;
+
+        Stack<Node> stack = new Stack<>();
+        Node cur = head;
+
+        while (cur != null) {
+
+            // 如果有 child
+            if (cur.child != null) {
+ 
+                // 如果有 next，先存起来
+                if (cur.next != null) {
+                    stack.push(cur.next);
+                    cur.next.prev = null;
+                }
+
+                // child 接到 next
+                cur.next = cur.child;
+                cur.child.prev = cur;
+                cur.child = null;
+            }
+
+            // 如果走到当前链表末尾，且栈不空
+            if (cur.next == null && !stack.isEmpty()) {
+                Node next = stack.pop();
+                cur.next = next;
+                next.prev = cur;
+            }
+
+            cur = cur.next;
+        }
+
+        return head;
+    }
+}
 
 
 
@@ -108,61 +147,55 @@ stats:
 	- Memory Usage: 38 MB, less than 70.00% 
 
 
+/*
+// Definition for a Node.
+class Node {
+    public int val;
+    public Node prev;
+    public Node next;
+    public Node child;
 
-class Solution {
-	// Global variable pre to track the last node we visited 
-    Node pre = null;
+    public Node() {}
 
-    public Node flatten(Node head) {
-        if (head == null) {
-            return null; 
-        }
-		// Connect last visted node with current node
-        if (pre != null) {
-            pre.next = head; 
-            head.prev = pre;
-        }
-
-        // store the globaly prev
-        pre = head; 
-
-		// Store head.next in a next pointer in case recursive call to flatten 
-		// head.child overrides head.next
-		// ex. before: 3 - 4(next), after: 3 - 7 - 4, so need to remember the correct next for next call
-		//			   |
-		//			   7
-        Node next = head.next; 
-
-        flatten(head.child);
-
-        // After we flatten the sublist pointed by the curr.child pointer, we should remove 
-        // the child pointer since it is no longer needed in the final result.
-        head.child = null;
-
-
-        // move forward~ 
-        flatten(next);        
-        return head; 
+    public Node(int _val,Node _prev,Node _next,Node _child) {
+        val = _val;
+        prev = _prev;
+        next = _next;
+        child = _child;
     }
-}
+};
+*/
+class Solution {
+  public Node flatten(Node head) {
+    if (head == null) return head;
+    // pseudo head to ensure the `prev` pointer is never none
+    Node pseudoHead = new Node(0, null, head, null);
 
+    flattenDFS(pseudoHead, head);
+
+    // detach the pseudo head from the real head
+    pseudoHead.next.prev = null;
+    return pseudoHead.next;
+  }
+  /* return the tail of the flatten list */
+  public Node flattenDFS(Node prev, Node curr) {
+    if (curr == null) return prev;
+    curr.prev = prev;
+    prev.next = curr;
+
+    // the curr.next would be tempered in the recursive function
+    Node tempNext = curr.next;
+
+    Node tail = flattenDFS(curr, curr.child);
+    curr.child = null;
+
+    return flattenDFS(tail, tempNext);
+  }
+}
 
 
 =======================================================================================================
 method 2:
-
-method:
-
-	- 
-	- 
-
-stats:
-
-	- 
-	- 
-
-=======================================================================================================
-method 3:
 
 method:
 
