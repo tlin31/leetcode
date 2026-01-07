@@ -33,7 +33,7 @@ method 1:
 method:
 
 	- bucket sort (a reversed version)
-	- store the frequencies as index, then go from largest to smallest in bucket array
+	- bucket store the frequencies as index, then go from largest to smallest in bucket array
 
 stats:
 

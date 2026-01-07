@@ -49,50 +49,67 @@ key:
 
 
 
-===================================================================================================
-Method 1:
+为什么「环形数组」可以这样拆？
 
-Method:
+情况 1️：最大子数组 不跨环
 
-2 case: involve the edge/circular part， or notignored
+    这就是经典的 Kadane（LC 53）：maxSubarraySum
 
-转换公式： max(the max subarray sum, the total sum - the min subarray sum)
+情况 2️：最大子数组 跨环
 
-Just one to pay attention:
-If all numbers are negative, maxSum = max(A) and minSum = sum(A).
-In this case, max(maxSum, total - minSum) = 0, which means the sum of an empty subarray.
-According to the deacription, We need to return the max(A), instead of sum of am empty subarray.
-So we return the maxSum to handle this corner case.
+    跨环意味着：[中间一段不要] + [两头拼起来]
 
+    等价于：totalSum - minSubarraySum
+
+    💡 因为你“拿走”了一段最小和的连续子数组。
 
 
+三、最关键的坑（90% WA 出在这里）
+❌ 全是负数怎么办？
+
+    例子：nums = [-3, -2, -5]
+
+    maxSubarray = -2
+
+    minSubarray = -10
+
+    totalSum - min = 0 ❌（非法！）
+
+    ⚠️ 环形子数组必须是非空子数组
+
+    ✅ 正确判断
+    如果 maxSubarray < 0：
+        return maxSubarray
+    否则：
+        return max(maxSubarray, totalSum - minSubarray)
+
+maxSub：最大子数组和（Kadane）
+minSub：最小子数组和（反向 Kadane）
 
 
-Complexity
-One pass, time O(N)
-No extra space, space O(1)
+class Solution {
+    public int maxSubarraySumCircular(int[] nums) {
+        int total = 0;
 
+        int curMax = 0, maxSum = Integer.MIN_VALUE;
+        int curMin = 0, minSum = Integer.MAX_VALUE;
 
-    public int maxSubarraySumCircular(int[] A) {
-        int total = 0, 
-        	maxSum = A[0], 
-        	curMax = 0, 
-        	minSum = A[0], 
-        	curMin = 0;
-
-        for (int a : A) {
-
-            curMax = Math.max(curMax + a, a);
+        for (int num : nums) {
+            curMax = Math.max(num, curMax + num);
             maxSum = Math.max(maxSum, curMax);
 
-            curMin = Math.min(curMin + a, a);
+            curMin = Math.min(num, curMin + num);
             minSum = Math.min(minSum, curMin);
 
-            total += a;
+            total += num;
         }
-        
-        return maxSum > 0 ? Math.max(maxSum, total - minSum) : maxSum;
+
+        // 全负数情况
+        if (maxSum < 0) return maxSum;
+
+        return Math.max(maxSum, total - minSum);
     }
+}
 
 
 

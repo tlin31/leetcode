@@ -40,8 +40,14 @@ method:
 	- 这里要注意一个细节，就是 for 循环中，i < nums.length - 1，少了末尾。因为开始的时候边界是
 	  	第 0 个位置，steps 已经加 1 了。如下图，如果最后一步刚好跳到了末尾，此时 steps 其实不用加 1 了。
 	  	如果是 i < nums.length，i 遍历到最后的时候，会进入 if 语句中，steps 会多加 1 。
-	- 写代码的话，我们用 end 表示当前能跳的边界，对于上边第一个图的橙色 1，第二个图中就是橙色的 4，
-		遍历数组的时候，到了边界，我们就重新更新新的边界。
+	- 写代码的话，我们用 end 表示当前能跳的边界，遍历数组的时候，到了边界，我们就重新更新新的边界。
+
+The main idea is based on greedy. Let's say the range of the current jump is [curBegin, curEnd], 
+curFarthest is the farthest point that all points in [curBegin, curEnd] can reach. 
+Once the current point reaches curEnd, then trigger another jump, and set the new curEnd with 
+curFarthest, then keep the above steps, as the following:
+
+
 
 stats:
 

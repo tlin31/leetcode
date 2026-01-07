@@ -61,19 +61,36 @@ public class MultipleFieldSorter
 - 5. Add comparator for priority queue:
 
     小的在前:
+    ```java
         Queue<int[]> pq = new PriorityQueue<>((a,b) -> (Integer.compare(a[0], b[0])));
+    ```
 
     same as:
-        Queue<int[]> pq = new PriorityQueue<>((a,b) -> (a[0] - b[0]));
+    ```java
 
+        Queue<int[]> pq = new PriorityQueue<>((a,b) -> (a[0] - b[0]));
+    ```
+
+    same as:
+    ```java
+        list.sort((a, b) -> {
+            if (a[1] != b[1]) return b[1] - a[1];
+            return b[0] - a[0];
+        });
+    ```
+
+    
     compare Map.Entry
+    ```java
         PriorityQueue<Map.Entry<String, Integer>> pq = new PriorityQueue<>(
              (a,b) -> a.getValue()==b.getValue() ? b.getKey().compareTo(a.getKey()) : a.getValue()-b.getValue()
         );
+    ```
 
     compare heights[]
+    ```java
         PriorityQueue<Integer> left = new PriorityQueue<>((a,b)->(heights[a]==heights[b])?b-a:heights[a]-heights[b]);
-
+```
 
 - (old) if comparining a new object:
 ```java

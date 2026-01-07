@@ -30,13 +30,34 @@
 | -------------- | -------------- | -------- | ----  | ------      | ------ |
 | Counting Sort  | O(n + k)       | O(k)     | ✅    | ❌          | 数据范围小  |
 | Bucket Sort    | O(n + k) avg   | O(n + k) | 取决实现 | ❌        | 均匀分布   |
-| Selection Sort | O(n²)          | O(1)     | ❌    | ✅          | 教学     |
 | Quick Sort     | O(n log n) avg | O(log n) | ❌    | ✅          | 工业级    |
 | Insertion Sort | O(n²)          | O(1)     | ✅    | ✅          | 小数据    |
 | Merge Sort     | O(n log n)     | O(n)     | ✅    | ✅          | 稳定排序   |
 | Heap Sort      | O(n log n)     | O(1)     | ❌    | ✅          | 内存受限   |
 | Radix Sort     | O(d·(n+k))     | O(n+k)   | ✅    | ❌          | 整数/字符串 |
 | Bubble Sort    | O(n²)          | O(1)     | ✅    | ✅          | 教学     |
+| Selection Sort | O(n²)          | O(1)     | ❌    | ✅          | 教学     |
+
+
+
+问题: 比较O（n+k）的bucket sort和O（n * log n）的排序算法？
+
+1. 理论性能：𝑂(𝑛+𝑘) 胜出 
+- 桶排序 𝑂(𝑛+𝑘))：是一种非比较排序。它通过空间换取时间，跳出了比较排序算法 𝑂(𝑛log𝑛) 的理论下界
+
+- 当数据分布非常均匀时，每个数据几乎直接“跳”进它所属的桶，这种线性效率在处理海量数据时（如 10 亿个分布均匀的浮点数）具有绝对优势。
+
+- 快速/归并排序 𝑂(𝑛log𝑛)：是比较排序。无论数据分布如何，它都必须通过两两比较来确定顺序，其处理速度随数据量 𝑛 的增加呈对数级增长，效率上限低于线性算法。 
+
+2. 实际运行速度：𝑂(𝑛log𝑛) 往往表现更稳 
+在实际中，常数项（Constant Factor）和缓存命中率决定了真实感知的速度：
+
+- 硬件缓存友好性：
+  - 𝑂(𝑛log𝑛)（如快速排序）：具有极佳的局部性原理，它主要在连续的内存块上操作，能充分利用 CPU 的 L1/L2 缓存。
+  - 桶排序：由于数据被分散到不同的桶（通常是链表或离散数组），会产生大量的随机内存访问，导致 CPU 缓存频繁失效（Cache Miss），在实际执行中可能会慢于优化良好的快排。
+
+- 内存分配开销：
+  - 桶排序需要频繁申请和管理多个桶的内存空间，这个“管理成本”有时会抵消掉算法复杂度带来的红利。 
 
 
 
@@ -344,6 +365,37 @@ public class QuickSort {
 4. 随机化基准：通过随机选择基准，使算法在面对任何输入时都有极大概率维持 O(n * log n)
 
 
+## 4.1 Java用的排序？
+
+
+
+1️⃣ 对 基本类型（int / long / double）
+Arrays.sort(int[])
+
+
+👉 Dual-Pivot QuickSort（双轴快排）
+
+平均：O(n log n)
+
+实际速度极快
+
+cache locality 极佳
+
+Java 7+ 使用
+
+2️⃣ 对 对象类型（Integer / String / 自定义对象）
+Arrays.sort(Object[])
+
+
+👉 TimSort（归并排序 + 插入排序）
+
+稳定排序
+
+O(n log n)
+
+对「部分有序」数组非常快
+
+Python / Java 都用它
 ## 5. Insertion sort （插入排序）
 
 - 像整理扑克牌一样插入。
@@ -548,31 +600,43 @@ public class HeapSort {
         int n = arr.length;
 
         // 1. 构建大顶堆（从最后一个非叶子节点开始向上调整）
+        // 👉 从 n/2 开始的节点，全是叶子节点, 叶子节点天然满足堆性质, 最后一个非叶子节点 = n/2 - 1
         for (int i = n / 2 - 1; i >= 0; i--) {
             heapify(arr, n, i);
         }
 
-        // 2. 依次取出堆顶元素并调整
+        /* 2. 依次取出堆顶元素并调整
+            arr[0] 是当前最大值
+
+            把它放到最终位置 i
+
+            堆大小缩小为 i
+
+            修复堆顶即可（只破坏了 root）
+        */
         for (int i = n - 1; i > 0; i--) {
             // 将当前最大的堆顶换到末尾
             int temp = arr[0];
             arr[0] = arr[i];
             arr[i] = temp;
 
-            // 重新调整堆，使其满足大顶堆
+            // 重新调整root @ indx 0的堆，边界是i，因为[i+1 ... n-1]已经排好序（最大在右）
             heapify(arr, i, 0);
         }
     }
 
-    // 堆化逻辑：使以 i 为根的子树满足大顶堆
+    // 堆化逻辑：使以 i 为根的子树满足大顶堆， 左右子树已经是堆，只修当前节点
     void heapify(int[] arr, int n, int i) {
         int largest = i; 
         int left = 2 * i + 1;
         int right = 2 * i + 2;
 
         // If left child is larger than root
-        if (left < n && arr[left] > arr[largest]) largest = left;
-        if (right < n && arr[right] > arr[largest]) largest = right;
+        if (left < n && arr[left] > arr[largest]) 
+            largest = left;
+
+        if (right < n && arr[right] > arr[largest]) 
+            largest = right;
 
         if (largest != i) {
             int swap = arr[i];
@@ -585,33 +649,28 @@ public class HeapSort {
 }
 
 
-    // To heapify a subtree rooted with node i which is
-    // an index in arr[]. n is size of heap
-    void heapify(int arr[], int N, int i)
-    {
-        int largest = i; // Initialize largest as root
-        int l = 2 * i + 1; // left = 2*i + 1
-        int r = 2 * i + 2; // right = 2*i + 2
-
-        // If left child is larger than root
-        if (l < N && arr[l] > arr[largest])
-            largest = l;
-
-        // If right child is larger than largest so far
-        if (r < N && arr[r] > arr[largest])
-            largest = r;
-
-        // If largest is not root
-        if (largest != i) {
-            int swap = arr[i];
-            arr[i] = arr[largest];
-            arr[largest] = swap;
-
-            // Recursively heapify the affected sub-tree
-            heapify(arr, N, largest);
-        }
-    }
 ```
+
+### 例子
+
+215. Kth Largest Element in an Array
+
+```java
+class Solution {
+    public int findKthLargest(int[] nums, int k) {
+        PriorityQueue<Integer> heap = new PriorityQueue<>();
+        for (int num: nums) {
+            heap.add(num);
+            if (heap.size() > k) {
+                heap.remove();
+            }
+        }
+        
+        return heap.peek();
+    }
+}
+```
+
 ### Advantages of Heap Sort:
 
 1. Efficient Time Complexity: Heap Sort has a time complexity of O(n log n) in all cases. This makes it efficient for sorting large datasets. The log n factor comes from the height of the binary heap, and it ensures that the algorithm maintains good performance even with a large number of elements.
@@ -630,126 +689,75 @@ Disadvantages of Heap Sort:
 
 ## 8. Radix Sort
 
-核心思想
+- 按位（个位、十位…）排序。
 
-按位（个位、十位…）排序。
+- 非比较排序
 
-特点
+- 稳定
 
-非比较排序
+- 依赖位数
 
-稳定
+- 复杂度： time： O(d·(n+k)) d是number of digits, n 是 number of elements, and b is the base of the number system being used.
 
-依赖位数
+- Auxiliary Space: O(n + b)，因为要创建每一个digit的bucket
 
-复杂度
-
-O(d·(n+k))
-
-用途
-
-整数、字符串排序
-
-
-Radix Sort is a linear sorting algorithm that sorts elements by processing them digit by digit. It is an efficient sorting algorithm for integers or strings with fixed-size keys. 
-
-distributes the elements into buckets based on each digit’s value. By repeatedly sorting the elements by their significant digits, from the least significant to the most significant
-
-non-comparative sorting
-
-### Complexity
-
-Time complexity： O(d * (n + b)), where d is the number of digits, n is the number of elements, and b is the base of the number system being used.
-
-In practical implementations, radix sort is often faster than **other comparison-based sorting** algorithms, such as quicksort or merge sort, for large datasets, especially when the keys have many digits. 
-
-
-Auxiliary Space: 
-
-O(n + b), where n is the number of elements and b is the base of the number system. This space complexity comes from the need to create buckets for each digit value and to copy the elements back to the original array after each digit has been sorted.
+- 用途：整数、字符串排序
 
 
 ### Algorithm
-1. Start with the least significant digit (rightmost digit).
-2. Sort the values based on the digit in focus by first putting the values in the correct bucket based on the digit in focus, and then put them back into array in the correct order.
-3. Move to the next digit, and sort again, like in the step above, until there are no digits left.
+基数排序通常采用 LSD (Least Significant Digit) 方式，即从最低有效位（个位）开始，一直排序到最高有效位。
 
+1. 找最大值：确定数组中最大数的位数（决定需要进行几轮排序）。
+
+2. 按位排序：从个位开始，使用一种稳定的排序算法（通常是计数排序 Counting Sort）对所有数字进行排序。
+
+3. 迭代：移动到十位、百位……重复上述过程。
+
+4. 稳定性要求：每一轮排序必须是稳定的，否则高位排序时会破坏低位已经排好的相对顺序。
 ```java
-class Radix {
+import java.util.Arrays;
 
-    // A utility function to get maximum value in arr[]
-    static int getMax(int arr[], int n)
-    {
-        int mx = arr[0];
-        for (int i = 1; i < n; i++)
-            if (arr[i] > mx)
-                mx = arr[i];
-        return mx;
+public class RadixSort {
+    public static void sort(int[] arr) {
+        if (arr == null || arr.length < 2) return;
+
+        // 1. 获取最大值，确定位数
+        int max = arr[0];
+        for (int val : arr) max = Math.max(max, val);
+
+        // 2. 从个位开始，对每一位进行计数排序
+        // exp 是 1, 10, 100...
+        for (int exp = 1; max / exp > 0; exp *= 10) {
+            countingSortByDigit(arr, exp);
+        }
     }
 
-    // A function to do counting sort of arr[] according to
-    // the digit represented by exp.
-    static void countSort(int arr[], int n, int exp)
-    {
-        int output[] = new int[n]; // output array
-        int i;
-        int count[] = new int[10];
-        Arrays.fill(count, 0);
+    private static void countingSortByDigit(int[] arr, int exp) {
+        int n = arr.length;
+        int[] output = new int[n];
+        int[] count = new int[10]; // 十进制只有 0-9
 
-        // Store count of occurrences in count[]
-        for (i = 0; i < n; i++)
-            count[(arr[i] / exp) % 10]++;
-
-        // Change count[i] so that count[i] now contains
-        // actual position of this digit in output[]
-        for (i = 1; i < 10; i++)
-            count[i] += count[i - 1];
-
-        // Build the output array
-        for (i = n - 1; i >= 0; i--) {
-            output[count[(arr[i] / exp) % 10] - 1] = arr[i];
-            count[(arr[i] / exp) % 10]--;
+        // 统计当前位（(val/exp)%10）出现的次数
+        for (int val : arr) {
+            count[(val / exp) % 10]++;
         }
 
-        // Copy the output array to arr[], so that arr[] now
-        // contains sorted numbers according to current
-        // digit
-        for (i = 0; i < n; i++)
-            arr[i] = output[i];
-    }
+        // 累加计数，确定位置
+        for (int i = 1; i < 10; i++) {
+            count[i] += count[i - 1];
+        }
 
-    // The main function to that sorts arr[] of
-    // size n using Radix Sort
-    static void radixsort(int arr[], int n)
-    {
-        // Find the maximum number to know number of digits
-        int m = getMax(arr, n);
+        // 反向遍历保证稳定性
+        for (int i = n - 1; i >= 0; i--) {
+            int digit = (arr[i] / exp) % 10;
+            output[count[digit] - 1] = arr[i];
+            count[digit]--;
+        }
 
-        // Do counting sort for every digit. Note that
-        // instead of passing digit number, exp is passed.
-        // exp is 10^i where i is current digit number
-        for (int exp = 1; m / exp > 0; exp *= 10)
-            countSort(arr, n, exp);
-    }
-
-    // A utility function to print an array
-    static void print(int arr[], int n)
-    {
-        for (int i = 0; i < n; i++)
-            System.out.print(arr[i] + " ");
-    }
-
-    // Main driver method
-    public static void main(String[] args)
-    {
-        int arr[] = { 170, 45, 75, 90, 802, 24, 2, 66 };
-        int n = arr.length;
-
-        // Function Call
-        radixsort(arr, n);
-        print(arr, n);
+        System.arraycopy(output, 0, arr, 0, n);
     }
 }
+
 ```
 
 

@@ -384,9 +384,9 @@ output:
 ## 单调队列 Monotonic Queue
 单调队列是一种保持元素单调（递增或递减）的双端队列结构，用来**解决滑动窗口最大值/最小值**
 
-不是heap！heap是所以元素都排序，单调队列保持元素的先后顺序
+不是heap！heap是所有元素都排序，单调队列保持元素的先后顺序
 
-「单调队列」的核⼼思路和「单调栈」类似。单调队列的 push ⽅法依然在队尾添加元素，但是要把前 ⾯比新元素⼩的元素都删掉
+「单调队列」的核⼼思路和「单调栈」类似。单调队列的 push ⽅法依然在队尾添加元素，但是要把前⾯比新元素⼩的元素都删掉
 
 1. 特点：
 - 队列中的元素按某种顺序单调（如从队头到队尾递减）
@@ -395,16 +395,16 @@ output:
 - 每个元素最多入队、出队一次 → O(n)
 
 2. 单调队列的两种形式
-① 单调递减队列：队头最大，常用于找滑动窗口最大值。队列从前到后：大 → 小
+- ① 单调递减队列：队头最大，常用于找滑动窗口最大值。队列从前到后：大 → 小
 
-② 单调递增队列：队头最小，常用于滑动窗口最小值、最短子数组、最短窗口问题。队列从前到后：小 → 大
+- ② 单调递增队列：队头最小，常用于滑动窗口最小值、最短子数组、最短窗口问题。队列从前到后：小 → 大
 
 
 3. “单调队列的黄金公式”（必须记住）
 
-以单调递减队列为例：
+- 以单调递减队列为例：
 
-1) 入队（push x）保证从队头到队尾递减 → 队头永远是最大值。
+  - 1) 入队（push x）保证从队头到队尾递减 → 队头永远是最大值。
 
 ```java
 	while (!dq.isEmpty() && dq.back() < x)
@@ -412,10 +412,10 @@ output:
 	dq.push_back(x);
 ```
 
-2) 出队（pop x）
+  - 2) 出队（pop x）
 
 ```java
-	如果 x == dq.front()：dq.pop_front();
+	如果 x == dq.front()，则 dq.pop_front();
 	否则不动。
 
 	也要记住左右指针中，如果要把左指针右移，记得在queue中检查是否需要删除：
@@ -425,28 +425,30 @@ output:
 
 ```
 
-3) 最大值
-dq.front();
+  - 3) 最大值 ： 永远是 dq.front();
 
+
+
+  - 4) 如果需要shrink window：
+
+		```java
+			// shrink window
+            while (nums[maxD.peekFirst()] - nums[minD.peekFirst()] > k) {
+                if (maxD.peekFirst() == l) maxD.pollFirst();
+                if (minD.peekFirst() == l) minD.pollFirst();
+                l++;
+            }
+        ```
 
 4. 如何知道某题是否适合用单调队列？
 
-✔ 条件 1：滑动窗口内求最大/最小值
-	→ 一定是单调队列（LC 239, 1438）
+✔ 条件 1：滑动窗口内求最大/最小值 → 一定是单调队列（LC 239, 1438）
 
-✔ 条件 2：窗口内求 max/min 的 DP
+✔ 条件 2：窗口内求 max/min 的 DP → 单调队列优化 （LC 1696）
 
-→ 单调队列优化
-（LC 1696）
+✔ 条件 3：用 prefix sum + 单调性判断最短/最长窗口 → 单调队列 find boundary （LC 862）
 
-✔ 条件 3：用 prefix sum + 单调性判断最短/最长窗口
-
-→ 单调队列 find boundary
-（LC 862）
-
-✔ 条件 4：窗口扩张/收缩的过程中，需要维护最值
-
-→ 单调队列 / 双单调队列
+✔ 条件 4：窗口扩张/收缩的过程中，需要维护最值 → 单调队列 / 双单调队列
 
 ⭐ 题 1：239. Sliding Window Maximum（滑动窗口最大值）
 
@@ -472,13 +474,7 @@ prefix 数组保持单调递增
 
 这是非常典型的用法。
 
-⭐ 题 3：剑指 Offer 59、LCR 170
-
-其实是 239 的变种。
-
-⭐ 题 4：1438. Longest Continuous Subarray With Absolute Diff ≤ Limit
-
-（双单调队列）
+⭐ 题 3：1438. Longest Continuous Subarray With Absolute Diff ≤ Limit （双单调队列）
 
 用法：
 
@@ -1126,6 +1122,90 @@ class Solution {
 	Arr[(i-1)/2]	Returns the parent node
 	Arr[(2*i)+1]	Returns the left child node
 	Arr[(2*i)+2]	Returns the right child node
+
+1. 怎么记用哪种堆？（核心口诀）
+最直观的记法是：“想要什么，就让什么浮到堆顶”，同时根据 Top-K 问题 的需求反向思考：
+
+**找最大的 K 个数 (Top-K Large) --> 用 最小堆 (Min Heap)**
+- 要找“最大的 K 个”，本质上是要剔除掉那些不够大的数。
+- 堆的职责：在最小堆中，堆顶（Root）永远是当前堆里最小的那个。
+- 筛选策略：我们将堆看作一个“准入委员会”。如果新来的数比堆顶（委员会里最弱的那个）还要大，说明堆顶已经没资格待在前 K 名里了。
+- 结果：我们踢掉堆顶，把新数放进去。这样，经过一轮洗牌，留在堆里的永远是到目前为止发现的最大的 K 个。
+
+```java
+public List<Integer> getTopK(int[] nums, int k) {
+    // 1. 初始化最小堆（默认即为最小堆）
+    PriorityQueue<Integer> minHeap = new PriorityQueue<>(k);
+
+    for (int num : nums) {
+        if (minHeap.size() < k) {
+            minHeap.offer(num);
+        } else if (num > minHeap.peek()) {
+            // 如果当前数比堆里最小的还大，替换它
+            minHeap.poll();
+            minHeap.offer(num);
+        }
+    }
+
+    // 返回结果（此时堆中是最大的K个数，但由于是最小堆，出来的顺序是升序）
+    return new ArrayList<>(minHeap);
+}
+
+```
+
+**找最小的 K 个数 (Top-K Small) -->  用 最大堆 (Max Heap)**
+
+2. Java 如何初始化 (Initialize)？
+
+A. 最小堆 (Min Heap) —— 升序出列
+
+// 方式 1：默认即为最小堆
+
+PriorityQueue<Integer> minHeap = new PriorityQueue<>();
+
+// 方式 2：显式指定初始容量（为了性能优化）
+
+PriorityQueue<Integer> minHeap = new PriorityQueue<>(11);
+
+// 方式 3：Lambda 表达式（语义最清晰）
+
+PriorityQueue<Integer> minHeap = new PriorityQueue<>((a, b) -> a - b);
+
+
+
+B. 最大堆 (Max Heap) —— 降序出列
+
+// 方式 1：使用 Collections 翻转（最快，2026 推荐）
+
+PriorityQueue<Integer> maxHeap = new PriorityQueue<>(Collections.reverseOrder());
+
+// 方式 2：Lambda 表达式（面试常用）
+
+PriorityQueue<Integer> maxHeap = new PriorityQueue<>((a, b) -> b - a);
+
+// 方式 3：对象属性比较
+
+PriorityQueue<User> maxHeap = new PriorityQueue<>(Comparator.comparingInt(u -> u.id).reversed());
+
+升序 (Min Heap)：a - b。逻辑：如果 a > b，结果为正，表示 a 的优先级低于 b（a 往后排，b 往堆顶走）。
+降序 (Max Heap)：b - a。逻辑：如果 b > a，结果为正，表示 a 的优先级低于 b（b 往堆顶走）。
+
+安全建议：
+- 在处理可能溢出的整数（如 Integer.MIN_VALUE）时，不要直接相减。推荐使用：
+
+- 升序：(a, b) -> Integer.compare(a, b)
+- 降序：(a, b) -> Integer.compare(b, a)
+
+
+### Complexity
+
+1. 空间复杂度极其节省 O(K)：
+- 无论总数据量 N 是 100 万还是 10 亿，你永远只需要一个大小为 K 的内存空间。这对于单机处理海量日志至关重要。
+
+2. 时间复杂度极其稳定O(N log K)：
+- 遍历 N 个数。每次调整堆的时间是 log K。相比于全量排序（O(N log N)，当 K 远小于 N 时，堆排序快得多。
+
+
 
 ### Applications of Heaps:
 

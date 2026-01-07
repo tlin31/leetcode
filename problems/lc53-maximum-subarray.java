@@ -23,6 +23,115 @@ key:
 
 
 
+Kadane：在每个位置 i，只关心“以 i 结尾的最大子数组和”，
+		如果之前的和是负数，就果断丢弃，从当前元素重新开始。
+
+
+dp[i] = 以 i 结尾的最大子数组和
+dp[i] = max(nums[i], dp[i-1] + nums[i])
+最终的答案： max(dp[i])  (i 从 0 到 n-1)
+
+
+空间优化（Kadane 的精华）
+
+	我们发现：dp[i] 只依赖 dp[i-1]
+
+	所以可以压缩成两个变量：
+
+	curSum：当前以 i 结尾的最大和
+
+	maxSum：全局最大子数组和
+
+class Solution {
+    public int maxSubArray(int[] nums) {
+        int curSum = nums[0];
+        int maxSum = nums[0];
+
+        for (int i = 1; i < nums.length; i++) {
+            curSum = Math.max(nums[i], curSum + nums[i]);
+            maxSum = Math.max(maxSum, curSum);
+        }
+
+        return maxSum;
+    }
+}
+
+
+=======================================================================================================
+
+method:
+
+	- divide and conquer approach
+	- 假设我们有了一个函数 int getSubMax(int start, int end, int[] nums) ，可以得到 num[ start, end ) 
+		(左包右不包) 中子数组最大值。
+	- 如果， start == end，那么 getSubMax 直接返回 nums [ start ] 就可以了。
+	- 先找一个 mid ， mid = ( start + end ) / 2。
+	- 然后，对于我们要找的和最大的子数组有两种情况。
+		1) mid 不在我们要找的子数组中
+			--> 子数组的最大值要么是 mid 左半部分数组的子数组产生，要么是右边的产生，最大值可以利用 getSubMax 求出来。
+			int leftMax = getSubMax(start, mid, nums);
+			int rightMax = getSubMax(mid + 1, end, nums);
+
+		2) mid 在我们要找的子数组中
+			--> 我们可以分别从 mid 左边扩展，和右边扩展，找出两边和最大的时候，然后加起来就可以了。
+				当然如果，左边或者右边最大的都小于 0 ，我们就不加了。
+
+	- 最后，我们只需要返回这三个中最大的值就可以了。
+
+stats:
+
+	- 
+	- 时间复杂度：O（n log ( n )）。由于 getContainMidMax 这个函数耗费了 O（n）。所以时间复杂度反而相比之前的算法变大了。
+	- Runtime: 53 ms, faster than 5.16% of Java online submissions for Maximum Subarray.
+	- Memory Usage: 46.6 MB, less than 5.16%
+
+
+class Solution {
+
+    int[] nums;
+    
+    public int maxSubArray(int[] nums) {
+        //divide and conquer
+
+        if(nums==null||nums.length==0) return 0;
+        int n = nums.length;
+        this.nums=nums;
+        return divideAndConquer(0,n-1);
+    }
+
+    private int divideAndConquer(int start, int end){
+        if(start==end) return nums[start];
+
+        int mid = start+(end-start)/2;
+        //if max sum doesn't conatin mid
+        int leftMax = divideAndConquer(start,mid);
+        int rightMax = divideAndConquer(mid+1,end);
+
+        // if contains max
+        int midLeftMax = 0;
+        int sum = 0;
+        for(int i = mid-1;i>=start;i--){
+            sum+=nums[i];
+            midLeftMax=Math.max(midLeftMax,sum);
+        }
+
+
+        int midRightMax=0;
+        sum=0;
+        for(int i = mid+1;i<=end;i++){
+            sum+=nums[i];
+            midRightMax=Math.max(midRightMax,sum);         
+            
+        }
+
+        int containMid = midLeftMax+nums[mid]+midRightMax;
+	    return Math.max(containMid, Math.max(leftMax, rightMax));
+    }
+}
+
+
+
+
 =======================================================================================================
 method 1:
 
@@ -136,76 +245,4 @@ public int maxSubArray(int[] nums) {
 =======================================================================================================
 method 2:
 
-method:
-
-	- divide and conquer approach, which is more subtle.
-	- 假设我们有了一个函数 int getSubMax(int start, int end, int[] nums) ，可以得到 num[ start, end ) 
-		(左包右不包) 中子数组最大值。
-	- 如果， start == end，那么 getSubMax 直接返回 nums [ start ] 就可以了。
-	- 先找一个 mid ， mid = ( start + end ) / 2。
-	- 然后，对于我们要找的和最大的子数组有两种情况。
-		1) mid 不在我们要找的子数组中
-			--> 子数组的最大值要么是 mid 左半部分数组的子数组产生，要么是右边的产生，最大值的可以利用 getSubMax 求出来。
-			int leftMax = getSubMax(start, mid, nums);
-			int rightMax = getSubMax(mid + 1, end, nums);
-
-		2) mid 在我们要找的子数组中
-			--> 我们可以分别从 mid 左边扩展，和右边扩展，找出两边和最大的时候，然后加起来就可以了。
-				当然如果，左边或者右边最大的都小于 0 ，我们就不加了。
-
-	- 最后，我们只需要返回这三个中最大的值就可以了。
-
-stats:
-
-	- 
-	- 时间复杂度：O（n log ( n )）。由于 getContainMidMax 这个函数耗费了 O（n）。所以时间复杂度反而相比之前的算法变大了。
-	- Runtime: 53 ms, faster than 5.16% of Java online submissions for Maximum Subarray.
-	- Memory Usage: 46.6 MB, less than 5.16%
-
-
-	public int maxSubArray(int[] nums) {
-	    return getSubMax(0, nums.length - 1, nums);
-	}
-
-	private int getSubMax(int start, int end, int[] nums) {
-	    //递归出口
-	    if (start == end) {
-	        return nums[start];
-	    }
-	    int mid = (start + end) / 2;
-	    //要找的数组不包含 mid，然后得到左边和右边最大的值
-	    int leftMax = getSubMax(start, mid, nums);
-	    int rightMax = getSubMax(mid + 1, end, nums);
-	    //要找的数组包含 mid
-	    int containsMidMax = getContainMidMax(start, end, mid, nums);
-	    //返回它们 3 个中最大的
-	    return Math.max(containsMidMax, Math.max(leftMax, rightMax));
-	}
-
-	private int getContainMidMax(int start, int end, int mid, int[] nums) {
-	    int containsMidLeftMax = 0; //初始化为 0 ，防止最大的值也小于 0 
-	    //找左边最大
-	    if (mid > 0) {
-	        int sum = 0;
-	        for (int i = mid - 1; i >= 0; i--) {
-	            sum += nums[i];
-	            if (sum > containsMidLeftMax) {
-	                containsMidLeftMax = sum;
-	            }
-	        }
-
-	    }
-	    int containsMidRightMax = 0;
-	    //找右边最大
-	    if (mid < end) {
-	        int sum = 0;
-	        for (int i = mid + 1; i <= end; i++) {
-	            sum += nums[i];
-	            if (sum > containsMidRightMax) {
-	                containsMidRightMax = sum;
-	            }
-	        }
-	    }
-	    return containsMidLeftMax + nums[mid] + containsMidRightMax;
-	}
 

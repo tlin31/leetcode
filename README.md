@@ -2381,14 +2381,6 @@ a^b = 0011 0001
 
  
  
-
-
-
-
-
-
-
-
 ### Geeks for geeks 
 |#|    Title   |Solution|Complexity|Note|
 |---|-------------| ----- |----|---------|
@@ -2397,21 +2389,133 @@ a^b = 0011 0001
 
 
 
+
+
 ## Hashmap
 
-Notes:
-1.different ways of checking whether an element exists: 
+### 1， 基础操作
+
+V put(K key, V value)：插入键值对。如果 Key 已存在，覆盖旧值并返回旧值。
+
+V get(Object key)：获取 Key 对应的值，不存在则返回 null。
+
+V remove(Object key)：根据 Key 删除键值对。
+
+boolean containsKey(Object key)：判断是否包含某个 Key。
+
+int size()：返回当前键值对的数量。
+
+void clear()：清空 Map。
+
+
+### 2. Java 8+ 增强函数式 API 
+
+#### A. getOrDefault(Object key, V defaultValue) : 默认值处理
+
+- 用法：map.getOrDefault("ID_123", 0);
+
+- 价值：避免了 null 指针检查，直接提供备选方案。
+
+#### B. 智能插入与更新
+
+computeIfAbsent(K key, Function mappingFunction)
+
+- 核心作用是：“如果指定的键（Key）不存在或值为 null，则通过给定的映射函数计算一个值，并将其放入 Map 中，最后返回这个值。”
+
+- 场景：初始化集合。例如 map.computeIfAbsent("list", k -> new ArrayList<>()).add(item);
+
+```java
+V value = map.computeIfAbsent(K key, Function<? super K, ? extends V> mappingFunction);
+```
+
+场景 A：初始化集合（构建多值 Map）
+
+这是最常见的用法。例如，将学生按班级分组：
+
+```java
+    Map<String, List<String>> classMap = new HashMap<>();
+
+    // 逻辑：如果班级不存在，新建一个 ArrayList；然后把学生加进去
+    classMap.computeIfAbsent("一班", k -> new ArrayList<>()).add("张三");
+    classMap.computeIfAbsent("一班", k -> new ArrayList<>()).add("李四");
+
+    // 结果：一班 -> [张三, 李四]
+
+```
+如果value是一个priority queue：
+
+```java
+    HashMap<String, PriorityQueue<Food>>cuisineMap = new HashMap<>();
+    
+    cuisineMap.computeIfAbsent(cuisines[i], k ->
+                new PriorityQueue<>((a, b) -> {
+                    if (a.rating != b.rating) return b.rating - a.rating; // higher rating first
+                    return a.name.compareTo(b.name);                     // lexicographically smaller first
+                })
+            ).add(food);
+
+
+```
+
+场景 B：本地缓存（Cache）
+作为简单的内存缓存，避免重复计算：
+
+```java
+
+Map<Integer, Integer> fibCache = new ConcurrentHashMap<>();
+
+public int fibonacci(int n) {
+    if (n <= 1) return n;
+    return fibCache.computeIfAbsent(n, k -> fibonacci(k - 1) + fibonacci(k - 2));
+}
+```
+
+
+如果 Value 是简单的常量，使用 putIfAbsent 更直观。
+```java
+     HashMap<String, Integer> map = new HashMap<>(); 
+     map.put("key5", 10000); 
+     map.computeIfAbsent("key5", k -> 2000 + 3000); 
+
+     不会放入(key5, 5000)因为 key1 已经有了
+````
+
+
+putIfAbsent(K key, V value)
+- 场景：仅在 Key 不存在时插入，防止覆盖已有数据。
+
+merge(K key, V value, BiFunction remappingFunction)
+- 场景：计数器或合并逻辑。例如 map.merge(key, 1, Integer::sum);（如果不存在设为 1，存在则加 1）。
+
+### 3. 遍历 API
+```java
+    for (Map.Entry<String, Integer> entry : map.entrySet()) {
+        System.out.println(entry.getKey() + ": " + entry.getValue());
+    }
+```
+
+Lambda 表达式（最简洁）：
+- map.forEach((k, v) -> System.out.println(k + ": " + v));
+
+
+仅遍历 Key 或 Value：
+- map.keySet() 或 map.values()。
+
+
+
+Notes: 
+### 1.different ways of checking whether an element exists: 
 
 1)
-
+```java
 	if (hashMap.getOrDefault(c, 0) != 0) {
-	                return false;
-	            } else {
-	                hashMap.put(c, 1);
-	            }
+	    return false;
+	} else 
+	    hashMap.put(c, 1);
+	            
 
 	!!getOrDefault(key, defaultValue): 当Map集合中有这个key时，就使用这个key值，如果没有就使用默认值defaultValue
-
+```
 2)
 
 	if (!singleSet.add(board[i][j])) return false;
@@ -2421,8 +2525,8 @@ Notes:
 	void putIfAbsence(path, value)
 
 
-2.use hashmap to store anagrams
-
+### 2.use hashmap to store anagrams
+```java
 	Map<String, List<String>> map = new HashMap<String, List<String>>();
 	Arrays.sort(strs);
 	for (String s : strs) {
@@ -2432,35 +2536,28 @@ Notes:
 		if (!map.containsKey(keyStr)) map.put(keyStr, new ArrayList<String>());
 			map.get(keyStr).add(s);
 	}
-	
+```	
 3.create array with each hash map's value:
 
 	new ArrayList<List<String>>(hashmap.values())
 
 4.store letter in hashmap:
-
+```java
 	1. Map<Character, Integer> dictT = new HashMap<Character, Integer>();
         for (int i = 0; i < t.length(); i++) {
             int count = dictT.getOrDefault(t.charAt(i), 0);
             dictT.put(t.charAt(i), count + 1);
         }
-
+```
 !! another possibility --> if only characters or integers, use array as the hashmap !!
-
+```java
     2. int[] map = new int[256];
        for(char c: t.toCharArray()){
          map[c - 'A']++;
        }
+```
 
-5.Tricks:
-1) computeIfAbsent(Key, Function)
-
-     HashMap<String, Integer> map = new HashMap<>(); 
-     map.put("key5", 10000); 
-     map.computeIfAbsent("key5", k -> 2000 + 3000); 
-
-     不会放入(key5, 5000)因为 key1 已经有了
-
+### treemap
 2) Treemap.floorEntry(int key): return a key-value mapping associated with the greatest key less than or equal to the given key, or null if there is no such key.
 
 Treemap.ceilingEntry(int key):return a key-value mapping associated with the least key greater than or equal to the given key, or null if there is no such key.

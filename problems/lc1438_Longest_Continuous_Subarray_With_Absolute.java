@@ -115,7 +115,7 @@ class Solution {
             }
             minDeque.addLast(x);
 
-            // Shrink window if condition violated,  左指针右移缩小窗口
+            // 不断右移左指针并同步清理队首，保证当前窗口始终合法
             while (maxDeque.peekFirst() - minDeque.peekFirst() > limit) {
                 if (nums[l] == maxDeque.peekFirst()) maxDeque.pollFirst();
                 if (nums[l] == minDeque.peekFirst()) minDeque.pollFirst();

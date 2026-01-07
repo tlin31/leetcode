@@ -24,6 +24,61 @@ key:
 
 ******************************************************
 
+maxProd：以当前位置结尾的最大乘积
+
+minProd：以当前位置结尾的最小乘积（可能是负数）
+
+最终答案是所有 maxProd 中的最大值
+
+
+
+核心 DP 定义（非常重要）
+    令 nums[i] 是当前位置的数：
+
+    maxProd[i] = 以 i 结尾的最大乘积子数组
+    minProd[i] = 以 i 结尾的最小乘积子数组
+
+    状态转移（关键）
+
+    当前位置 x = nums[i]，有 3 种可能来源：
+
+    只取自己：x
+
+    接在之前最大后面：maxProd[i-1] * x
+
+    接在之前最小后面：minProd[i-1] * x
+
+    所以：
+
+    maxProd = max(x, maxProd * x, minProd * x)
+    minProd = min(x, maxProd * x, minProd * x)
+
+
+⚠️ 注意：计算 maxProd 前要先保存旧值（否则被覆盖）
+
+class Solution {
+    public int maxProduct(int[] nums) {
+        int maxProd = nums[0];
+        int minProd = nums[0];
+        int res = nums[0];
+
+        for (int i = 1; i < nums.length; i++) {
+            int x = nums[i];
+
+            int prevMax = maxProd;
+            int prevMin = minProd;
+
+            maxProd = Math.max(x, Math.max(prevMax * x, prevMin * x));
+            minProd = Math.min(x, Math.min(prevMax * x, prevMin * x));
+
+            res = Math.max(res, maxProd);
+        }
+        return res;
+    }
+}
+
+
+
 
 
 =======================================================================================================

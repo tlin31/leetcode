@@ -32,25 +32,54 @@ key:
 
 =======================================================================================================
 
-Simplest O(N) solution with constant space
-
-Idea is to work backwards from the last index. Keep track of the smallest index that can 
-"jump" to the last index. Check whether the current index can jump to this smallest index.
-
-For every index, I'm checking the max reach I can have till that element, if that reach is less 
-than the value of my index, that means I can never reach this particular index and my answer should 
-be false.
+Simplest O(N) solution with constant space, greedy
 
 
-bool canJump(int A[], int n) {
-    int last=n-1,i,j;
-    for(i=n-2;i>=0;i--){
-        if(i+A[i]>=last)
-        	last=i;
+class Solution {
+    public boolean canJump(int[] nums) {
+        if(nums.length==0||nums==null) return true;
+        int n = nums.length;
+        int goal = nums.length-1;
+        for(int i = n-2; i>=0;i--){
+            if(i+nums[i]>=goal)
+                goal = i;
+        }
+
+        return goal==0;
     }
-    return last<=0;
 }
 
+
+
+
+If we meet the condition we update goal with current index.
+
+Let's see how it works.
+
+Input: nums = [2,3,1,1,4]
+We start at the second position from the last.
+
+[2,3,1,1,4]
+       i g
+
+i = current position
+g = goal
+Let's use the formula above.
+
+current position + maximum jump >= goal
+= 3 + 1 >= 4
+= true
+We can reach the current goal(= index 4) from current position(= index 3), that means if we reach index 3, we are sure that we can definitely reach the goal(= the last index).
+
+That's why we can move goal to index 3.
+
+Next,
+
+[2,3,1,1,4]
+     i g
+current position + maximum jump >= goal
+= 2 + 1 >= 3
+= true
 =======================================================================================================
 method 1:
 

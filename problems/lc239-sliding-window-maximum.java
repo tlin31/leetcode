@@ -74,7 +74,7 @@ class Solution {
                 deque.pollLast();
             }
 
-            // ③ 将当前元素下标加入队尾
+            // ③ 将当前元素的indx加入队尾
             deque.offerLast(i);
 
             // ④ 当窗口大小达到 k 时，记录窗口最大值
@@ -87,7 +87,7 @@ class Solution {
 }
 
 
-ex. [1,3,-1,-3,5,3,6,7]
+ex. [1,3,-1,-3,5,3,6,7]， k=3
 
 i=0: [1]
 i=1: [3]       // 1 < 3, so 1 removed
