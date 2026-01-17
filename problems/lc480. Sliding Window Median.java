@@ -183,7 +183,7 @@ class Solution {
 用 两个 TreeSet 存索引而不是值，
 通过自定义 comparator 保证：
 
-按 nums[index] 排序！
+    按 nums[index] 排序！
 
 值相同按 index 排序，从而 支持 O(log k) 删除窗口左端元素。
 
@@ -191,6 +191,24 @@ class Solution {
 	❌ 有重复值 → TreeSet 会认为是同一个元素
 
 	❌ 删除不确定（删哪个）
+
+
+left  = maxHeap（TreeSet reversed）
+        👉 存「较小的一半」
+        👉 left.first() = 较小一半里的最大值
+
+right = minHeap
+        👉 存「较大的一半」
+        👉 right.first() = 较大一半里的最小值
+中位数规则
+    k 是奇数 → median = right.first()
+
+    k 是偶数 → (left.first() + right.first()) / 2
+
+    ⚠️ 注意：
+    中位数永远在 right 里（或 right 的最小值）
+
+
 
 
 ⚠️ TreeSet 支持 O(log k) 删除，这是最大优势
@@ -226,12 +244,12 @@ class Solution {
                 right.remove(i - k);
             }
 
-            //保证 right 中都是「较大一半」
+            //先把新元素扔进“右边（大的一半）”，
+            //再把右边最小的那个，挪到左边
             right.add(i); 
-
-            //👉 重新分割两边
             left.add(right.pollFirst());
             balance(left, right); 
+
             res[r] = getMedian(k, nums, left, right);
             r++;
         }

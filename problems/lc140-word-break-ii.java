@@ -115,6 +115,8 @@ class Solution {
     }
 }
 
+
+
 =======================================================================================================
 Trie optimization
 
@@ -192,9 +194,7 @@ class Solution {
                         validSentences.add(currentWord);
                     } else {
                         // If it's not the last word, append it to each sentence formed by the remaining substring
-                        List<String> sentencesFromNextIndex = dp.get(
-                            endIdx + 1
-                        );
+                        List<String> sentencesFromNextIndex = dp.get(endIdx + 1);
                         for (String sentence : sentencesFromNextIndex) {
                             validSentences.add(currentWord + " " + sentence);
                         }

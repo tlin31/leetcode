@@ -36,16 +36,88 @@ key:
 
 ******************************************************
 
+KMP:
+
+class Solution {
+
+    public boolean repeatedSubstringPattern(String s) {
+        if (s.isEmpty()) return false;
+        int len = s.length();
+
+        // 第一步：构建 next 数组（预处理模式串）
+        int[] next = buildNext(s);
+
+        int repeat = next[len-1];
+        
+        if(next[len - 1] != 0 && len % (len - next[len - 1]) == 0) return true;
+        
+        return false;
+
+    }
+
+    /**
+     * 构建 next 数组的核心逻辑
+     * 理解点：寻找每个子串 [0...i] 的“最长相等前后缀长度”
+     */
+    private static int[] buildNext(String pattern) {
+        int n = pattern.length();
+        int[] next = new int[n];
+        int j = 0; // j 代表当前最长公共前后缀的长度 
+
+        // 下标 i 从 1 开始，因为单个字符没有前后缀
+        for (int i = 1; i < n; i++) {
+            // 如果不匹配，j 回退到之前的对称位置
+            // 这是 KMP 最精妙的地方，利用已知的 next 结果递归回退
+            while (j > 0 && pattern.charAt(i) != pattern.charAt(j)) {
+                j = next[j - 1];
+            }
+
+            // 如果字符相等，说明最长前后缀长度增加了
+            if (pattern.charAt(i) == pattern.charAt(j)) {
+                j++;
+            }
+
+            // 记录当前位置的长度
+            next[i] = j;
+        }
+        return next;
+    }
+}
 
 
 =======================================================================================================
+String Concatenation
+
+Time complexity: O(n).
+Space complexity: O(n).
+
+If a string can be constructed by taking a substring of it and appending multiple copies 
+of the substring together, it must be a rotation of itself. However, it would be inefficient 
+to check all rotations.
+
+
+
+class Solution {
+    public boolean repeatedSubstringPattern(String s) {
+        String t = s + s;
+        if (t.substring(1, t.length() - 1).contains(s))
+            return true;
+
+        return false;
+    }
+}
+
+
+
+
+
 Method 1:
 
 
 Stats:
 
-	- 
-	- 
+Time complexity: O(n⋅ sqrt(n) ).
+Space complexity: O(n).	
 
 
 Method:
@@ -60,30 +132,23 @@ Method:
 
 
 
-
-	public boolean repeatedSubstringPattern(String str) {
-		int l = str.length();
-		StringBuilder sb = new StringBuilder();
-		String subS = "";
-
-		for(int i = l/2; i>=1; i--) {
-
-			// i is a potential divisor
-			if(l % i==0) {
-				int multiple = l/i;
-				subS = str.substring(0,i);
-
-				for(int j=0; j<multiple; j++) {
-					sb.append(subS);
-				}
-
-				if(sb.toString().equals(str)) 
-					return true;
-			}
-		}
-		return false;
-	}
-
+class Solution {
+    public boolean repeatedSubstringPattern(String s) {
+        int n = s.length();
+        for (int i = 1; i <= n / 2; i++) {
+            if (n % i == 0) {
+                StringBuilder pattern = new StringBuilder();
+                for (int j = 0; j < n / i; j++) {
+                    pattern.append(s.substring(0, i));
+                }
+                if (s.equals(pattern.toString())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+}
 
 
 
