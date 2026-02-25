@@ -54,29 +54,37 @@ Method:
 		string will transform into a palindrome.
 
 
-	public boolean isValidPalindrome(String s, int k) {
-	    int n = s.length();
-	    int[][] dp = new int[n + 1][n + 1];
-	    for (int length = 0; length < n; length++) {
 
-	    	// i = start index, j = end index
-	        for (int i = 1; i <= n - length; i++) {
-	            int j = i + length;
+class Solution {
+    public boolean isValidPalindrome(String s, int k) {
+        int n = s.length();
+        // dp[i][j] stores the length of the longest palindromic subsequence in s[i...j]
+        int[][] dp = new int[n][n];
 
-	            // all length == 0, which is a single char in string, it is a valid palindrome
-	            if (i == j) {
-	                dp[i][j] = 1;
-	            } else if (s.charAt(i - 1) == s.charAt(j - 1)) {
-	                dp[i][j] = dp[i + 1][j - 1] + 2;
-	            } else {
-	                dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
-	            }
-	        }
-	    }
-	    return n - dp[1][n] <= k;
-	}
+        // Every single character is a palindrome of length 1
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = 1;
+        }
 
+        // Build the table for substrings of length 2 up to n
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i <= n - len; i++) {
+                int j = i + len - 1;
+                if (s.charAt(i) == s.charAt(j)) {
+                    // If ends match, add 2 to the LPS of the inner substring
+                    dp[i][j] = dp[i + 1][j - 1] + 2;
+                } else {
+                    // If ends don't match, take the max from skipping one end
+                    dp[i][j] = Math.max(dp[i + 1][j], dp[i][j - 1]);
+                }
+            }
+        }
 
+        // Check if removing at most k characters can leave a palindrome
+        // (n - LPS length) gives the minimum deletions required
+        return n - dp[0][n - 1] <= k;
+    }
+}
 
 
 

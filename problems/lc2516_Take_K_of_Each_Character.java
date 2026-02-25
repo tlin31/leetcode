@@ -65,6 +65,53 @@ Stats:
 
 	- 
 	- 
+class Solution {
+    public int takeCharacters(String s, int k) {
+        int n = s.length();
+        int[] total = new int[3];
+        
+        // 1. Count total occurrences of 'a', 'b', and 'c'
+        for (char c : s.toCharArray()) {
+            total[c - 'a']++;
+        }
+        
+        // 2. If any character count is less than k, it's impossible
+        if (total[0] < k || total[1] < k || total[2] < k) {
+            return -1;
+        }
+        
+        // 3. Sliding Window to find the largest "middle" part we can discard
+        // The characters OUTSIDE the window must be >= k.
+        // So characters INSIDE the window must be <= (total - k).
+        int[] target = new int[3];
+        for (int i = 0; i < 3; i++) {
+            target[i] = total[i] - k;
+        }
+        
+        int[] window = new int[3];
+        int left = 0, maxMiddle = 0;
+        
+        for (int right = 0; right < n; right++) {
+            window[s.charAt(right) - 'a']++;
+            
+            // If the window contains too many of a character, shrink from the left
+            while (window[0] > target[0] || window[1] > target[1] || window[2] > target[2]) {
+                window[s.charAt(left) - 'a']--;
+                left++;
+            }
+            
+            // Calculate the max size of this "discardable" middle section
+            maxMiddle = Math.max(maxMiddle, right - left + 1);
+        }
+        
+        // The answer is the total length minus the part we left in the middle
+        return n - maxMiddle;
+    }
+}
+
+
+
+
 
 class Solution {
     public int takeCharacters(String s, int k) {

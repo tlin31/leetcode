@@ -46,7 +46,6 @@ sell1 = max(sell1, buy1 + prices[i])
 
 
 
-
 第二次买入
 
 buy2 = max(buy2, sell1 - prices[i])

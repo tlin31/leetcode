@@ -68,6 +68,168 @@ Analysis:
 
 
 
+关键思维转换
+    ❌ 错误直觉: 先去一趟 DP, 再回来一趟 DP 👉 会 重复计数 / 无法避免冲突
+
+    ✅ 正确建模（面试官最想听）
+
+        👉 不是“走两次”
+        👉 而是：两个人同时从 (0,0) 走到 (n-1,n-1)
+
+        每一步：都只能向 右 or 下。两个人同步走， 如果走到同一个格子，樱桃只能算一次
+
+DP 状态设计（核心）
+    dp[k][i1][i2]：一共走了 k 步，第一个人在 (i1, k - i1)，第二个人在 (i2, k - i2) 能拿到的最多樱桃数
+
+    📌 因为：row + col = k
+
+状态转移（4 种情况）
+
+    两个人每一步：
+
+    下 / 下， 下 / 右， 右 / 下， 右 / 右
+
+    dp[k][i1][i2] =
+        max(
+          dp[k-1][i1-1][i2-1],
+          dp[k-1][i1-1][i2],
+          dp[k-1][i1][i2-1],
+          dp[k-1][i1][i2]
+        )
+
+加上当前格子的樱桃
+    if (i1 == i2 && j1 == j2)
+        cherries += grid[i1][j1];  // 同一个格子
+    else
+        cherries += grid[i1][j1] + grid[i2][j2];
+
+初始化 & 边界
+
+    dp 初始为 -∞（非法状态）
+
+    dp[0][0][0] = grid[0][0]
+
+    如果某一步走到 -1 → 跳过
+
+import java.util.Arrays;
+
+class Solution {
+    public int cherryPickup(int[][] grid) {
+        int n = grid.length;
+        // dp[r1][r2] 表示在步数 k 下，两人的行坐标分别为 r1, r2 时的最大得分
+        int[][] dp = new int[n][n];
+        
+        // 初始化：-1 表示不可达
+        for (int[] row : dp) Arrays.fill(row, -1);
+        dp[0][0] = grid[0][0];
+
+        // 总步数 k = r + c，从 1 步走到 2n-2 步
+        for (int k = 1; k <= 2 * n - 2; k++) {
+            int[][] nextDp = new int[n][n];
+            for (int[] row : nextDp) Arrays.fill(row, -1);
+
+            // 遍历两个人的行坐标 r1, r2, 就是row
+            // 范围限制：行不能超过 n-1，且 c = k - r 也不能超过 n-1 (即 r >= k - (n-1))
+            for (int r1 = Math.max(0, k - (n - 1)); r1 <= Math.min(n - 1, k); r1++) {
+                for (int r2 = Math.max(0, k - (n - 1)); r2 <= Math.min(n - 1, k); r2++) {
+                    
+                    // 如果当前格有荆棘，不可达
+                    if (grid[r1][k - r1] == -1 || grid[r2][k - r2] == -1) continue;
+
+                    // 寻找上一步的 4 种来源中的最大值
+                    int res = -1;
+                    for (int i = r1 - 1; i <= r1; i++) {
+                        for (int j = r2 - 1; j <= r2; j++) {
+                            if (i >= 0 && j >= 0) {
+                                res = Math.max(res, dp[i][j]);
+                            }
+                        }
+                    }
+
+                    if (res != -1) {
+                        // 加上当前格的樱桃
+                        int cherries = (r1 == r2) ? grid[r1][k - r1] : 
+                                       grid[r1][k - r1] + grid[r2][k - r2];
+                        nextDp[r1][r2] = res + cherries;
+                    }
+                }
+            }
+            dp = nextDp;
+        }
+
+        return Math.max(0, dp[n - 1][n - 1]);
+    }
+}
+
+
+
+
+
+
+class Solution {
+    public int cherryPickup(int[][] grid) {
+        int n = grid.length;
+        int maxK = 2 * n - 2; //两人一共总的最多的步数
+        int[][][] dp = new int[maxK + 1][n][n];
+
+        // 初始化为 -1 表示不可达
+        for (int k = 0; k <= maxK; k++) {
+            for (int i = 0; i < n; i++) {
+                Arrays.fill(dp[k][i], -1);
+            }
+        }
+
+        if (grid[0][0] == -1) return 0;
+
+        dp[0][0][0] = grid[0][0];
+
+        //总步数 k = r + c，从 1 步走到 2n-2 步
+        for (int k = 1; k <= maxK; k++) {
+
+            // 遍历两个人的行坐标 i1, i2
+            // 范围限制：行不能超过 n-1，且 column = k - i 也不能超过 n-1 (即 i >= k - (n-1))
+            for (int i1 = Math.max(0, k - (n - 1)); i1 <= Math.min(n - 1, k); i1++) {
+                for (int i2 = Math.max(0, k - (n - 1)); i2 <= Math.min(n - 1, k); i2++) {
+                    int j1 = k - i1;
+                    int j2 = k - i2;
+
+                    if (grid[i1][j1] == -1 || grid[i2][j2] == -1) continue;
+
+                    int best = -1;
+
+                    // 枚举两个人在上一步（k-1）可能来自的 4 种走法，选出“能到达当前状态的最大樱桃数”。
+                    for (int di1 = 0; di1 <= 1; di1++) {
+                        for (int di2 = 0; di2 <= 1; di2++) {
+                            int pi1 = i1 - di1;
+                            int pi2 = i2 - di2;
+                            if (pi1 >= 0 && pi2 >= 0 && dp[k - 1][pi1][pi2] != -1) {
+                                best = Math.max(best, dp[k - 1][pi1][pi2]);
+                            }
+                        }
+                    }
+
+                    if (best == -1) continue;
+
+                    int cherries = best;
+                    if (i1 == i2 && j1 == j2) {
+                        cherries += grid[i1][j1];
+                    } else {
+                        cherries += grid[i1][j1] + grid[i2][j2];
+                    }
+
+                    dp[k][i1][i2] = cherries;
+                }
+            }
+        }
+
+        return Math.max(0, dp[maxK][n - 1][n - 1]);
+    }
+}
+
+项目  复杂度
+时间  O(n³)
+空间  O(n³)（可优化为 O(n²) 👉 用 滚动数组：dp[k] 只依赖 dp[k-1]
+
 =======================================================================================================
 Method 1: DP - top down
 

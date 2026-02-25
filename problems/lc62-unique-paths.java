@@ -36,6 +36,45 @@ key:
 
 ******************************************************
 
+核心思路：到达格 \((i,j)\) 的路径只有两个来源：从上方来 \((i-1,j)\) 或 从左方来 \((i,j-1)\)。 状态定义：dp[i][j] 表示到达位置 \((i,j)\) 的路径总数。转移方程：dp[i][j] = dp[i-1][j] + dp[i][j-1]。边界条件：第一行和第一列的所有格子都只有 1 条路径（只能一直向右或一直向下）。
+
+
+class Solution {
+    public int uniquePaths(int m, int n) {
+        int[][] dp = new int[m][n];
+        
+        // 初始化第一列和第一行
+        for (int i = 0; i < m; i++) dp[i][0] = 1;
+        for (int j = 0; j < n; j++) dp[0][j] = 1;
+
+        for (int i = 1; i < m; i++) {
+            for (int j = 1; j < n; j++) {
+                dp[i][j] = dp[i - 1][j] + dp[i][j - 1];
+            }
+        }
+        return dp[m - 1][n - 1];
+    }
+}
+
+
+解法二：空间优化 (滚动数组)
+由于 dp[i][j] 只依赖于左边和上边的值，我们可以将二维数组压缩为一维。
+
+public int uniquePaths(int m, int n) {
+    int[] dp = new int[n];
+    java.util.Arrays.fill(dp, 1); // 初始化第一行
+    for (int i = 1; i < m; i++) {
+        for (int j = 1; j < n; j++) {
+            // dp[j] 其实是上一行的值，dp[j-1] 是当前行左边的值
+            dp[j] += dp[j - 1];
+        }
+    }
+    return dp[n - 1];
+}
+
+
+
+
 
 
 =======================================================================================================
@@ -149,6 +188,7 @@ method 2.2
 stats:
 	- Runtime: 0 ms, faster than 100.00% of Java online submissions for Unique Paths.
 	- Memory Usage: 32.9 MB, less than 5.10% 
+
 	public int uniquePaths(int m, int n) {
 	    int[] dp = new int[n];
 	    for (int i = 0; i < n; i++) {

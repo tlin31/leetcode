@@ -56,22 +56,32 @@ stats:
 
 
 class Solution {
-    public int numSubarrayProductLessThanK(int[] nums, int k) {
-        if (k == 0) return 0;
-        int cnt = 0;
-        int pro = 1;
-        for (int i = 0, j = 0; j < nums.length; j++) {
-            pro *= nums[j];
+	public int numSubarrayProductLessThanK(int[] nums, int k) {
+	    // 1. 边界处理 (Edge Case: k <= 1, as nums are positive, product can't be < 1)
+	    if (k <= 1) return 0;
 
-            // if product exceeds k, delete i from the product
-            while (i <= j && pro >= k) {
-                pro /= nums[i++];
-            }
-            cnt += j - i + 1;
-        }
+	    int count = 0;
+	    int prod = 1;
+	    int left = 0;
 
-        return cnt;        
-    }
+	    for (int right = 0; right < nums.length; right++) {
+	        // 2. 进窗 (Expand Window)
+	        prod *= nums[right];
+
+	        // 3. 缩窗 (Shrink Window)
+	        while (prod >= k) {
+	            prod /= nums[left];
+	            left++;
+	        }
+
+	        // 4. 批量计数 (Batch Counting)
+	        // 关键逻辑：新增的子数组个数等于当前窗口的长度
+	        count += (right - left + 1);
+	    }
+
+	    return count;
+	}
+
 }
 
 

@@ -38,7 +38,11 @@ key:
 
 ******************************************************
 
+dp[k][i][j] 表示从坐标 (i,j) 出发，剩余 k 步时能移出边界的路径总数。
 
+转移方程：如果球已经在边界外，返回 1（找到一条路径）。
+如果步数用完但球仍在界内，返回 0。
+否则，当前位置的路径数等于四个相邻方向在 k-1 步时的路径数之和：
 
 =======================================================================================================
 Method 1: Brute force --> DFS with memo
@@ -124,43 +128,45 @@ Method:
 
 	-	
 	-	
+class Solution {
+    public int findPaths(int m, int n, int maxMove, int startRow, int startColumn) {
+        if (maxMove <= 0) return 0;
+        int MOD = 1000000007;
+        int count = 0;
 
-DP[i][j][k] stands for how many possible ways to walk into cell j,k in step i, 
-DP[i][j][k] only depends on DP[i - 1][j][k], so we can compress 3 dimensional dp array to 2 dimensional.
+        // dp[i][j] 表示当前步数下，球在 (i, j) 的路径数
+        int[][] dp = new int[m][n];
+        dp[startRow][startColumn] = 1;
 
-public class Solution {
-    public int findPaths(int m, int n, int N, int i, int j) {
-        if (N <= 0) return 0;
-        
-        final int MOD = 1000000007;
-        int[][] count = new int[m][n];
-        count[i][j] = 1;
-        int result = 0;
-        
-        int[][] dirs = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
-        
-        for (int step = 0; step < N; step++) {
-            int[][] temp = new int[m][n];
+        // 方向数组，方便四联通遍历
+        int[][] dirs = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+
+        for (int k = 0; k < maxMove; k++) {
+            int[][] nextDp = new int[m][n];
             for (int r = 0; r < m; r++) {
                 for (int c = 0; c < n; c++) {
-                    for (int[] d : dirs) {
-                        int nr = r + d[0];
-                        int nc = c + d[1];
-
-                        // update result
-                        if (nr < 0 || nr >= m || nc < 0 || nc >= n) {
-                            result = (result + count[r][c]) % MOD;
-                        }
-                        else {
-                            temp[nr][nc] = (temp[nr][nc] + count[r][c]) % MOD;
+                    if (dp[r][c] > 0) {
+                        for (int[] d : dirs) {
+                            int nr = r + d[0];
+                            int nc = c + d[1];
+                            
+                            // 检查是否出界
+                            if (nr < 0 || nr >= m || nc < 0 || nc >= n) {
+                                // 如果出界，将当前路径数累加到总数
+                                count = (count + dp[r][c]) % MOD;
+                            } else {
+                                // 如果没出界，累加到下一轮的状态中
+                                nextDp[nr][nc] = (nextDp[nr][nc] + dp[r][c]) % MOD;
+                            }
                         }
                     }
                 }
             }
-            count = temp;
+            // 更新当前状态为下一轮的基准
+            dp = nextDp;
         }
-        
-        return result;
+
+        return count;
     }
 }
 

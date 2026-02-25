@@ -22,6 +22,96 @@ key:
 ******************************************************
 
 
+一、一句话结论（先抓住本质）
+
+    判断 s3 是否能由 s1 和 s2 保持各自字符相对顺序 交错组成。👉 不是子串问题，不是排列问题，是“顺序不变的合并”
+
+
+二、为什么一定是 DP？
+
+    每个字符 只能来自 s1 或 s2, 当前位置能不能成立，只和前一步是否成立有关 👉 典型二维 DP
+
+
+三、DP 状态定义（面试最重要）
+
+dp[i][j] = 是否能用 s1 的前 i 个字符 和 s2 的前 j 个字符 
+            组成 s3 的前 i + j 个字符
+
+
+    📌 索引统一：
+
+    s1[i - 1]
+
+    s2[j - 1]
+
+    s3[i + j - 1]
+
+四、状态转移方程（核心）
+    两种可能来源
+
+    情况 1：s3 当前字符来自 s1
+        dp[i-1][j] == true
+        AND
+        s1[i-1] == s3[i+j-1]
+
+    情况 2：s3 当前字符来自 s2
+        dp[i][j-1] == true
+        AND
+        s2[j-1] == s3[i+j-1]
+
+    合并
+    dp[i][j] =
+        (dp[i-1][j] && s1[i-1] == s3[i+j-1]) ||
+        (dp[i][j-1] && s2[j-1] == s3[i+j-1]);
+
+五、Base Case（别写错）
+    dp[0][0] = true; // 空 + 空 = 空
+
+    第一行（只用 s2）
+    dp[0][j] = dp[0][j-1] && s2.charAt(j-1) == s3.charAt(j-1);
+
+    第一列（只用 s1）
+    dp[i][0] = dp[i-1][0] && s1.charAt(i-1) == s3.charAt(i-1);
+
+
+
+class Solution {
+    public boolean isInterleave(String s1, String s2, String s3) {
+
+        if (s1.length() + s2.length() != s3.length()) return false;
+
+        int m = s1.length(), n = s2.length();
+        boolean[][] dp = new boolean[m + 1][n + 1];
+
+        dp[0][0] = true;
+
+        // s1 only
+        for (int i = 1; i <= m; i++) {
+            dp[i][0] = dp[i - 1][0] && s1.charAt(i - 1) == s3.charAt(i - 1);
+        }
+
+        // s2 only
+        for (int j = 1; j <= n; j++) {
+            dp[0][j] = dp[0][j - 1] && s2.charAt(j - 1) == s3.charAt(j - 1);
+        }
+
+        // general case
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                char c = s3.charAt(i + j - 1);
+                dp[i][j] =
+                    (dp[i - 1][j] && s1.charAt(i - 1) == c) ||
+                    (dp[i][j - 1] && s2.charAt(j - 1) == c);
+            }
+        }
+
+        return dp[m][n];
+    }
+}
+
+
+
+
 
 =======================================================================================================
 Method 1:	DFS + memo

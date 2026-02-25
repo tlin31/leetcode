@@ -1,5 +1,4 @@
-259. 3Sum Smaller
-Medium
+259. 3Sum Smaller - Medium
 
 Given an array of n integers nums and an integer target, find the number of index 
 triplets i, j, k with 0 <= i < j < k < n that satisfy the condition 
@@ -44,6 +43,67 @@ key:
 
 ******************************************************
 
+
+这道题的最优解法是 排序 (Sorting) + 双指针 (Two Pointers)。
+与 15. 3Sum 不同的是，这里求的是个数，且是不等式，这让我们可以利用排序后的单调性进行“批量计数”。
+
+核心思路：利用单调性批量计数
+    如果 nums[left] + nums[right] < current_target，那么由于数组已排序，
+    left 与 left+1, left+2, ..., right 之间的任何元素组合也一定小于 current_target。
+
+
+步骤 (Steps)：
+1. 排序：将 nums 升序排列。
+2. 外层循环：固定第一个数 nums[i]，目标变为寻找 nums[j] + nums[k] < target - nums[i]。
+3. 内层双指针：
+    设置 left = i + 1, right = n - 1。
+    如果 nums[left] + nums[right] < sum：
+        关键点：此时从 left + 1 到 right 的所有位置作为第三个数都符合条件。
+        直接累加 count += (right - left)。
+        left++ 继续尝试更大的值。
+    否则：right-- 减小总和。
+
+
+
+public int threeSumSmaller(int[] nums, int target) {
+    // 1. 排序 (Sorting is essential for Two Pointers)
+    Arrays.sort(nums);
+    int count = 0;
+    int n = nums.length;
+
+    for (int i = 0; i < n - 2; i++) {
+        int left = i + 1;
+        int right = n - 1;
+        int currentTarget = target - nums[i];
+
+        while (left < right) {
+            if (nums[left] + nums[right] < currentTarget) {
+                // 2. 批量计数 (Batch Counting)
+                // 如果 nums[left] + nums[right] 达标，
+                // 那么 nums[left] 配合中间任何一个数都达标
+                count += (right - left);
+                left++; 
+            } else {
+                right--;
+            }
+        }
+    }
+    return count;
+}
+
+
+3. 业界最佳实践 (Best Practices)
+早期停止 (Early Exit)：
+    在电商促销引擎中，如果 nums[i] + nums[i+1] + nums[i+2] 已经大于等于 target，且数组已排序，
+    那么后续所有组合都不可能达标，可以直接 break循环
+
+避免重复计算：
+    如果 target 是静态的，可以利用 Caffeine Cache 缓存计算结果。在微服务环境下，如果数据源频繁变动，
+    建议在 Redis 中存储计算出的 count 并设置合理的 TTL (Time To Live)。
+
+处理溢出 (Overflow Handling)：
+    在处理财务或大数据金额时，int 可能会溢出。建议在计算 sum 时使用 long 类型，或者在 Java 
+    中使用 Math.addExact() 来捕获溢出异常。
 
 
 =======================================================================================================
