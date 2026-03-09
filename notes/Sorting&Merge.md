@@ -31,10 +31,10 @@
 | Counting Sort  | O(n + k)       | O(k)     | ✅    | ❌          | 数据范围小  |
 | Bucket Sort    | O(n + k) avg   | O(n + k) | 取决实现 | ❌        | 均匀分布   |
 | Quick Sort     | O(n log n) avg | O(log n) | ❌    | ✅          | 工业级    |
-| Insertion Sort | O(n²)          | O(1)     | ✅    | ✅          | 小数据    |
 | Merge Sort     | O(n log n)     | O(n)     | ✅    | ✅          | 稳定排序   |
 | Heap Sort      | O(n log n)     | O(1)     | ❌    | ✅          | 内存受限   |
 | Radix Sort     | O(d·(n+k))     | O(n+k)   | ✅    | ❌          | 整数/字符串 |
+| Insertion Sort | O(n²)          | O(1)     | ✅    | ✅          | 小数据    |
 | Bubble Sort    | O(n²)          | O(1)     | ✅    | ✅          | 教学     |
 | Selection Sort | O(n²)          | O(1)     | ❌    | ✅          | 教学     |
 
@@ -322,36 +322,45 @@ Auxiliary Space: O ( log (N))主要是递归调用产生的栈空间。
 
 ```java
 public class QuickSort {
-    public void sort(int[] arr, int low, int high) {
-        if (low < high) {
-            // 获取分区索引
-            int pivotIdx = partition(arr, low, high);
-            // 递归排序左子数组
-            sort(arr, low, pivotIdx);
-            // 递归排序右子数组
-            sort(arr, pivotIdx + 1, high);
-        }
+    public void sort(int[] nums) {
+        if (nums == null || nums.length < 2) return;
+        quickSort(nums, 0, nums.length - 1);
     }
 
-    private int partition(int[] arr, int low, int high) {
-        // 取中间值作为基准，防止在已排序数组上退化
-        int pivot = arr[low + (high - low) / 2];
-        int i = low - 1;
-        int j = high + 1;
-        
-        while (true) {
-            do { i++; } while (arr[i] < pivot);
-            do { j--; } while (arr[j] > pivot);
-            
-            if (i >= j) return j;
-            
-            // 交换元素
-            int temp = arr[i];
-            arr[i] = arr[j];
-            arr[j] = temp;
+    private void quickSort(int[] nums, int left, int right) {
+        if (left >= right) return;
+
+        // 1. 分区操作，获取基准值的最终位置
+        int pivotIndex = partition(nums, left, right);
+
+        // 2. 递归排序左子数组和右子数组
+        quickSort(nums, left, pivotIndex - 1);
+        quickSort(nums, pivotIndex + 1, right);
+    }
+
+    private int partition(int[] nums, int left, int right) {
+        // 选择最右侧元素作为基准 (Pivot)
+        int pivot = nums[right];
+        int i = left; // i 记录小于 pivot 的元素的边界
+
+        for (int j = left; j < right; j++) {
+            if (nums[j] < pivot) {
+                swap(nums, i, j);
+                i++;
+            }
         }
+        // 将基准值交换到中间正确的位置
+        swap(nums, i, right);
+        return i;
+    }
+
+    private void swap(int[] nums, int i, int j) {
+        int temp = nums[i];
+        nums[i] = nums[j];
+        nums[j] = temp;
     }
 }
+
 
 ```
 
@@ -364,8 +373,19 @@ public class QuickSort {
 
 4. 随机化基准：通过随机选择基准，使算法在面对任何输入时都有极大概率维持 O(n * log n)
 
+### 面试追问
+Q1: 为什么 Java 的 Arrays.sort() 对基本类型用快排，而对对象类型用归并排序 (TimSort)？
 
-## 4.1 Java用的排序？
+- 稳定性 (Stability)：对象排序通常需要稳定性（即相等元素的相对顺序不变），快排是不稳定排序 (Unstable)，而 TimSort 是稳定的。
+- 基本类型无需稳定性：对于 int 这种基本类型，两个 5 交换位置没有任何影响，因此选择平均速度最快的快排。
+
+Q2: 快速排序和堆排序 (Heap Sort) 相比，哪个更好？
+
+- 虽然两者平均都是 O（n log n），但在实际运行中快排通常更快。因为快排具有良好的 局部性原理 (Locality of Reference)，对 CPU 缓存 (CPU Cache) 更加友好，而堆排序的**跳跃式访问**会导致频繁的缓存缺失。
+
+
+
+### Java用的排序？
 
 
 
@@ -396,6 +416,54 @@ O(n log n)
 对「部分有序」数组非常快
 
 Python / Java 都用它
+
+
+## 4.1 Tim Sort
+TimSort 是一种结合了 合并排序 (Merge Sort) 和 插入排序 (Insertion Sort) 的混合稳定排序算法
+
+
+### 1. 核心原理
+TimSort 的核心思想是：现实世界中的数据通常包含许多**已经部分排好序**的子序列。
+
+A. 分区 (Runs)
+- TimSort 将数组拆分为一个个小的、已经排好序的片段，称为 Run。
+- 如果片段是升序的，直接保留。
+- 如果片段是严格降序的，将其反转为升序。
+
+B. 二分插入排序 (Binary Insertion Sort)
+- 如果一个 Run 的长度太短（小于 minRun，通常是 32 或 64），TimSort 会使用插入排序将后续元素挤进这个 Run 中。由于数据量小且在连续内存，插入排序在小范围内非常快。
+
+C. 合并 (Merging)
+- 当产生多个 Run 后，TimSort 使用合并排序将它们合并。
+- 合并规则：它维持一个栈来记录这些 Run，并遵循特定的合并策略（如 A>B+C 且 B>C），确保合并过程的平衡性。
+- Galloping Mode (飞跃模式)：
+  - 当合并两个已排序序列 A 和 B 时，如果发现 A 中的元素连续多次（默认 7 次）都比 B 中的当前元素小，算法会认为 A 中可能有一大块数据都更小。此时不再逐一对比，而是通过二分查找直接定位 B[0]在 A 中的插入位置，批量拷贝数据。
+
+
+
+
+### 2. 为什么 Java 对象排序必须用 TimSort？
+
+1) 稳定性 (Stability)：
+- 在电商项目中，如果用户先按“价格”排序，再按“销量”排序。稳定排序能保证销量相同时，价格的相对顺序不变。快排 (QuickSort) 不稳定，而 TimSort 是稳定的 (Stable)。
+
+2) 适应性 (Adaptability)：
+- 对于已经部分有序的数据（这在数据库查询结果中很常见），TimSort 的时间复杂度趋近于 O(N)，而快排依然是 O(N log N)
+- 最坏情况保障： TimSort 的最坏时间复杂度是固定的 O(N log N)，不像快排可能退化到 O(N^2)
+
+
+### 3. 业界最佳实践 (Best Practices)
+1) 利用局部有序性：
+- 在微服务中，如果从多个分片获取已排序的数据流，使用 Java 的 sort 会非常快，因为它能迅速识别这些 Runs。
+
+2) 重写 compareTo 或 Comparator：
+- TimSort 严格依赖比较逻辑。注意：Java 的 TimSort 要求比较器必须满足 传递性 (Transitivity)。如果你的比较逻辑（如 a > b 返回 1，b > a 返回 1）违反逻辑，Java 会抛出 IllegalArgumentException: Comparison method violates its general contract!。
+
+3) 内存占用：
+- TimSort 需要额外的临时空间来合并 Run（最坏 O(N)），如果你的微服务容器内存极度紧张且处理的是海量数据，需监控 JVM 堆内存 (Heap Memory)。
+
+
+
 ## 5. Insertion sort （插入排序）
 
 - 像整理扑克牌一样插入。
@@ -574,17 +642,23 @@ class Solution {
 
 - 用最大堆 / 最小堆选最大值。
 
-- 基于二叉堆（Binary Heap）数据结构
+- 堆排序利用了完全二叉树 (Complete Binary Tree) 的特性：
+  - 最大堆 (Max Heap)：任意节点的值都 >= 其子节点。
+  - 堆顶（根节点）必然是最大值。
+  - 索引规律：对于索引为 i 的节点，左孩子是 2i + 1，右孩子是 2i + 2，父节点是 (i - 1) / 2。
 
 - 原地排序
 
 - 不稳定， 但是可以implement成stable的
 
-- 复杂度 Time: O(n log n)， Space: O(1)
+- 复杂度 
+  - 最好、最坏、平均Time: O(n log n)
+  - Space: O(1)
 
 - 用途： 内存受限， Top K 问题
 
 ### Algorithm
+
 1. 建堆：将无序数组构建成一个大顶堆。
 
 2. 交换与下沉：将堆顶元素（最大值）与数组末尾元素交换，此时最大值已归位。
@@ -606,16 +680,12 @@ public class HeapSort {
         }
 
         /* 2. 依次取出堆顶元素并调整
-            arr[0] 是当前最大值
-
-            把它放到最终位置 i
-
+            arr[0] 是当前最大值， 把它放到最终位置 i = n-1
             堆大小缩小为 i
-
             修复堆顶即可（只破坏了 root）
         */
         for (int i = n - 1; i > 0; i--) {
-            // 将当前最大的堆顶换到末尾
+            // 将当前最大的堆顶换到末尾 swap(0, i)
             int temp = arr[0];
             arr[0] = arr[i];
             arr[i] = temp;
@@ -627,7 +697,7 @@ public class HeapSort {
 
     // 堆化逻辑：使以 i 为根的子树满足大顶堆， 左右子树已经是堆，只修当前节点
     void heapify(int[] arr, int n, int i) {
-        int largest = i; 
+        int largest = i;  // 假设根节点最大
         int left = 2 * i + 1;
         int right = 2 * i + 2;
 
@@ -638,10 +708,12 @@ public class HeapSort {
         if (right < n && arr[right] > arr[largest]) 
             largest = right;
 
+        // 如果最大值不是根节点，则交换并递归
         if (largest != i) {
             int swap = arr[i];
             arr[i] = arr[largest];
             arr[largest] = swap;
+
             // 递归调整受影响的子树
             heapify(arr, n, largest);
         }
@@ -651,7 +723,7 @@ public class HeapSort {
 
 ```
 
-### 例子
+### 代码使用例子
 
 215. Kth Largest Element in an Array
 
@@ -670,16 +742,85 @@ class Solution {
     }
 }
 ```
+### 例子
+
+数组：[4, 10, 3, 5, 1]
+
+索引： 0  1   2  3  4
+
+
+#### 第一阶段：建堆 (Build Max Heap)
+
+这个数组对应的完全二叉树结构是：
+```
+        4 (0)
+       /     \
+    10 (1)    3 (2)
+   /    \
+ 5 (3)   1 (4)
+```
+
+步骤：从最后一个非叶子节点开始 heapify。
+公式：最后一个非叶子节点索引 = n/2 - 1 = 5/2 - 1 = 索引 1 (值为 10)。
+
+1) 处理索引 1 (值为 10)：
+- 孩子是 5 (索引3) 和 1 (索引4)。
+- 10 比 5 和 1 都大，不需要交换。
+- 树保持不变。
+
+
+2) 处理索引 0 (值为 4)：
+- 左孩子是 10 (索引1)，右孩子是 3 (索引2)。
+- 10 比 4 大，交换 4 和 10。
+- 数组变为：[10, 4, 3, 5, 1]
+  - 递归调整：交换后，原本的 4 到了索引 1，需要检查它的孩子（5 和 1）。
+  - 5 比 4 大，交换 4 和 5。
+  - 数组变为：[10, 5, 3, 4, 1]（建堆完成！堆顶是 10）。
+
+
+#### 第二阶段：排序 (Sorting)
+现在我们有一个最大堆：[10, 5, 3, 4, 1]。
+
+1) Round 1:
+- 交换：堆顶 10 和末尾 1 交换 --> 数组变为：[1, 5, 3, 4, | 10] （10 已固定）。
+- 调整：对剩余的 [1, 5, 3, 4] 进行 heapify(0)。
+  - 1 与孩子 5, 3 比较，5 最大，交换 1 和 5 -> [5, 1, 3, 4]。
+  - 1 再与孩子 4 比较，4 最大，交换 1 和 4 -> [5, 4, 3, 1]。
+- 结果：[5, 4, 3, 1, | 10]
+
+
+2) Round 2:
+- 交换：堆顶 5 和当前末尾 1 交换。 --> 数组变为：[1, 4, 3, | 5, 10] （5 已固定）。
+- 调整：对 [1, 4, 3] 进行 heapify(0)。
+- 1 与孩子 4, 3 比较，4 最大，交换 1 和 4 -> [4, 1, 3]。
+- 结果：[4, 1, 3, | 5, 10]
+
+
+3) Round 3:
+- 交换：堆顶 4 和当前末尾 3 交换。 --> 数组变为：[3, 1, | 4, 5, 10] （4 已固定）。
+- 调整：对 [3, 1] 进行 heapify(0)。3 比 1 大，不需要交换。
+- 结果：[3, 1, | 4, 5, 10]
+
+
+4) Round 4:
+- 交换：堆顶 3 和当前末尾 1 交换, 数组变为：[1, | 3, 4, 5, 10] （3 已固定）。
+- 完成：只剩一个元素，排序结束。
+
+最终数组：[1, 3, 4, 5, 10]
+
 
 ### Advantages of Heap Sort:
 
-1. Efficient Time Complexity: Heap Sort has a time complexity of O(n log n) in all cases. This makes it efficient for sorting large datasets. The log n factor comes from the height of the binary heap, and it ensures that the algorithm maintains good performance even with a large number of elements.
+1. Efficient Time Complexity: 
+- Heap Sort has a time complexity of O(n log n) in all cases. This makes it efficient for sorting large datasets. The log n factor comes from the height of the binary heap, and it ensures that the algorithm maintains good performance even with a large number of elements.
 
-2. Memory Usage – Memory usage can be minimal (by writing an iterative heapify() instead of a recursive one). So apart from what is necessary to hold the initial list of items to be sorted, it needs no additional memory space to work
+2. Memory Usage 
+- Memory usage can be minimal (by writing an iterative heapify() instead of a recursive one). So apart from what is necessary to hold the initial list of items to be sorted, it needs no additional memory space to work
 
-3. Simplicity –  It is simpler to understand than other equally efficient sorting algorithms because it does not use advanced computer science concepts such as recursion.
+3. Simplicity 
+- It is simpler to understand than other equally efficient sorting algorithms because it does not use advanced computer science concepts such as recursion.
 
-Disadvantages of Heap Sort:
+### Disadvantages of Heap Sort:
 1. Costly: Heap sort is costly as the constants are higher compared to merge sort even if the time complexity is O(n Log n) for both.
 
 2. Unstable: Heap sort is unstable. It might rearrange the relative order.
@@ -714,6 +855,7 @@ Disadvantages of Heap Sort:
 3. 迭代：移动到十位、百位……重复上述过程。
 
 4. 稳定性要求：每一轮排序必须是稳定的，否则高位排序时会破坏低位已经排好的相对顺序。
+
 ```java
 import java.util.Arrays;
 
@@ -764,33 +906,18 @@ public class RadixSort {
 
 ## Bubble Sort
 
-核心思想
-
-不断交换相邻逆序元素。
+核心思想:
+- 不断交换相邻逆序元素。
 
 特点
-
-最简单
-
-最慢
-
-稳定
-
-复杂度
-
-Time: O(n²)
-
-Space: O(1)
-
-用途
+- 最简单
+- 最慢
+- 稳定
 
 
-repeatedly swapping the adjacent elements if they are in the wrong order.
-
-### Complexity
-Time Complexity: O(N^2)
-
-Auxiliary Space: O(1)
+### 复杂度
+- Time: O(n²)
+- Space: O(1)
 
 
 

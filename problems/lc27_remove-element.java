@@ -39,21 +39,59 @@ for (int i = 0; i < len; i++) {
 
 
 =========================================================================================================================================================
-method 1:
 
-key:
+2 pointers
 
-// Runtime: 0 ms, faster than 100.00% of Java online submissions for Remove Element.
-// Memory Usage: 35.3 MB, less than 100.00% 
-
-public int removeElement(int A[],int elem) {
-    int begin = 0;
-    int n = A.length;
-
-    for (int i = 0; i < n; i++)
-        if (A[i] != elem) A[begin++] = A[i];
-    return begin;
+class Solution {
+    public int removeElement(int[] nums, int val) {
+        int i = 0;
+        for (int j = 0; j < nums.length; j++) {
+            if (nums[j] != val) {
+                nums[i] = nums[j];
+                i++;
+            }
+        }
+        return i;
+    }
 }
+
+
+
+Approach 2: Two Pointers - when elements to remove are rare
+
+    For example, nums=[1,2,3,5,4],val=4. The previous algorithm will do unnecessary copy operation 
+    of the first four elements. 
+
+    Another example is nums=[4,1,2,3,5],val=4. It seems unnecessary to move elements [1,2,3,5] 
+    one step left as the problem description mentions that the order of elements could be changed.
+
+
+Algorithm
+
+When we encounter nums[i]=val, we can swap the current element out with the last element and 
+dispose the last one. This essentially reduces the array's size by 1.
+
+Note that the last element that was swapped in could be the value you want to remove itself. 
+But don't worry, in the next iteration we will still check this element.
+
+
+class Solution {
+    public int removeElement(int[] nums, int val) {
+        int i = 0;
+        int n = nums.length;
+        while (i < n) {
+            if (nums[i] == val) {
+                nums[i] = nums[n - 1];
+                // reduce array size by one
+                n--;
+            } else {
+                i++;
+            }
+        }
+        return n;
+    }
+}
+
 
 
 =========================================================================================================================================================
@@ -72,3 +110,4 @@ public int removeElement(int[] A, int elem) {
     }
     return len;
 }
+

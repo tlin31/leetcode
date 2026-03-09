@@ -40,10 +40,89 @@ key:
 
 ******************************************************
 
+peak & valley
+1. 解题思路：左右双取向
+这道题的核心难点在于，一个孩子的糖果数同时受左邻居和右邻居的影响。如果我们只走一遍，很难同时满足两边的条件。
+最佳实践：
+    左规则 (Left-to-Right)：从左向右遍历。如果右边比左边评分高，右边的糖果 = 左边 + 1。
+    右规则 (Right-to-Left)：从右向左遍历。如果左边比右边评分高，左边的糖果取 (当前值) 和 (右边 + 1) 中的最大值。
+
+Time & space O(n)
+
+class Solution {
+    public int candy(int[] ratings) {
+        int n = ratings.length;
+        int[] candies = new int[n];
+        
+        // 每人至少分 1 个
+        Arrays.fill(candies, 1);
+
+        // 1. 从左往右扫：处理比左邻居分高的情况
+        for (int i = 1; i < n; i++) {
+            if (ratings[i] > ratings[i - 1]) {
+                candies[i] = candies[i - 1] + 1;
+            }
+        }
+
+        // 2. 从右往左扫：处理比右邻居分高的情况
+        for (int i = n - 2; i >= 0; i--) {
+            if (ratings[i] > ratings[i + 1]) {
+                // 取最大值是为了同时满足左规则和右规则
+                candies[i] = Math.max(candies[i], candies[i + 1] + 1);
+            }
+        }
+
+        // 统计总和
+        int totalCandies = 0;
+        for (int c : candies) {
+            totalCandies += c;
+        }
+        return totalCandies;
+    }
+}
+
 
 
 =======================================================================================================
-Method 1:
+Method 1: 坡度理论 (The Slope Theory)
+
+想象一下评分数组是一个山脉，由“上坡”、“下坡”和“平原”组成：
+上坡 (Ascent)：糖果数必须递增（1, 2, 3...）。
+下坡 (Descent)：糖果数必须递减（...3, 2, 1）。
+平原 (Flat)：评分相同。根据题目，评分相同不需要更多糖果，所以直接只给 1 个。
+
+2. 算法三大变量 (Three Keys)
+我们要维护三个状态：
+    pre: 前一个孩子分到的糖果数。
+    inc: 当前连续上坡的长度。
+    dec: 当前连续下坡的长度。
+
+3. 逻辑规则 (The Rules)
+如果评分增加 (Up)：
+pre++, inc = pre, dec = 0。
+ans += pre。
+
+如果评分相等 (Flat)：(重置为最低限度)
+pre = 1, inc = 1, dec = 0。
+ans += 1。
+
+如果评分降低 (Down)：
+为了保持糖果数最少，下坡的终点必须是 1 个糖果。但我们是从左往右走的，我们不知道下坡有多长。
+解决办法：每多一步下坡，我们就给“之前的下坡路径”上的每个人都多补 1 个糖果。
+
+dec++。
+    假设从山顶 (5) 开始下坡：
+    评分:    5  ->  3  ->  2  ->  1
+    步数:          [1]    [2]    [3]  (dec 增加)
+
+    第1步下坡 (到3): 给 3 分 1 个。           累加 +1 (dec=1)
+    第2步下坡 (到2): 给 3 分 2 个, 2 分 1 个。 累加 +2 (dec=2)
+    第3步下坡 (到1): 给 3 分 3 个, 2 分 2 个, 1 分 1 个。 累加 +3 (dec=3)
+
+如果下坡长度达到了上坡长度（dec == inc），说明山峰那个点也需要补一个糖果（为了让下坡能接得住）。
+ans += dec。
+pre = 1（下坡到底部，下一个起跳点设为 1）。
+
 
 
 Stats:
@@ -56,89 +135,54 @@ Method:
 
 	-	
 
-We can easily calculate the number of candy needed by using an array to store the candy of each child. 
-And after that traverse the rating array twice. The first loop makes sure children with a higher rating 
-get more candy than its left neighbor, the second loop makes sure children with a higher rating get 
-more candy than its right neighbor. At last add the total number of candies. This approach is O(n) 
-time and O(n) space. 
-
-
-
-
-Space O(1) approach
-We can consider this problem like valley and peak problem. In each valley there should be 1 candy 
-and for each increasing slope in either side we need to increse candy by 1. Peaks have highest candy. 
-If any equal rating is found then candy resets to 1 as two equal neighbours may have any number of 
-candies. The peak should contain the higher number of candy between which is calculated from the 
-incresing slope and which is calculated from decreasing slope. Because this will satisfy the condition 
-that peak element is having more candies than its neighbours.
-
-
-
-
-Each child represented as rating(candy he is given)
-Peak = max(peak, valley)
---> find the number that satisfy both left and right, which is take max
---> max of the peak calculated from left and valley calculated from right.
---> if equal element it gets reset to 1 candy or if it is peak we take max(0, right valley)
-/**
-1. initially n candy for n children. Then we start traversing the rating array from the second element. 
-If we find equal elements we continue to next element as they already have 1 candy.
-
-2. If an increasing slop is found (ratings[i] > ratings [i-1]) we increase value of peak and and 
-add the peak value to candy. After each iteration new peak is found and the value is added to candy. 
-In this way we also get the value of minimum height of the peak at the end.
-
-3. If a decreasing slope is found (ratings[i] < ratings [i-1]) we calculate the depth of the valley 
-which is in turn the minimum height of the previous peak. In each iteration we increse the valley 
-by 1 and add it to the candy. You can visualise it as 1 candy is added to each of the previous 
-members untill peak or the new peak value is interted at the previous peak and other values are 
-shifted to right by 1 place. We also need to check if it is going out of array if so then return 
-the number of candy.
-
-4. After this we can see we have added the peak value twice in candy once as peak and once as valley. 
-But we need only the max value out of these two so we substract the min(peak, valley) from candy.
-**/
-
 class Solution {
     public int candy(int[] ratings) {
         int n = ratings.length;
-        int candy = n;//each kid has 1 candy at the begining
-        int i=1;
+        if (n <= 1) return n;
 
-        while(i<n){
-            //since all candy is initialized as 1
-            if(ratings[i]==ratings[i-1]){
-                i++;
-                continue;
-            }
+        int ans = 1; // 第一个孩子起码 1 个
+        int inc = 1; // 连续上升长度
+        int dec = 0; // 连续下降长度
+        int pre = 1; // 前一个人分的糖果
 
-            //for increasing slope
-            int peak=0;
-            while(ratings[i]>ratings[i-1]){
-            	//peak is the number of candy index i-1 gets
-                peak++;
-                candy+=peak;
-                i++;
-                //if it's a monotonic increasing array, return the accumulated candy
-                if(i==n){
-                    return candy;
+        for (int i = 1; i < n; i++) {
+            //上坡
+            if (ratings[i] >= ratings[i - 1]) {
+                dec = 0; // reset dec， 以防前面一个是下坡的
+                pre = (ratings[i] == ratings[i - 1]) ? 1 : pre + 1;
+                ans += pre;
+                inc = pre;
+            } 
+            else {
+                dec++;
+                // 关键点：如果下坡长度等于上坡高度，山峰需要额外加 1
+                if (dec == inc) {
+                    dec++;
                 }
+                ans += dec;
+                pre = 1;
             }
-
-            //for decreasing
-            int valley=0;
-            while(i<n && ratings[i]<ratings[i-1]){
-                valley++;
-                candy+=valley;
-                i++;
-            }
-            //keep only te higher peak
-            candy-=Math.min(peak,valley);
         }
-        return candy;
+        return ans;
     }
 }
+
+
+例子：
+
+数组：[1, 3, 5, 3, 2, 1]
+步骤  评分  坡度  动作  糖果分布示意 (仅逻辑)    总数 ans
+1   1   起点  ans=1, inc=1, pre=1 [1] 1
+2   3   上坡  pre=2, ans+=2, inc=2    [1, 2]  3
+3   5   上坡  pre=3, ans+=3, inc=3    [1, 2, 3]   6
+4   3   下坡  dec=1, ans+=1   [1, 2, 3, 1]    7
+5   2   下坡  dec=2, ans+=2   [1, 2, 3, 2, 1] 9
+6   1   下坡  dec=3. 发现 dec == inc!   [1, 2, 4, 3, 2, 1]  9 + 4 = 13
+注意步骤 6：
+原本 dec 应该是 3，但因为 dec 追平了 inc (3)，说明山顶的 3 不够用了。
+我们将 dec 变成 4（相当于给山顶补了 1），总数增加 4。最终山顶变成了 4。
+
+
 =======================================================================================================
 
         public int Candy(int[] ratings) {

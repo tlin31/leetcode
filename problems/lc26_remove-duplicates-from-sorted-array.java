@@ -37,6 +37,58 @@ for (int i = 0; i < len; i++) {
     print(nums[i]);
 }
 
+=========================================================================================================================================================
+
+1. 核心算法方案：快慢双指针 (Fast & Slow Pointers) 
+
+由于数组是已排序 (Sorted) 的，重复的元素必然相邻。我们使用两个指针来处理： 
+慢指针 (slow)：指向当前已去重部分的最后一个元素。
+快指针 (fast)：负责向后扫描寻找新的唯一元素。 
+
+
+逻辑步骤 (Logic Steps)：
+1. 如果 nums[fast] != nums[slow]：说明找到了一个新元素。
+2. 将慢指针后移一位 slow++。
+3. 将快指针指向的新元素复制到慢指针位置 nums[slow] = nums[fast]。 
+
+
+class Solution {
+    public int removeDuplicates(int[] nums) {
+        if (nums == null || nums.length == 0) return 0;
+        
+        // slow 指针记录唯一元素的边界 (The boundary of unique elements)
+        int slow = 0;
+        
+        for (int fast = 1; fast < nums.length; fast++) {
+            // 发现新元素 (New unique element found)
+            if (nums[fast] != nums[slow]) {
+                slow++;
+                nums[slow] = nums[fast];
+            }
+        }
+        
+        // 返回唯一元素的个数 (Return count of unique elements),因为slow从0开始的
+        return slow + 1;
+    }
+}
+
+class Solution:
+    def removeDuplicates(self, nums: List[int]) -> int:
+        if not nums:
+            return 0
+        
+        # slow 维护当前“非重复序列”的末尾
+        slow = 0
+        
+        for fast in range(1, len(nums)):
+            # 只有当快指针发现不同数值时，才更新慢指针位置
+            if nums[fast] != nums[slow]:
+                slow += 1
+                nums[slow] = nums[fast]
+                
+        return slow + 1
+
+
 
 
 =========================================================================================================================================================

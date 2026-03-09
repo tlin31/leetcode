@@ -40,26 +40,53 @@ stats:
     - 时间复杂度： O（n）。
     - 空间复杂度：O（n）。
 
+
+
 public int longestValidParentheses(String s) {
-    int maxans = 0;
-    Stack<Integer> stack = new Stack<>();
-    stack.push(-1);
+    Deque<Integer> stack = new ArrayDeque<>();
+    stack.push(-1); // Base index for calculation
+    int maxLen = 0;
+
     for (int i = 0; i < s.length(); i++) {
         if (s.charAt(i) == '(') {
             stack.push(i);
         } else {
             stack.pop();
-
-            // doesn't have a match
-            if (stack.empty()) {
-                stack.push(i);
+            if (stack.isEmpty()) {
+                stack.push(i); // New base index for future valid substrings
             } else {
-                maxans = Math.max(maxans, i - stack.peek());
+                maxLen = Math.max(maxLen, i - stack.peek());
             }
         }
     }
-    return maxans;
+    return maxLen;
 }
+
+
+def longestValidParentheses(s: str) -> int:
+    left = right = max_len = 0
+    
+    # Left-to-right pass
+    for char in s:
+        if char == '(': 
+            left += 1
+        else: 
+            right += 1
+
+        if left == right: 
+            max_len = max(max_len, 2 * right)
+        elif right > left: 
+            left = right = 0
+            
+    # Right-to-left pass to catch cases like "(()"
+    left = right = 0
+    for char in reversed(s):
+        if char == '(': left += 1
+        else: right += 1
+        if left == right: max_len = max(max_len, 2 * left)
+        elif left > right: left = right = 0
+            
+    return max_len
 
 
 

@@ -87,5 +87,77 @@ private void reverse(int[] nums, int i, int j){
     }
 }
 
+===============================================
+method 2： 核心原理：环状替换 (Cyclic Replacements)
+想象数组中的每个位置都是一个座位。我们把索引 i 处的元素搬到它旋转后的新位置 (i + k) % n。
+
+动作：拿起一个元素（保存在临时变量 prev 中），走到它的目标位置。
+替换：放下 prev，拿起该位置原有的元素，继续走向下一个目标位置。
+闭环 (Cycle)：经过若干次移动，你会回到起始位置。
+
+处理多个环：如果 n 和 k 有最大公约数 (GCD)，一次闭环无法遍历所有元素，需要从下一个起点开始继续。
+
+
+class Solution {
+    public void rotate(int[] nums, int k) {
+        int n = nums.length;
+        k %= n;
+        if (k == 0) return;
+
+        int count = 0; // 记录已移动的元素个数 (Count of moved elements)
+        for (int start = 0; count < n; start++) {
+            int current = start;
+            int prevValue = nums[start];
+            
+            do {
+                int next = (current + k) % n;
+                // 交换与暂存 (Swap and store)
+                int temp = nums[next];
+                nums[next] = prevValue;
+                prevValue = temp;
+                
+                current = next;
+                count++;
+            } while (start != current); // 回到起点则结束当前环
+        }
+    }
+}
+
+Python 实现 (Python Implementation)
+
+class Solution:
+    def rotate(self, nums: List[int], k: int) -> None:
+        n = len(nums)
+        k %= n
+        if k == 0: return
+
+        count = 0
+        start = 0
+        while count < n:
+            current = start
+            prev_value = nums[start]
+            
+            while True:
+                next_idx = (current + k) % n
+                # 原地交换 (In-place swap)
+                nums[next_idx], prev_value = prev_value, nums[next_idx]
+                
+                current = next_idx
+                count += 1
+                
+                if start == current:
+                    break
+            start+=1
+
+
+3. 业界最佳实践 (Best Practices)
+1、 最大公约数 (GCD)：
+环的数量正好等于 GDC(n, k)。
+例如：n = 6, k = 2, gcd = 2, 那么你会遇到两个环：(0->2->4->0) 和 (1->3->5->1)。
+
+2、 避免死循环：使用 count < n 作为外层判定是最稳健的，它确保每个元素只被搬动一次。
+
+3. 内存局部性 (Memory Locality)：虽然这种方法是 O（1）空间，但由于它是“跳跃式”访问内存（从 i 跳到 i+k），
+   在数组极大时，其 CPU 缓存命中率 (Cache Hit Rate) 可能不如三次翻转法。
 
 

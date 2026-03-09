@@ -193,214 +193,60 @@ class Test {
 
 1. Iterative approach:
     - use a queue
+    - for each i, j in the matrix, check for matrix[i][j]'s condition, 比如是否为0/可以通过等
+      - 如果可以通过， create queue，queue.offer(node) 把这个点加到queue里面
+      - mark （i,j）as visited (也可以更改matrix的值，让下次循环到这里就不通过了，比如把值改为-1)
+      - while(!queue.isEmpty()):开始访问这个点的neighbors
+        - curNode = queue.poll()
+        - for(比如是上下左右的邻居)， 每一个都检查邻居是否valid（比如到没到边界，值是否=1）
+            - 如果是好邻居，mark as visited
+            - queue.offer(邻居)
+
     - indegre-endegree-check whether a node is explored before adding it to the queue
-
+    - 例子： leetcode 200， number of islands
 ```java
-import java.io.*; 
-import java.util.*; 
+class Solution {
+    public int numIslands(char[][] grid) {
+        if (grid == null || grid.length == 0) return 0;
+        int count = 0;
+        int rows = grid.length;
+        int cols = grid[0].length;
+        int[][] dirs = {{0,1}, {0,-1}, {1,0}, {-1,0}};
 
-class Graph 
-{ 
-    // No. of vertices
-    private int V;  
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (grid[i][j] == '1') {
+                    count++;
+                    // Start BFS
+                    Queue<int[]> queue = new LinkedList<>();
+                    queue.offer(new int[]{i, j});
+                    grid[i][j] = '0'; // Mark as visited (sink it)
 
-     //Adjacency Lists 
-    private LinkedList<Integer> adj[];
-
-    // Constructor 
-    Graph(int v) 
-    { 
-        V = v; 
-        adj = new LinkedList[v]; 
-        for (int i=0; i<v; ++i) 
-            adj[i] = new LinkedList(); 
-    } 
-
-    // Function to add an edge into the graph 
-    void addEdge(int v,int w) 
-    { 
-        adj[v].add(w); 
-    } 
-
-    // prints BFS traversal from a given source s 
-    void BFS(int s) 
-    { 
-        // Mark all the vertices as not visited(By default set as false) 
-        boolean visited[] = new boolean[V]; 
-
-        // Create a queue for BFS 
-        LinkedList<Integer> queue = new LinkedList<Integer>(); 
-
-        // Mark the current node as visited and enqueue it 
-        visited[s]=true; 
-        queue.add(s); 
-
-        while (queue.size() != 0) 
-        { 
-            // Dequeue a vertex from queue and print it 
-            s = queue.poll(); 
-            System.out.print(s+" "); 
-
-            // Get all adjacent vertices of the dequeued vertex s 
-            // If a adjacent has not been visited, then mark it visited and enqueue it 
-            Iterator<Integer> i = adj[s].listIterator(); 
-            while (i.hasNext()) 
-            { 
-                int n = i.next(); 
-                if (!visited[n]) 
-                { 
-                    visited[n] = true; 
-                    queue.add(n); 
-                } 
-            } 
-        } 
-    } 
-
-    // Driver method to 
-    public static void main(String args[]) 
-    { 
-        Graph g = new Graph(4); 
-
-        g.addEdge(0, 1); 
-        g.addEdge(0, 2); 
-        g.addEdge(1, 2); 
-        g.addEdge(2, 0); 
-        g.addEdge(2, 3); 
-        g.addEdge(3, 3); 
-
-        System.out.println("Following is Breadth First Traversal "+ 
-                        "(starting from vertex 2)"); 
-
-        g.BFS(2); 
-    } 
-} 
-
-```
-
-
-2. Recursive
-
-```java
-
-import java.util.*;
-
-// data structure to store graph edges
-class Edge
-{
-    int source, dest;
-
-    public Edge(int source, int dest) {
-        this.source = source;
-        this.dest = dest;
-    }
-};
-
-// class to represent a graph object
-class Graph
-{
-    // A List of Lists to represent an adjacency list
-    List<List<Integer>> adjList = null;
-
-    // Constructor
-    Graph(List<Edge> edges, int N) {
-        adjList = new ArrayList<>(N);
-
-        for (int i = 0; i < N; i++) {
-            adjList.add(i, new ArrayList<>());
-        }
-
-        // add edges to the undirected graph
-        for (int i = 0; i < edges.size(); i++)
-        {
-            int src = edges.get(i).source;
-            int dest = edges.get(i).dest;
-
-            adjList.get(src).add(dest);
-            adjList.get(dest).add(src);
-        }
-    }
-}
-
-class BFS
-{
-    // Perform BFS recursively on graph
-    public static void recursiveBFS(Graph graph, Queue<Integer> q, boolean[] discovered)
-    {
-        if (q.isEmpty())
-            return;
-
-        // pop front node from queue and print it
-        int v = q.poll();
-        System.out.print(v + " ");
-
-        // do for every edge (v -> u)
-        for (int u : graph.adjList.get(v))
-        {
-            if (!discovered[u])
-            {
-                // mark it discovered and push it into queue
-                discovered[u] = true;
-                q.add(u);
+                    while (!queue.isEmpty()) {
+                        int[] cur = queue.poll();
+                        for (int[] d : dirs) {
+                            int r = cur[0] + d[0];
+                            int c = cur[1] + d[1];
+                            if (r >= 0 && r < rows && c >= 0 && c < cols && grid[r][c] == '1') {
+                                grid[r][c] = '0'; // Mark visited IMMEDIATELY
+                                queue.offer(new int[]{r, c});
+                            }
+                        }
+                    }
+                }
             }
         }
-
-        recursiveBFS(graph, q, discovered);
-    }
-
-    public static void main(String[] args)
-    {
-        // List of graph edges as per above diagram
-        List<Edge> edges = Arrays.asList(
-                new Edge(1, 2), new Edge(1, 3), new Edge(1, 4),
-                new Edge(2, 5), new Edge(2, 6), new Edge(5, 9),
-                new Edge(5, 10), new Edge(4, 7), new Edge(4, 8),
-                new Edge(7, 11), new Edge(7, 12)
-                // vertex 0, 13 and 14 are single nodes
-        );
-
-        // Set number of vertices in the graph
-        final int N = 15;
-
-        // create a graph from edges
-        Graph graph = new Graph(edges, N);
-
-        // stores vertex is discovered or not
-        boolean[] discovered = new boolean[N];
-
-        // create a queue used to do BFS
-        Queue<Integer> q = new ArrayDeque<>();
-
-        // Do BFS traversal from all undiscovered nodes to
-        // cover all unconnected components of graph
-        for (int i = 0; i < N; i++) {
-            if (discovered[i] == false)
-            {
-                // mark source vertex as discovered
-                discovered[i] = true;
-
-                // push source vertex into the queue
-                q.add(i);
-
-                // start BFS traversal from vertex i
-                recursiveBFS(graph, q, discovered);
-            }
-        }
+        return count;
     }
 }
 
 ```
 
-### bfs queue template in matrix
 
-example: lc 200 number of islands
-
-1. set boolean matrix visited to avoid going in loops
-2. can use queue to store indicies int[]
-3. in double for loop: if (condition met && !visited[i][j]), then queue offer current, set visited matrix to true, and call bfs
-4. in bfs method: 
-    while (!q.isEmpty()) 
+2. Recursive （BFS一般不用）
 
 ```java
+
 class Solution {
     int[][] dirs = {{0,1}, {1,0}, {0, -1}, {-1, 0}};
 
@@ -451,7 +297,9 @@ class Solution {
         }
     }
 }
+
 ```
+
 ## DFS
 
 ### 总结
@@ -481,6 +329,8 @@ private List<String> dfs(int start, String s) --> 问题：每层递归都要传
     2) Mark current node as visited
     3) Visit current node
     4) Traverse unvisited adjacent vertices
+
+    
 
 ```java
     public void dfs(int start) {

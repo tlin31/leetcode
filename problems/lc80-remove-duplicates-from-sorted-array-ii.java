@@ -56,19 +56,45 @@ key:
 将当前快指针遍历的数字和慢指针指向的数字的前一个数字比较（也就是满足条件的倒数第 2 个数），如果相等，因为有序，
 所有倒数第 1 个数字和倒数第 2 个数字都等于当前数字，再添加就超过 2 个了，所有不添加，如果不相等，那么就添加
 
-public int removeDuplicates2(int[] nums) {
-    int slow = 1;
-    int fast = 2;
-    int max = 2;
-    for (; fast < nums.length; fast++) {
-        //不相等的话就添加
-        if (nums[fast] != nums[slow - max + 1]) {
-            slow++;
-            nums[slow] = nums[fast];
+
+通用快慢双指针 (General Fast & Slow Pointers)
+    这道题的核心技巧是：比较快指针当前指向的元素与“已确定序列”倒数第 K 个元素。 在本题中 K=2。
+
+逻辑步骤 (Logic Steps)：
+1. 初始化：如果数组长度 N<2，直接返回长度。
+
+2. 慢指针 (slow)：代表当前有效序列的长度（也指向下一个待插入的位置）。
+   由于前两个元素无论是否重复都符合要求，我们从索引 2 开始。
+
+3. 快指针 (fast)：从索引 2 开始遍历整个数组。
+
+4. 判定条件：如果 nums[fast] != nums[slow - 2]，说明当前元素与有效序列中倒数第二个元素不同，符合“最多重复两次”的
+   规则。
+    将 nums[fast] 复制到 nums[slow]。
+    slow 指针后移。
+
+class Solution {
+    public int removeDuplicates(int[] nums) {
+        if (nums.length <= 2) return nums.length;
+        
+        // slow 指针表示下一个可以放置元素的位置
+        // 前两个元素 [0, 1] 默认保留
+        int slow = 2;
+        
+        for (int fast = 2; fast < nums.length; fast++) {
+            // 关键：检查当前元素是否与“确定序列”的倒数第二个元素相同
+            if (nums[fast] != nums[slow - 2]) {
+                nums[slow] = nums[fast];
+                slow++;
+            }
         }
+        
+        return slow;
     }
-    return slow + 1;
 }
+
+
+
 =======================================================================================================
 Method 1:
 

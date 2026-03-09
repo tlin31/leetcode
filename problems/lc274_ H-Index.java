@@ -64,26 +64,57 @@ Method:
 	the end of the array is that we are looking for the greatest h-index. 
 
 
+规律：如果一个学者的发表文章总数为 n，那么他的 H 指数最高也不可能超过 n 。
+策略：
+创建一个长度为 n 的数组 buckets。
+遍历原数组，记录每种引用次数出现的频率。
+重点：如果某篇文章的引用次数超过了 n，我们直接把它记在 buckets[n] 上（因为 h 指数最大就是 n）。
+逆向累加：从后往前遍历 buckets，累加文章数量。当我们累加的数量第一次 >= 当前下标 i 时，
+        i 就是我们要找的 H 指数。
 
-public int hIndex(int[] citations) {
-    int n = citations.length;
-    int[] buckets = new int[n+1];
-    for(int c : citations) {
-        if(c >= n) {
-            buckets[n]++;
-        } else {
-            buckets[c]++;
-        }
-    }
+class Solution {
+    public int hIndex(int[] citations) {
+        int n = citations.length;
+        int[] buckets = new int[n + 1];
 
-    int count = 0; // use this instead of the output count array
-    for(int i = n; i >= 0; i--) {
-        count += buckets[i];
-        if(count >= i) {
-            return i;
+        // 1. 填充桶 (Bucket Filling)
+        for (int c : citations) {
+            if (c >= n) {
+                buckets[n]++;
+            } else {
+                buckets[c]++;
+            }
         }
+
+        // 2. 逆向统计 (Reverse Accumulation)
+        int count = 0;
+        for (int i = n; i >= 0; i--) {
+            count += buckets[i]; // 引用次数至少为 i 的文章总数
+            if (count >= i) {
+                return i;
+            }
+        }
+
+        return 0;
     }
-    return 0;
 }
 
 
+class Solution:
+    def hIndex(self, citations: List[int]) -> int:
+        n = len(citations)
+        temp = [0 for _ in range(n + 1)]
+
+        for i,v in enumerate(citations):
+            if v > n :
+                temp[n] += 1
+            else:
+                temp[v] += 1
+        
+        total = 0
+        for i in range(n, -1, -1):
+            total += temp[i]
+            if total >= i:
+                return i
+
+                

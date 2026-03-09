@@ -143,7 +143,7 @@ stats:
 
 	public List<List<String>> solveNQueens(int n) {
 	    List<List<String>> result = new ArrayList<List<String>>();
-	    backtack(result, , 0, new boolean[n], new boolean[2*n], new boolean[2*n], n);
+	    backtack(result,  new ArrayList<String>(), 0, new boolean[n], new boolean[2*n], new boolean[2*n], n);
 	    return result;
 	}
 

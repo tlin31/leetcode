@@ -128,14 +128,35 @@ dest:目的数组；	destPos:目的数组放置的起始位置；		length:复制
         for (int[] memoRow : memo)
             Arrays.fill(memoRow, -1);
 
-### 2d array 
+## 2d array 
 
 ### declare
 
 
     data_type[][] array_Name = new data_type[no_of_rows][no_of_columns];
 
+### 怎么visualize这个matrix
+- as a top-down grid
 
+The Standard "Row-Major" Visualization
+- When you define int[][] board = new int[rows][cols], think of it like a table or a spreadsheet:
+- Row Index (r): Starts at 0 at the top and increases as you move down.
+- Column Index (c): Starts at 0 on the left and increases as you move right.
+
+```
+Visual Representation:
+
+            Col 0    Col 1    Col 2    Col 3
+Row 0  --> [ (0,0) , (0,1) , (0,2) , (0,3) ]  TOP
+Row 1  --> [ (1,0) , (1,1) , (1,2) , (1,3) ]
+Row 2  --> [ (2,0) , (2,1) , (2,2) , (2,3) ]  BOTTOM
+```
+
+- 因此在定义matrix中一个位置的上下左右是：
+    - Up: (r - 1, c)
+    - Down: (r + 1, c)
+    - Left: (r, c - 1)
+    - Right: (r, c + 1)
 
 
 

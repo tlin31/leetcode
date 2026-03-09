@@ -37,31 +37,38 @@ Method 1:
 我们只在 较短的数组（nums1） 上二分。
 
 设：
+我们在两个数组中选一个切割点：
+        
+            L1     R1
+nums1: [0..i-1] | [i..]  //i 是在 nums1 上的分割点；
+nums2: [0..j-1] | [j..]  //j 是在 nums2 上的分割点，
+            L2     R2
 
-i 是在 nums1 上的分割点；
+i + j = (m + n + 1) / 2  //（确保左边元素个数等于右边或多一个）
 
-j 是在 nums2 上的分割点，使得：
+希望：
 
-i + j = (m + n + 1) / 2
+左边总长度 = (m+n+1)/2
 
-（确保左边元素个数等于右边或多一个）
 
 我们要满足：
 
-nums1[i-1] <= nums2[j]
-nums2[j-1] <= nums1[i]
+L1 <= R2
+L2 <= R1
 
 
 否则我们调整 i：
 
-如果 nums1[i-1] > nums2[j]，说明 i 太大，要左移；
+如果 (L1>R2) nums1[i-1] > nums2[j]，说明 i 太大，要左移；
 
 否则 i 太小，要右移。
 
 
+
 class Solution {
     public double findMedianSortedArrays(int[] nums1, int[] nums2) {
-        // 确保 nums1 是较短的那个数组
+
+        // 保证 nums1 是短数组
         if (nums1.length > nums2.length) {
             return findMedianSortedArrays(nums2, nums1);
         }
@@ -69,44 +76,98 @@ class Solution {
         int m = nums1.length;
         int n = nums2.length;
 
-        int left = 0;
-        int right = m;
+        // left和right是在nums1上面操作
+        int left = 0, right = m;
+
+        // 两个数组nums1和nums2 总左半部分需要的长度
+        int halfLen = (m + n + 1) / 2;
 
         while (left <= right) {
+
             int i = (left + right) / 2;
-            int j = (m + n + 1) / 2 - i;
+            int j = halfLen - i;
 
-            // 边界值处理
-            int maxLeft1 = (i == 0) ? Integer.MIN_VALUE : nums1[i - 1];
+            int L1 = (i == 0) ? Integer.MIN_VALUE : nums1[i - 1];
+            int R1 = (i == m) ? Integer.MAX_VALUE : nums1[i];
 
-            int maxLeft2 = (j == 0) ? Integer.MIN_VALUE : nums2[j - 1];
+            int L2 = (j == 0) ? Integer.MIN_VALUE : nums2[j - 1];
+            int R2 = (j == n) ? Integer.MAX_VALUE : nums2[j];
 
-            int minRight1 = (i == m) ? Integer.MAX_VALUE : nums1[i];
-
-            int minRight2 = (j == n) ? Integer.MAX_VALUE : nums2[j];
-
-            // 满足中位数条件
-            if (maxLeft1 <= minRight2 && maxLeft2 <= minRight1) {
+            if (L1 <= R2 && L2 <= R1) {
+                // 找到正确划分
                 if ((m + n) % 2 == 0) {
-                    return ((double)Math.max(maxLeft1, maxLeft2) + Math.min(minRight1, minRight2)) / 2;
+                    return (Math.max(L1, L2) + Math.min(R1, R2)) / 2.0;
                 } else {
-                    return (double)Math.max(maxLeft1, maxLeft2);
+                    return Math.max(L1, L2);
                 }
-            } 
-            // i 太大，往左走
-            else if (maxLeft1 > minRight2) {
+            } else if (L1 > R2) {
                 right = i - 1;
-            } 
-            // i 太小，往右走
-            else {
+            } else {
                 left = i + 1;
             }
         }
 
-        throw new IllegalArgumentException("Input arrays are not sorted or invalid.");
+        throw new IllegalArgumentException();
     }
 }
 
+1. 为什么要引入 MIN_VALUE 和 MAX_VALUE？
+
+1）在二分查找切分位置 i 和 j 时，切分线可能会移到数组的 最左端 或 最右端。
+
+当 i=0 时：表示 nums1 的左半部分没有任何元素。此时我们逻辑上认为它的左边界 L1 是 负无穷
+原因：在判断条件 L1 <= R2 时，负无穷永远小于任何数，这样就不会干扰对 nums2 的判断。
+
+当 i=m 时：表示 nums1 的右半部分没有任何元素。此时我们认为它的右边界 R1 是 正无穷 。
+原因：在判断条件 L2 <= R1 时，正无穷永远大于任何数。
+
+
+2）处理“一个数组完全在另一个数组一边”的情况
+假设 nums1 = [10, 11]，nums2 = [1, 2]。
+最终切分时，nums1 的所有数都在右边，i 会变成 0。
+这时 L1 = -inf，它一定小于 R2 (即 2)，算法能顺利跑通。
+
+3）方便计算中位数
+找到切分点后：
+左半部分最大的数就是 max(L1, L2)。
+右半部分最小的数就是 min(R1, R2)。
+由于使用了极值，即使用某个数组贡献了 0 个元素，Math.max 和 Math.min 依然能得到正确的结果。
+
+
+2. 为什么是 max(L1, L2) 和 min(R1, R2)?
+    左半部分的“最后一名”：Math.max(L1, L2)
+    左半部分由两段组成。要在左半部分找到最靠近中位线的数，必须找这堆数里的最大值。
+    因为 L1 是数组 1 左段的头， L2是数组 2 左段的头。
+    中位线左侧紧邻的那个数，要么是 L1，要么是 L2。
+    
+    右半部分的“第一名”：Math.min(R1, R2)
+    同理，要在右半部分找到最靠近中位线的数，必须找这堆数里的最小值。
+
+
+3.  为什么要加 1？ (处理奇偶性)         int halfLen = (m + n + 1) / 2;
+
+    在整数除法中，+1 的操作实际上起到了向上取整 (Ceil) 的效果。
+    场景 A：总长度为偶数 (Even)
+    假设 m+n = 4。
+    公式：halfLen = (4+1)/2 = 2.5 --> 结果为 2。
+    结果：左半部分有 2 个元素，右半部分有 2 个元素。完美对分。
+    
+    场景 B：总长度为奇数 (Odd)
+    假设 m+n = 5
+    公式： halfLen = (5+1)/2 = 3, 结果：左半部分有 3 个元素，右半部分有 2 个元素。
+    关键设计：让左半部分多出一个元素。
+    这意味着，如果是奇数，中位数就是左半部分最大的那个数（即 Math.max(L1, L2)）。
+
+
+4. 为什么开始要设置 int right = m 而不是通常的m-1？
+    因为在你的代码逻辑中，变量 i 代表的是 nums1 左半部分的元素个数。而不是value。
+    
+
+    如果 i = 0：代表 nums1 一个元素都不出（全在右边）。
+    如果 i = m：代表 nums1 所有元素都出（全在左边）。
+    nums1 共有 m+1 种可能的切割方式。
+    如果你设置 right = m - 1，那么二分查找将永远无法触达 “所有元素都在左半部分”
+    （即 i=m）这一种极其常见的情况。
 
 
 

@@ -1,4 +1,4 @@
-642. Design Search Autocomplete System Hard
+642. Design Search Autocomplete System - Hard
 
 Design a search autocomplete system for a search engine. Users may input a sentence (at least one word
 and end with a special character '#'). For each character they type except '#', you need to return the
@@ -161,6 +161,9 @@ class AutocompleteSystem {
     }
 
     public List<String> input(char c) {
+    	// 保存至今输入的char
+    	// 存入countmap， 然后存到trie
+    	// reset curInput
         if (c == '#') {
             String sentence = curInput.toString();
             countMap.put(sentence, countMap.getOrDefault(sentence, 0) + 1);
@@ -169,10 +172,12 @@ class AutocompleteSystem {
             return new ArrayList<>();
         }
 
+        // 如果当前已存储的没有
         curInput.append(c);
         TrieNode node = root;
         for (char ch : curInput.toString().toCharArray()) {
-            if (!node.children.containsKey(ch)) return new ArrayList<>();
+            if (!node.children.containsKey(ch)) 
+            	return new ArrayList<>();
             node = node.children.get(ch);
         }
 
@@ -181,6 +186,22 @@ class AutocompleteSystem {
             (a, b) -> a.getValue().equals(b.getValue()) ?
                 a.getKey().compareTo(b.getKey()) : b.getValue() - a.getValue()
         );
+
+//         PriorityQueue<Map.Entry<String, Integer>> pq = new PriorityQueue<>(
+//     Comparator.comparing(Map.Entry<String, Integer>::getValue, Comparator.reverseOrder())
+//               .thenComparing(Map.Entry<String, Integer>::getKey)
+// );
+
+/**
+        PriorityQueue<Map.Entry<String, Integer>> pq = new PriorityQueue<>((a, b) -> {
+		    // 1. If counts are the same, compare Strings alphabetically
+		    if (a.getValue().equals(b.getValue())) {
+		        return a.getKey().compareTo(b.getKey());
+		    }
+		    // 2. Otherwise, sort by Count (Highest first)
+		    return b.getValue() - a.getValue(); 
+			});
+*/
 
         pq.addAll(node.countMap.entrySet());
         List<String> res = new ArrayList<>();

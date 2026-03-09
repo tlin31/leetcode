@@ -62,6 +62,19 @@ method 0:
 	- given in the problem note, "users will not attempt to retrieve file content or list a directory 
 	  or file that does not exist", so always create sub-directory along the way in findNode function.
 
+1. 核心设计思路 (Core Design)
+节点结构 (Node Structure)：每个节点代表一个目录或文件。节点应包含：
+    children: 一个映射表（Java 的 TreeMap 可自动维持字典序，Python 的 dict 需手动排序），存储子节点。
+    isFile: 布尔标志位。
+    content: 字符串或 StringBuilder，用于存储文件内容。
+路径解析 (Path Parsing)：将路径按 / 分割，逐级在 Trie 树中查找或创建节点。 
+
+
+使用 TreeMap 可以让 ls 操作在返回目录内容时自动保持字典序。 
+
+
+
+
 stats:
 
 	- GetList method takes O(N)
@@ -70,6 +83,49 @@ stats:
 
 
 public class FileSystem {
+    // Private class
+   private class FileNode{
+        private TreeMap<String, FileNode> children;
+        private StringBuilder fileContent;
+        private String name;
+
+        public FileNode(String name) {
+            children = new TreeMap<>();
+            fileContent = new StringBuilder();
+            this.name = name;
+        }
+
+        public String getContent(){
+            return fileContent.toString();
+        }
+
+        public String getName(){
+            return name;
+        }
+
+        public void addContent(String content){
+            fileContent.append(content);
+        }
+
+        // always check for fileContent, only work if a file is already written
+        // valid here since we only have mkdir, no operation to create new file
+        public boolean isFile(){
+            return fileContent.length() > 0;
+        }
+
+        public List<String> getList(){
+            List<String> list = new ArrayList<>();
+            if(isFile()){
+                list.add(getName());
+            }else{
+                list.addAll(children.keySet());
+            }
+
+            return list;
+        }
+    }
+
+    //-----------------------------------------------
     private FileNode root;
 
     public FileSystem() {
@@ -114,48 +170,70 @@ public class FileSystem {
         return cur;
     }
 
-   // Private class
-   private class FileNode{
-        private TreeMap<String, FileNode> children;
-        private StringBuilder fileContent;
-        private String name;
-
-        public FileNode(String name) {
-            children = new TreeMap<>();
-            fileContent = new StringBuilder();
-            this.name = name;
-        }
-
-        public String getContent(){
-            return fileContent.toString();
-        }
-
-        public String getName(){
-            return name;
-        }
-
-        public void addContent(String content){
-            fileContent.append(content);
-        }
-
-        // always check for fileContent, only work if a file is already written
-        // valid here since we only have mkdir, no operation to create new file
-        public boolean isFile(){
-            return fileContent.length() > 0;
-        }
-
-        public List<String> getList(){
-            List<String> list = new ArrayList<>();
-            if(isFile()){
-                list.add(getName());
-            }else{
-                list.addAll(children.keySet());
-            }
-
-            return list;
-        }
-    }
+   
 }
+
+
+Python version
+
+
+def __init__(self):
+    self.content = ""
+    self.children = defaultdict(TrieNode)
+    self.isfile = False
+    
+
+
+def __init__(self):
+    self.top = TrieNode()
+
+def ls(self, path: str) -> List[str]:
+    path_lst = path.split("/")
+    node = self.top
+    for p in path_lst:
+        if not p:
+            continue
+        node = node.children.get(p)
+    if node.isfile:
+        return [p]
+    ans = [i for i in node.children.keys()]
+    if not ans:
+        return ans
+    ans.sort()
+    return ans
+        
+        
+def mkdir(self, path: str) -> None:
+    path_lst = path.split("/")
+    node = self.top
+    for p in path_lst:
+        if not p:
+            continue
+        node = node.children[p]
+
+def addContentToFile(self, filePath: str, content: str) -> None:
+    path_lst = filePath.split("/")
+    node = self.top
+    for p in path_lst:
+        if not p:
+            continue
+        node = node.children[p]
+    node.content += content
+    node.isfile = True
+    
+def readContentFromFile(self, filePath: str) -> str:
+    path_lst = filePath.split("/")
+    node = self.top
+    for p in path_lst:
+        if not p:
+            continue
+        node = node.children.get(p)
+    return node.content
+
+
+
+
+
 
 =======================================================================================================
 method 1:

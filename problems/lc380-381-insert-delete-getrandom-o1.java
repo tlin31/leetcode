@@ -85,6 +85,13 @@ stats:
 	- 
 	- 
 
+HashMap 的致命弱点：无法真正 O（1） 随机访问
+虽然 HashMap 的插入和删除是 O（1），但它的 getRandom 操作非常低效：
+	- 内存不连续性：HashMap 的 Key 散落在哈希表的各个桶（Buckets）中，中间充满了大量的空位（null）。
+	- 缺乏索引：HashMap 没有“第 n 个元素”的概念。如果你想随机取一个，你必须先得到所有的 Keys（keySet()），
+		而获取 keySet 或将其转为数组的操作是 O(n) 的。
+	- 随机性偏差：如果你尝试在哈希表的物理数组上随机选一个下标，你可能会抽到空位；
+							如果你跳过空位往后找，那么元素的被抽中概率就不再相等（不符合均匀分布）。
 
 class RandomizedSet {
   Map<Integer, Integer> dict;

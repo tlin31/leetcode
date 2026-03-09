@@ -74,56 +74,70 @@ key:
 ******************************************************
 
 
-public class Solution {
+1. 分组 (Grouping)：确定每一行能容纳多少个单词。
+2. 分配空格 (Distributing Spaces)：
+    常规行：采用“均匀分配”原则。如果空格不能平分，左侧的间隔要比右侧多。
+    最后一行或单单词行：采用“左对齐”原则，单词间只留一个空格，末尾补齐空格。
+3. 构建字符串 (Building)：将单词和空格拼接。
+
+防御性编程：在真实项目中，我们需要额外检查是否有单个单词的长度超过了 maxWidth，这会导致程序死循环或崩溃。
+
+
+class Solution {
     public List<String> fullJustify(String[] words, int maxWidth) {
         List<String> res = new ArrayList<>();
-        List<String> curWords = new ArrayList<>();
-        int curLen = 0;
+        int i = 0; //一行开头的第一个单词
 
-        for (String word : words) {
-
-            // curWrods.size is the number of current spaces
-            if (curLen + word.length() + curWords.size() > maxWidth) {
-                int totalSpaces = maxWidth - curLen;
-                int gaps = curWords.size() - 1;
-
-                //1 word firs this whole line
-                if (gaps == 0) {
-                    res.add(curWords.get(0) + " ".repeat(totalSpaces));
-                } 
-                else {
-                    int spacePerGap = totalSpaces / gaps;
-                    int extraSpaces = totalSpaces % gaps;
-                    StringBuilder line = new StringBuilder();
-                    for (int i = 0; i < curWords.size(); i++) {
-                        line.append(curWords.get(i));
-                        if (i < gaps) {
-                            line.append(" ".repeat(spacePerGap));
-                            if (i < extraSpaces) {
-                                line.append(' ');
-                            }
-                        }
-                    }
-                    res.add(line.toString());
-                }
-                curWords.clear();
-                curLen = 0;
+        while (i < words.length) {
+            int j = i + 1; //第几个单词
+            int lineLength = words[i].length();
+            
+            // 1. 确定当前行能放多少个单词 (j - i 个)
+            while (j < words.length && lineLength + 1 + words[j].length() <= maxWidth) {
+                lineLength += 1 + words[j].length();
+                j++;
             }
 
-            // add new words will still stay in this cur line
-            curWords.add(word);
-            curLen += word.length();
-        }
+            StringBuilder sb = new StringBuilder();
+            int numWords = j - i;
+            int numSpaces = maxWidth - (lineLength - (numWords - 1));
 
-        StringBuilder lastLine = new StringBuilder(String.join(" ", curWords));
-        while (lastLine.length() < maxWidth) {
-            lastLine.append(' ');
-        }
-        res.add(lastLine.toString());
+            // 2. 特殊情况：最后一行 或 当前行只有一个单词 -> 左对齐
+            if (j == words.length || numWords == 1) {
+                for (int k = i; k < j; k++) {
+                    sb.append(words[k]);
+                    if (k < j - 1) sb.append(" ");
+                }
+                while (sb.length() < maxWidth) sb.append(" ");
+            } 
+            // 3. 常规情况：左右对齐 (Fully Justify)
+            else {
+                int spacesBetween = numSpaces / (numWords - 1);
+                int extraSpaces = numSpaces % (numWords - 1);
 
+                for (int k = i; k < j; k++) {
+                    sb.append(words[k]);
+                    if (k < j - 1) {
+                        int spacesToApply = spacesBetween + (extraSpaces-- > 0 ? 1 : 0);
+                        for (int s = 0; s < spacesToApply; s++) 
+                            sb.append(" ");
+                    }
+                }
+            }
+            res.add(sb.toString());
+            i = j; // 移动到下一行
+        }
         return res;
     }
 }
+
+
+extraSpaces-- > 0：这是一个后自减操作。
+它先判断 extraSpaces 是否大于 0。
+如果是，这一步就多加 1 个空格，然后 extraSpaces 减 1。
+当 extraSpaces 变成 0 后，后面的间隔就只能拿到 spacesBetween（基础值）了。
+这完美实现了题目要求的：“左侧的空格数量要尽量多于右侧”。
+
 
 =======================================================================================================
 method 1:
