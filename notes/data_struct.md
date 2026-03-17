@@ -2,7 +2,9 @@
 1. Complexity
 2. Queue
     1. Priority Queue
+    2. 单调队列 Monotonic Queue
 3. Stack
+	1. 单调栈 Monotonic Stack
 4. Deque
 5. Heap
 6. Tree
@@ -604,12 +606,12 @@ class Solution {
 
 
 
-## Stack
+# Stack
 
 用deque创建更好！stack已经过时&syntax不好用
 
 
-### java syntax
+## java syntax
 1. initialize + import:
 
 ```java
@@ -641,7 +643,7 @@ contains(Object o): 检查 Deque 是否包含特定元素。
 ArrayDeque: 基于可变大小的数组实现，高效且内存占用少。不支持存储 null 值。
 LinkedList: 基于双向链表实现，支持 null 值，但在性能上通常不如 ArrayDeque。 
 
-### 单调栈 Monotonic Stack
+## 单调栈 Monotonic Stack
 
 
 当你遇到 **“找临近比它大/小的元素”、“下一次更大/更小”、“区间扩展到不能扩展为止”**

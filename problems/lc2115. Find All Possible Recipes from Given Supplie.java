@@ -102,7 +102,7 @@ class Solution {
 
         while (!q.isEmpty()) {
             String cur = q.poll();
-            if (!graph.containsKey(cur)) continue;
+            if (!graph.containsKey(cur)) continue; // 如果没有由他组成的菜，跳过
 
             for (String recipe : graph.get(cur)) {
                 indegree.put(recipe, indegree.get(recipe) - 1);
@@ -116,6 +116,50 @@ class Solution {
         return res;
     }
 }
+
+
+例子：
+    Supplies: ["flour", "yeast", "meat"]
+    Recipes: ["bread", "burger"]
+    Ingredients:
+        Bread needs: ["flour", "yeast"]
+        Burger needs: ["bread", "meat"]
+
+
+
+Data Structure Snapshots (After Initialization)
+    adj (Adjacency List)
+    Maps an ingredient to the recipes that need it.  inverted index
+    This allows us to "push" progress when an ingredient becomes available.
+        "flour" → ["bread"]
+        "yeast" → ["bread"]
+        "meat" → ["burger"]
+        "bread" → ["burger"]
+
+    inDegree (Wait List)
+    Maps a recipe to the count of ingredients it is still waiting for.
+    "bread" : 2 (Waiting for flour and yeast)
+    "burger": 2 (Waiting for bread and meat)
+
+
+    queue (Available Items)
+    Starts with your basic supplies.
+    ["flour", "yeast", "meat"]
+
+
+Step-by-Step Execution
+Step    Item Pulled from Queue (u)  Action  i            nDegree    Update New to Queue?
+1       "flour"              Look at adj["flour"]    bread: 2 → 1    No
+2       "yeast"              Look at adj["yeast"]    bread: 1 → 0    Yes: "bread"
+3       "meat"               Look at adj["meat"]     burger: 2 → 1   No
+4       "bread"              Look at adj["bread"]    burger: 1 → 0   Yes: "burger"
+5       "burger"             No recipes need burger  -                No
+
+
+Final State
+Result List: ["bread", "burger"]
+inDegree: All values are 0.
+queue: Empty.
 
 
 ===================================================================================================

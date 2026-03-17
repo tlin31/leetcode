@@ -56,7 +56,8 @@ Ai, Bi, Cj, Dj consist of lower case English letters and digits.
 ******************************************************
 key:
 	- a --2--> b --3--> c
-We simply find a path using DFS from node a to node c and multiply the weights of edges passed, i.e. 2 * 3 = 6.
+We simply find a path using DFS from node a to node c and multiply the weights of edges passed, 
+i.e. 2 * 3 = 6.
 
 Please note that during DFS,
 	Rejection case should be checked before accepting case.
@@ -83,6 +84,57 @@ Stats:
 
 	- 
 	- 
+import java.util.*;
+
+class Solution {
+    public double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
+        Map<String, Map<String, Double>> adj = new HashMap<>();
+        
+        // 1. Build the Graph
+        for (int i = 0; i < equations.size(); i++) {
+            String u = equations.get(i).get(0);
+            String v = equations.get(i).get(1);
+            double k = values[i];
+            adj.computeIfAbsent(u, x -> new HashMap<>()).put(v, k);
+            adj.computeIfAbsent(v, x -> new HashMap<>()).put(u, 1.0 / k);
+        }
+        
+        double[] results = new double[queries.size()];
+        for (int i = 0; i < queries.size(); i++) {
+            String start = queries.get(i).get(0);
+            String end = queries.get(i).get(1);
+            
+            if (!adj.containsKey(start) || !adj.containsKey(end)) {
+                results[i] = -1.0;
+            } else if (start.equals(end)) {
+                results[i] = 1.0;
+            } else {
+                results[i] = dfs(start, end, 1.0, adj, new HashSet<>());
+            }
+        }
+        return results;
+    }
+
+    private double dfs(String u, String target, double product, Map<String, Map<String, Double>> adj, Set<String> visited) {
+        visited.add(u);
+        Map<String, Double> neighbors = adj.get(u);
+        
+        if (neighbors.containsKey(target)) {
+            return product * neighbors.get(target);
+        }
+        
+        for (Map.Entry<String, Double> entry : neighbors.entrySet()) {
+            String v = entry.getKey();
+            if (!visited.contains(v)) {
+                double res = dfs(v, target, product * entry.getValue(), adj, visited);
+                if (res != -1.0) return res;
+            }
+        }
+        return -1.0;
+    }
+}
+
+
 
 	public double[] calcEquation(List<List<String>> equations, double[] values, List<List<String>> queries) {
         // build big double direction map

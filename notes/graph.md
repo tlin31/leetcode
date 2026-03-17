@@ -567,7 +567,171 @@ class Graph
 
     Pod 之间的依赖、InitContainer 等都遵循 DAG 原则。
 
-### Algorithm 1: modify DFS （基于后序遍历 post-order）
+    
+### Algorithm 1: Kahn’s Algorithm（基于 BFS + 入度 in-degree）
+
+思想：
+
+1. 计算每个节点的入度 in degree
+
+2. 将所有入度为 0 的节点放进队列
+
+3. 不断取出队头、加入结果，并减少相邻节点入度
+
+4. 新入度为 0 的加入队列
+
+5. 直到队列空
+
+如果最后结果节点数 < 图的节点数 → 有环
+
+
+#### How to find in-degree of each node?
+
+- 算的是destination node，有几个指向他的
+
+- Take an in-degree array，traverse the array of edges and simply increase the counter of the destination node by 1 --> Time Complexity: O(V+E)
+
+```java
+    for each node in Nodes
+        indegree[node] = 0;
+
+    for each edge(src,dest) in Edges
+        indegree[dest]++
+```
+
+#### 代码
+```java
+    public List<Integer> topoSort(int n, int[][] edges) {
+        List<List<Integer>> graph = new ArrayList<>();
+        for (int i = 0; i < n; i++) graph.add(new ArrayList<>());
+
+        int[] indegree = new int[n];
+
+        // create graph & in degree array
+        for (int[] e : edges) {
+            graph.get(e[0]).add(e[1]);
+            indegree[e[1]]++;
+        }
+
+        Queue<Integer> q = new LinkedList<>();
+        for (int i = 0; i < n; i++) {
+            if (indegree[i] == 0) 
+                q.offer(i);
+        }
+
+        List<Integer> res = new ArrayList<>();
+
+        while (!q.isEmpty()) {
+            int cur = q.poll();
+            res.add(cur);
+
+            for (int next : graph.get(cur)) {
+                indegree[next]--;
+                if (indegree[next] == 0) 
+                    q.offer(next);
+            }
+        }
+
+        if (res.size() != n) 
+            return new ArrayList<>(); // has cycle
+
+        return res;
+    }
+```
+
+
+```java
+class Graph 
+{ 
+    // No. of vertices 
+    int V;
+      
+    //An Array of List which contains references to the Adjacency List of each vertex 
+    List <Integer> adj[]; 
+
+    // Constructor 
+    public Graph(int V)
+    { 
+        this.V = V; 
+        adj = new ArrayList[V]; 
+        for(int i = 0; i < V; i++) 
+            adj[i]=new ArrayList<Integer>(); 
+    } 
+      
+    // function to add an edge to graph 
+    public void addEdge(int u,int v) 
+    { 
+        adj[u].add(v); 
+    } 
+
+    // prints a Topological Sort of the complete graph     
+    public void topologicalSort() 
+    { 
+        // Create a array to store indegrees of all vertices. Initialize all indegrees as 0. 
+        int indegree[] = new int[V]; 
+          
+        // Traverse adjacency lists to fill indegrees of vertices. This step takes O(V+E) time         
+        for(int i = 0; i < V; i++) 
+        { 
+            ArrayList<Integer> temp = (ArrayList<Integer>) adj[i]; 
+            for(int node : temp) 
+            { 
+                indegree[node]++; 
+            } 
+        } 
+          
+        // Create a queue and enqueue all vertices with indegree 0 
+        Queue<Integer> q = new LinkedList<Integer>(); 
+
+        for(int i = 0;i < V; i++) 
+        { 
+            if(indegree[i]==0) 
+                q.add(i); 
+        } 
+          
+        // Initialize count of visited vertices 
+        int cnt = 0; 
+          
+        // Create a vector to store result (A topological ordering of the vertices) 
+        Vector <Integer> topOrder = new Vector<Integer>(); 
+        while(!q.isEmpty()) 
+        { 
+            // Extract front of queue (or perform dequeue) and add it to topological order 
+            int u = q.poll(); 
+            topOrder.add(u); 
+              
+            // Iterate through all its neighbouring nodes of dequeued node u and decrease their 
+            // in-degree by 1 
+            for(int node : adj[u]) 
+            { 
+                // If in-degree becomes zero, add it to queue 
+                if(--indegree[node] == 0) 
+                    q.add(node); 
+            } 
+            cnt++; 
+        } 
+          
+        // Check if there was a cycle         
+        if(cnt != V) 
+        { 
+            System.out.println("There exists a cycle in the graph"); 
+            return ; 
+        } 
+          
+        // Print topological order             
+        for(int i : topOrder) 
+        { 
+            System.out.print(i+" "); 
+        } 
+    } 
+} 
+```
+
+#### Time Complexity
+- The outer for loop will be executed V number of times and the inner for loop will be executed E number of times, Thus overall time complexity is O(V+E).
+
+
+### Algorithm 2: modify DFS （基于后序遍历 post-order）
 
 1. 对每个节点 DFS
 2. 当一个节点所有子节点 DFS 完毕以后，将它加入结果
@@ -667,7 +831,7 @@ private void topologicalSortRecursive(int current, boolean[] isVisited, LinkedLi
     }
 
     // add at the begining of the list --> decreasing finish time
-    // early it finish, later it is in the list
+    // earlier it finish, later it is in the list
     result.addFirst(current);
 }
 
@@ -683,168 +847,6 @@ private void topologicalSortRecursive(int current, boolean[] isVisited, LinkedLi
 
 
 
-
-### Algorithm 2: Kahn’s Algorithm（基于 BFS + 入度 in-degree）
-
-思想：
-
-1. 计算每个节点的入度 in degree
-
-2. 将所有入度为 0 的节点放进队列
-
-3. 不断取出队头、加入结果，并减少相邻节点入度
-
-4. 新入度为 0 的加入队列
-
-5. 直到队列空
-
-如果最后结果节点数 < 图的节点数 → 有环
-
-
-#### How to find in-degree of each node?
-
-- 算的是destination node，有几个指向他的
-
-- Take an in-degree array，traverse the array of edges and simply increase the counter of the destination node by 1 --> Time Complexity: O(V+E)
-
-```java
-    for each node in Nodes
-        indegree[node] = 0;
-
-    for each edge(src,dest) in Edges
-        indegree[dest]++
-```
-
-#### 代码
-```java
-    public List<Integer> topoSort(int n, int[][] edges) {
-        List<List<Integer>> graph = new ArrayList<>();
-        for (int i = 0; i < n; i++) graph.add(new ArrayList<>());
-
-        int[] indegree = new int[n];
-
-        // create graph & in degree array
-        for (int[] e : edges) {
-            graph.get(e[0]).add(e[1]);
-            indegree[e[1]]++;
-        }
-
-        Queue<Integer> q = new LinkedList<>();
-        for (int i = 0; i < n; i++) {
-            if (indegree[i] == 0) 
-                q.offer(i);
-        }
-
-        List<Integer> res = new ArrayList<>();
-
-        while (!q.isEmpty()) {
-            int cur = q.poll();
-            res.add(cur);
-
-            for (int next : graph.get(cur)) {
-                indegree[next]--;
-                if (indegree[next] == 0) 
-                    q.offer(next);
-            }
-        }
-
-        if (res.size() != n) 
-            return new ArrayList<>(); // has cycle
-
-        return res;
-    }
-```
-
-
-```java
-class Graph 
-{ 
-	// No. of vertices 
-    int V;
-      
-    //An Array of List which contains references to the Adjacency List of each vertex 
-    List <Integer> adj[]; 
-
-    // Constructor 
-    public Graph(int V)
-    { 
-        this.V = V; 
-        adj = new ArrayList[V]; 
-        for(int i = 0; i < V; i++) 
-            adj[i]=new ArrayList<Integer>(); 
-    } 
-      
-    // function to add an edge to graph 
-    public void addEdge(int u,int v) 
-    { 
-        adj[u].add(v); 
-    } 
-
-    // prints a Topological Sort of the complete graph     
-    public void topologicalSort() 
-    { 
-        // Create a array to store indegrees of all vertices. Initialize all indegrees as 0. 
-        int indegree[] = new int[V]; 
-          
-        // Traverse adjacency lists to fill indegrees of vertices. This step takes O(V+E) time         
-        for(int i = 0; i < V; i++) 
-        { 
-            ArrayList<Integer> temp = (ArrayList<Integer>) adj[i]; 
-            for(int node : temp) 
-            { 
-                indegree[node]++; 
-            } 
-        } 
-          
-        // Create a queue and enqueue all vertices with indegree 0 
-        Queue<Integer> q = new LinkedList<Integer>(); 
-
-        for(int i = 0;i < V; i++) 
-        { 
-            if(indegree[i]==0) 
-                q.add(i); 
-        } 
-          
-        // Initialize count of visited vertices 
-        int cnt = 0; 
-          
-        // Create a vector to store result (A topological ordering of the vertices) 
-        Vector <Integer> topOrder = new Vector<Integer>(); 
-        while(!q.isEmpty()) 
-        { 
-            // Extract front of queue (or perform dequeue) and add it to topological order 
-            int u = q.poll(); 
-            topOrder.add(u); 
-              
-            // Iterate through all its neighbouring nodes of dequeued node u and decrease their 
-            // in-degree by 1 
-            for(int node : adj[u]) 
-            { 
-                // If in-degree becomes zero, add it to queue 
-                if(--indegree[node] == 0) 
-                    q.add(node); 
-            } 
-            cnt++; 
-        } 
-          
-        // Check if there was a cycle         
-        if(cnt != V) 
-        { 
-            System.out.println("There exists a cycle in the graph"); 
-            return ; 
-        } 
-          
-        // Print topological order             
-        for(int i : topOrder) 
-        { 
-            System.out.print(i+" "); 
-        } 
-    } 
-} 
-```
-
-#### Time Complexity
-- The outer for loop will be executed V number of times and the inner for loop will be executed E number of times, Thus overall time complexity is O(V+E).
 
 ### Sample questions
 

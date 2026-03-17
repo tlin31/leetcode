@@ -48,10 +48,16 @@ key:
 Method 1:
 
 Method:
+	- set to store the index of the bad () that needs to be removed
+	- stack to store the index of '(' and ')'
+	- for each char in string:
+		if sees (, push the index of this char to the stack
+		if sees ), 
+			if the stack is empty: ')' is invalid, add its index to the set
+			if non empty: pop stack
 
-	-	
-
-
+	- if stack is non empty, add the leftovers to the steps
+	- use string builder to build string, skip the index if it's in set
 
 Stats:
 
