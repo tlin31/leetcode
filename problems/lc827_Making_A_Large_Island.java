@@ -42,6 +42,75 @@ key:
 
 ******************************************************
 
+1. Map Existing Islands: 
+	Iterate through the grid. For every unvisited land cell (1), use Depth-First Search (DFS) or BFS to find all connected cells.
+
+2.Assign Unique IDs: 
+	Label each island with a unique ID (starting from 2 to avoid confusion with 0 and 1) and store its size in a hash map.
+
+3. Evaluate Water Cells: 
+	Iterate through the grid again. For every water cell (0):
+
+	1. Check its four neighbors (up, down, left, right).
+	2. Collect the unique IDs of the islands it touches using a Set (to avoid double-counting the same island).
+	3. The potential island size if flipped is 1 + sum(area of neighbor islands)
+
+4. Find the Maximum: 
+	Track the largest size found. If the grid is all 1s, return N^2
+
+
+import java.util.*;
+
+class Solution {
+    public int largestIsland(int[][] grid) {
+        int N = grid.length;
+        Map<Integer, Integer> islandSizes = new HashMap<>();
+        islandSizes.put(0, 0);
+        int islandId = 2;
+
+        // Phase 1: Identify islands
+        for (int r = 0; r < N; r++) {
+            for (int c = 0; c < N; c++) {
+                if (grid[r][c] == 1) {
+                    int size = dfs(grid, r, c, islandId);
+                    islandSizes.put(islandId++, size);
+                }
+            }
+        }
+
+        int maxSize = islandSizes.getOrDefault(2, 0);
+        if (maxSize == N * N) return maxSize; // all connected, 全部都是1
+
+        // Phase 2: Check each water cell
+        for (int r = 0; r < N; r++) {
+            for (int c = 0; c < N; c++) {
+                if (grid[r][c] == 0) {
+                    Set<Integer> neighbors = new HashSet<>();
+                    for (int[] d : new int[][]{{0, 1}, {0, -1}, {1, 0}, {-1, 0}}) {
+                        int nr = r + d[0], nc = c + d[1];
+                        if (nr >= 0 && nr < N && nc >= 0 && nc < N) {
+                            neighbors.add(grid[nr][nc]);
+                        }
+                    }
+                    int currentSize = 1;
+                    for (int id : neighbors) currentSize += islandSizes.get(id);
+                    maxSize = Math.max(maxSize, currentSize);
+                }
+            }
+        }
+        return maxSize == 0 ? 1 : maxSize;
+    }
+
+    private int dfs(int[][] grid, int r, int c, int id) {
+        if (r < 0 || r >= grid.length || c < 0 || c >= grid[0].length || grid[r][c] != 1) return 0;
+        
+        // 改变matrix里面储存的值，从1变成island id
+        grid[r][c] = id;
+        return 1 + dfs(grid, r + 1, c, id) + dfs(grid, r - 1, c, id) + 
+                   dfs(grid, r, c + 1, id) + dfs(grid, r, c - 1, id);
+    }
+}
+
 
 
 ===================================================================================================

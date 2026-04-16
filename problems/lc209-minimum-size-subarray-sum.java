@@ -17,7 +17,8 @@ of which the time complexity is O(n log n).
 
 ******************************************************
 key:
-  - 2 pointers
+  - 2 sweep: presence of bidirectional local constraints that must be satisfied simultaneously
+
   - edge case:
     1) empty string, return empty
     2)

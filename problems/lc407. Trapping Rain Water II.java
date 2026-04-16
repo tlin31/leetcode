@@ -1,8 +1,5 @@
-407. Trapping Rain Water II
-Hard
-Topics
-conpanies icon
-Companies
+407. Trapping Rain Water II - Hard
+
 Given an m x n integer matrix heightMap representing the height of each unit cell in a 2D elevation map, return the volume of water it can trap after raining.
 
  
@@ -71,7 +68,7 @@ Step 3：向四个方向扩展
 
 	如果未访问：
 
-	若 height[nr][nc] < maxHeight --> 可以存水：water += maxHeight - height[nr][nc]
+	   且 height[nr][nc] < maxHeight --> 可以存水：water += maxHeight - height[nr][nc]
 
 	加入堆
 
@@ -152,13 +149,6 @@ class Solution {
         }
     }
 }
-
-
-推荐系统：
-
-1. go to database fetch user info, 
-2. gets user past purchase records, elasticsearch?
-2. recommendation algo based on user's past purchase, like category/keyword/price range
 
 
 

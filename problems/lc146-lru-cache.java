@@ -72,7 +72,6 @@ key:
 
 
 
-
 1. hash map holds iterators to linked list
 2. linked list holds key and value, key to access hash map items
 3. when item is accessed, it is promoted - moved to the tail of the list - O(1) operation
@@ -280,7 +279,33 @@ stats:
 	- 
 	- 
 
+import java.util.*;
 
+class LRUCache extends LinkedHashMap<Integer, Integer> {
+    private final int capacity;
+
+    public LRUCache(int capacity) {
+        // true for access-order, false for insertion-order
+        super(capacity, 0.75f, true);
+        this.capacity = capacity;
+    }
+
+    public int get(int key) {
+        return super.getOrDefault(key, -1);
+    }
+
+    public void put(int key, int value) {
+        super.put(key, value);
+    }
+
+    @Override
+    protected boolean removeEldestEntry(Map.Entry<Integer, Integer> eldest) {
+        return size() > capacity;
+    }
+}
+
+
+=================
 class LRUCache {
     LinkedHashSet<Integer> listSet;
     Map<Integer, Integer> map;

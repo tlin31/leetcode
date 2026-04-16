@@ -128,6 +128,17 @@ public void dfs(char[][] board, int i, int j, TrieNode p, List<String> res) {
 }
 
 
+here we prune the node by setting p.word = null to avoid duplicates
+    - we can use a set as result to filter, but still cost search time
+
+Efficiency (Stopping Early)
+- Once you have found a word, there is no reason for any future DFS call to "look" for 
+    that specific word ever again. By nullifying the word, you effectively tell the algorithm: 
+    "We are done with this specific target."
+
+- In advanced implementations, you can even go a step further: if a leaf node's word is set to 
+    null and it has no children, you can remove the entire node from the Trie 
+    (parent-to-child pruning). This drastically shrinks the search space as the algorithm progresses.
 
 =======================================================================================================
 method 2: interview friendly easier to come up ver.

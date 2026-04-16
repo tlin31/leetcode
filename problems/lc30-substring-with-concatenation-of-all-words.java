@@ -20,6 +20,73 @@ Input:
 Output: []
 
 =========================================================================================================================================================
+O(n*L) 解法
+ 
+ n is the length of string, L is the length of a single word
+
+算法核心步骤
+1. 确定步长与窗口总长：
+    设单单词长度为 w，单词总数为 k。目标子串的总长度为 k * w。
+
+2. 多起点滑动窗口：
+    因为子串可能从任何位置开始，我们需要枚举 0 到 w-1 之间的所有起点。
+    对于每个起点 i, 我们以 w 为步长移动窗口。这样每个字符在一次完整的遍历中只会被处理常数次。
+
+3. 动态维护单词频次：
+    使用一个哈希表记录窗口内各单词出现的次数。
+    右边界移入：如果新单词在 words 中，增加其计数。如果计数超过了 words 中的规定次数，则从左侧收缩窗口，直到合法为止。
+    左边界移出：当窗口内有效单词数达到 k 时，记录当前左边界索引，并将左侧第一个单词移出窗口。
+
+import java.util.*;
+
+class Solution {
+    public List<Integer> findSubstring(String s, String[] words) {
+        List<Integer> res = new ArrayList<>();
+        if (s == null || words.length == 0) return res;
+
+        int wordLen = words[0].length();
+        int wordNum = words.length; //有几个词
+        int totalLen = wordLen * wordNum;
+        Map<String, Integer> counts = new HashMap<>();
+        for (String w : words) counts.put(w, counts.getOrDefault(w, 0) + 1);
+
+        // Run the window wordLen times for every index 
+        for (int i = 0; i < wordLen; i++) {
+            Map<String, Integer> currentMap = new HashMap<>();
+            int left = i, count = 0;
+            
+            for (int j = i; j <= s.length() - wordLen; j += wordLen) {
+                String word = s.substring(j, j + wordLen);
+                if (counts.containsKey(word)) {
+                    currentMap.put(word, currentMap.getOrDefault(word, 0) + 1);
+                    count++;
+                    
+                    // If word frequency is higher than required, shrink from left
+                    while (currentMap.get(word) > counts.get(word)) {
+                        String leftWord = s.substring(left, left + wordLen);
+                        currentMap.put(leftWord, currentMap.get(leftWord) - 1);
+                        count--;
+                        left += wordLen;
+                    }
+                    
+                    if (count == wordNum) res.add(left);
+                } 
+                
+                else {
+                    // Word not in list: reset the window
+                    currentMap.clear();
+                    count = 0;
+                    left = j + wordLen;
+                }
+            }
+        }
+        return res;
+    }
+}
+
+
+
+=========================================================================================================================================================
 ref : https://leetcode.wang/leetCode-30-Substring-with-Concatenation-of-All-Words.html
 
 method 1:

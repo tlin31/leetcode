@@ -150,7 +150,8 @@ class Solution {
             smallSize--;
             largeSize++;
             prune(small);
-        } else if (smallSize < largeSize) {
+        } 
+        else if (smallSize < largeSize) {
             small.offer(large.poll());
             smallSize++;
             largeSize--;
@@ -230,6 +231,7 @@ class Solution {
         TreeSet<Integer> right = new TreeSet<>(comparator);
         double[] res = new double[nums.length - k + 1];
 
+        // initialize, add all element in window to left, then rebalance
         for (int i = 0; i < k; i++) {
             left.add(i);
         }
@@ -272,5 +274,63 @@ class Solution {
         }
     }
 }
+
+
+
+python:
+import heapq
+
+class Solution:
+    def medianSlidingWindow(self, nums: list[int], k: int) -> list[float]:
+        small, large = [], [] # Max-heap (small), Min-heap (large)
+        delayed = {} # Hash map for lazy removal
+        
+        def prune(heap, is_max_heap=False):
+            while heap:
+                val = -heap[0] if is_max_heap else heap[0]
+                if val in delayed and delayed[val] > 0:
+                    delayed[val] -= 1
+                    heapq.heappop(heap)
+                else:
+                    break
+
+        # Initial window
+        for i in range(k):
+            heapq.heappush(small, -nums[i])
+        for _ in range(k // 2):
+            heapq.heappush(large, -heapq.heappop(small))
+            
+        res = []
+        # Python's "/" handles float division
+        res.append(-small[0] if k % 2 else (-small[0] + large[0]) / 2.0)
+        
+        for i in range(k, len(nums)):
+            in_val, out_val = nums[i], nums[i-k]
+            balance = 0
+            
+            # Lazy remove out_val
+            delayed[out_val] = delayed.get(out_val, 0) + 1
+            balance += -1 if out_val <= -small[0] else 1
+            
+            # Add in_val
+            if small and in_val <= -small[0]:
+                balance += 1
+                heapq.heappush(small, -in_val)
+            else:
+                balance -= 1
+                heapq.heappush(large, in_val)
+                
+            # Rebalance
+            if balance < 0:
+                heapq.heappush(small, -heapq.heappop(large))
+            elif balance > 0:
+                heapq.heappush(large, -heapq.heappop(small))
+            
+            prune(small, True)
+            prune(large, False)
+            res.append(-small[0] if k % 2 else (-small[0] + large[0]) / 2.0)
+            
+        return res
+
 
 

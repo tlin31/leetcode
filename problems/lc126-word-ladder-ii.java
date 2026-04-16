@@ -47,9 +47,14 @@ key:
 
 ******************************************************
 
+Note:
+1. Layer-wise Removal: In BFS, do not remove words from the dictionary immediately when they are found. Wait until you've processed the entire current level. This ensures you capture all parallel shortest paths to the same word.
 
+2. Pruning: Stop the BFS immediately once you reach the level containing endWord. Any paths found deeper than this cannot be "shortest."
 
-=======================================================================================================
+3. Backward Search: For very large dictionaries, the backtracking phase is often faster if you search from the smaller "side" of the graph if using Bidirectional BFS.
+
+====================================================================================================
 method 1:
 
 method:
@@ -67,93 +72,140 @@ stats:
 	- Memory Usage: 46 MB, less than 82.69% 
 
 
+
+
+
+
+import java.util.*;
+
 class Solution {
     public List<List<String>> findLadders(String beginWord, String endWord, List<String> wordList) {
-        List<String> path = new ArrayList<>();
-        List<List<String>> result = new ArrayList<List<String>>();
-        HashMap<String, List<String>> graph = new HashMap<String, List<String>>();
-        HashSet<String> dict = new HashSet<>(wordList);
-        buildGraph(beginWord, endWord, graph, dict);
-        dfs(beginWord, endWord, graph, path, result);
-        return result;
-    }
-    
-    private void buildGraph(String beginWord, String endWord, HashMap<String, List<String>> graph, 
-      HashSet<String> dict) {
-        HashSet<String> visited = new HashSet<>();
-        HashSet<String> toVisit = new HashSet<>();
+        List<List<String>> result = new ArrayList<>();
+        Set<String> wordSet = new HashSet<>(wordList);
+
+        // Quick exit: if endWord not in dictionary, no path exists
+        if (!wordSet.contains(endWord)) return result;
+
+        // BFS: build a parent map — for each word, which words led to it?
+        Map<String, List<String>> parents = new HashMap<>();
+        Map<String, Integer> dist = new HashMap<>();
         Queue<String> queue = new LinkedList<>();
+
+        dist.put(beginWord, 0);
         queue.offer(beginWord);
-        toVisit.add(beginWord);
-        boolean foundEnd = false;
-        
-        while(!queue.isEmpty()) {
-            visited.addAll(toVisit);
-            toVisit.clear();
-            int count = queue.size();
-            
-            for (int i = 0; i < count; i++) {
-                String word = queue.poll();
-                List<String> children = getNextLevel(word, dict);
-                for (String child : children) {
-                    if (child.equals(endWord)) 
-                      foundEnd = true;
-                    if (!visited.contains(child)) {
-                        if (!graph.containsKey(word)) {
-                            graph.put(word, new ArrayList<String>());
+
+        boolean found = false;
+        int shortestLen = Integer.MAX_VALUE;
+
+        while (!queue.isEmpty()) {
+            String word = queue.poll();
+            int d = dist.get(word);
+            if (d >= shortestLen) break; // no need to go deeper
+
+            char[] chars = word.toCharArray();
+            for (int i = 0; i < chars.length; i++) {
+                char original = chars[i];
+                for (char c = 'a'; c <= 'z'; c++) {
+                    if (c == original) continue;
+                    
+                    chars[i] = c;
+                    String next = new String(chars);
+                    chars[i] = original;
+
+                    if (!wordSet.contains(next)) continue; //already visited/used
+
+                    if (!dist.containsKey(next)) {
+                        dist.put(next, d + 1);
+                        queue.offer(next);
+                        parents.computeIfAbsent(next, k -> new ArrayList<>()).add(word);
+
+                        // find end word with shortest distance! update!
+                        if (next.equals(endWord)) { 
+                            found = true; 
+                            shortestLen = d + 1; 
                         }
-                        graph.get(word).add(child);
-                    }
-                    if (!visited.contains(child) && !toVisit.contains(child)) {
-                        queue.offer(child);
-                        toVisit.add(child);
+                    } 
+
+                    else if (dist.get(next) == d + 1) {
+                        // Another word at same level can also reach next
+                        parents.get(next).add(word);
                     }
                 }
             }
-            
-            if (foundEnd) break;
-        }
-    }
-    
-    // find neighbor nodes, ex. hot --> try to find aot, bot, ...zot in dict,
-    // then find hat, hbt, hct,... hzt & hoa, hob,.... hoz in dict
-    private List<String> getNextLevel(String word, HashSet<String> dict) {
-        List<String> result = new ArrayList<>();
-        char[] chs = word.toCharArray();
-        
-        for (int i = 0; i < chs.length; i++) {
-            for (char c = 'a'; c <= 'z'; c++) {
-                if (chs[i] == c) 
-                   continue;
-                char t = chs[i];
-                chs[i] = c;
-                String target = String.valueOf(chs);
-                if (dict.contains(target)) 
-                	result.add(target);
-                chs[i] = t;
-            }
-        }
-        
-        return result;
-    }
-    
-    private void dfs(String curWord, String endWord, HashMap<String, List<String>> graph, 
-                     List<String> path, List<List<String>> result) {
-        path.add(curWord);
-        
-        if (curWord.equals(endWord)) 
-        	result.add(new ArrayList<String>(path));
-        
-        else if (graph.containsKey(curWord)) {
-            for (String nextWord : graph.get(curWord)) {
-                dfs(nextWord, endWord, graph, path, result);
-            }
         }
 
-        path.remove(path.size()-1);
+        if (!found) return result;
+
+        // DFS backward from endWord to beginWord using the parent map
+        Deque<String> path = new ArrayDeque<>();
+        path.addFirst(endWord);
+        dfs(beginWord, endWord, parents, path, result);
+        return result;
+    }
+
+    private void dfs(String beginWord, String word,
+                     Map<String, List<String>> parents,
+                     Deque<String> path, List<List<String>> result) {
+        if (word.equals(beginWord)) {
+            result.add(new ArrayList<>(path));
+            return;
+        }
+        for (String parent : parents.getOrDefault(word, List.of())) {
+            path.addFirst(parent);
+            dfs(beginWord, parent, parents, path, result);
+            path.removeFirst();
+        }
     }
 }
 
+
+
+这个solution在更新了test case之后可以通过！因为 it builds the graph backward using a parents map instead of a forward-facing children map.
+
+
+
+1. The "Narrowing" Effect (Pruning)
+In your original version, the DFS starts at the beginWord and explores forward. Even with a level graph, a beginWord might have many neighbors that eventually lead to dead ends or paths that don't reach the endWord.
+
+This solution uses a parents map (child -> [list of parents]). By doing this:
+    The BFS identifies every word that could be on a shortest path.
+    The DFS starts at the endWord and moves backward.
+
+The Logic: You only ever visit nodes that are guaranteed to have come from the beginWord. You aren't "searching" for the end; you are "retracing" a path that you already know exists.
+
+
+2. Strict Level Control (dist.get(next) == d + 1)
+
+Your original code used visited and toVisit sets. While correct, it was slightly loose. 
+
+This solution uses an explicit dist map to enforce a strict layer requirement:
+
+    If we find next and it’s not in the dist map, it’s a brand-new discovery.
+    
+    If next is in the dist map, we check: “Is the word I’m currently holding at the level exactly before next?”
+        
+        If yes, we add the current word as a parent. 
+
+This captures all parallel shortest paths without ever accidentally looking at a longer detour.
+
+
+3. Early Exit (d >= shortestLen)
+
+The moment it discovers the endWord, it sets shortestLen. 
+
+Any node pulled from the queue after that which is already at that distance is immediately ignored. 
+
+This prevents the BFS from processing useless nodes that are too far away to be part of the shortest path.
+
+
+
+4. Memory/Object Efficiency
+
+Deque for DFS: 
+    Using path.addFirst() and path.removeFirst() on a Deque (Double Ended Queue) is highly efficient for backtracking when building paths in reverse.
+
+String creation: 
+    It generates the next string inside the character loop only when necessary, minimizing garbage collection overhead.
 
 =======================================================================================================
 method 2:

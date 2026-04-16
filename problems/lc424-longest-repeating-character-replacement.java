@@ -50,6 +50,30 @@ key:
 ******************************************************
 
 
+use a Sliding Window with a frequency map to track how many characters we need to "change" 
+to make a substring uniform.
+
+
+
+1. Detailed Algorithm
+The core idea is to maintain a window 【left, right】and track the frequency of the 
+most frequent character (maxFreq) within that window.
+
+Window Condition: A window is "valid" if the number of characters we need to replace is <=k
+
+Number of replacements = (Window Length) - (Frequency of most frequent character).
+
+Formula: (right - left + 1) - maxFreq <= k.
+
+Expansion: Move the right pointer to include a new character and update its frequency. 
+		Update maxFreq if the new character is now the most frequent.
+
+Contraction: If the window becomes invalid (replacements > k), move the left pointer.
+
+Optimization: We don't actually need to decrement maxFreq when shrinking the window because 
+			we are only looking for a window larger than the current maximum.
+
+Result: The maximum right - left + 1 encountered is the answer
 
 =======================================================================================================
 method 1:

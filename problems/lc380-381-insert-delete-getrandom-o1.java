@@ -144,7 +144,7 @@ method 2:
 
 method:
 
-	- if allow duplicates --> hashmap stores <value, set of index that has this value>
+	- # 381 if allow duplicates --> hashmap stores <value, set of index that has this value>
 	- 
 
 stats:

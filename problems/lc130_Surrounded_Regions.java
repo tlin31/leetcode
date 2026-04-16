@@ -59,12 +59,12 @@ Method 1:dfs
 
 Method:
 
-	-从边界的 O 做 DFS，然后把遇到的 O 都标记一下，这些 O 就是可以连通到边界的。然后把边界的所有的 O 都做一次 DFS
-	把 DFS 过程的中的 O 做一下标记。最后我们只需要遍历节点，把没有标记过的 O 改成 X 就可以了。
+DFS解法：
+1. 从边界的 O 做 DFS，然后把遇到的 O 都标记一下，这些 O 就是可以连通到边界的。
+2. 然后把边界的所有的 O 都做一次 DFS， 把 DFS 过程的中的 O 做标记。
+3. 遍历节点，把没有标记过的 O 改成 X 就可以了。
 
-	标记的话，我们可以用一个 visited 二维数组，把访问过的置为 true 
-
-
+标记的话，用visited 二维数组，把访问过的值设为 true 
 
 Stats:
 
@@ -129,6 +129,7 @@ public class Solution {
 
         //多申请一个空间
         UnionFind uf = new UnionFind(rows * cols + 1);
+        
         //所有边界的 O 节点都和 dummy 节点合并
         int dummyNode = rows * cols;
 

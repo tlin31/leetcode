@@ -47,6 +47,39 @@ key:
 
 
 
+method:
+	- 只遍历一遍。
+	- 我们用 HashSet 实现放在一起的作用，但是这样的话总共就是 9 行，9 列，9 个小棋盘，27 个 HashSet 了。
+	  我们其实可以在放的时候标志一下，例如
+		如果第 4 行有一个数字 8，我们就 (8)4，把 "(8)4"放进去。
+		如果第 5 行有一个数字 6，我们就 5(6)，把 "5(6)"放进去。
+		小棋盘看成一个整体，总共是 9 个，3 行 3 列，如果第 2 行第 1 列的小棋盘里有个数字 3，
+		   我们就把 "2(3)1" 放进去。
+		这样 1 个 HashSet 就够了。
+
+stats:
+	- 时间复杂度：如果棋盘大小总共是 n，那么只遍历了一次，就是 O（n）。
+	- 空间复杂度：如果棋盘大小总共是 n，最坏的情况就是每个地方都有数字，就需要存三次，O（n）。
+	- Runtime: 5 ms, faster than 21.57% of Java online submissions for Valid Sudoku.
+	- Memory Usage: 43.3 MB, less than 95.65% of
+
+public boolean isValidSudoku(char[][] board) {
+    Set seen = new HashSet();
+    for (int i=0; i<9; ++i) {
+        for (int j=0; j<9; ++j) {
+            char number = board[i][j];
+            if (number != '.')
+                if (!seen.add(number + " in row " + i) ||
+                    !seen.add(number + " in column " + j) ||
+                    !seen.add(number + " in block " + i/3 + "-" + j/3))
+                    return false;
+        }
+    }
+    return true;
+}
+
+
+
 =======================================================================================================
 method 1:
 
@@ -182,37 +215,37 @@ stats:
 =======================================================================================================
 method 3:
 
-method:
-	- 只遍历一遍。
-	- 我们用 HashSet 实现放在一起的作用，但是这样的话总共就是 9 行，9 列，9 个小棋盘，27 个 HashSet 了。
-	  我们其实可以在放的时候标志一下，例如
-		如果第 4 行有一个数字 8，我们就 (8)4，把 "(8)4"放进去。
-		如果第 5 行有一个数字 6，我们就 5(6)，把 "5(6)"放进去。
-		小棋盘看成一个整体，总共是 9 个，3 行 3 列，如果第 2 行第 1 列的小棋盘里有个数字 3，我们就把 "2(3)1" 放进去。
-		这样 1 个 HashSet 就够了。
+ class Solution {
+    public boolean isValidSudoku(char[][] board) {
+        // Use boolean arrays to track digits 1-9 (index 0-8)
+        boolean[][] rows = new boolean[9][9]; // stores rows[row number][value]
+        boolean[][] cols = new boolean[9][9];
+        boolean[][] boxes = new boolean[9][9];
 
-stats:
-	- 时间复杂度：如果棋盘大小总共是 n，那么只遍历了一次，就是 O（n）。
-	- 空间复杂度：如果棋盘大小总共是 n，最坏的情况就是每个地方都有数字，就需要存三次，O（n）。
-	- Runtime: 5 ms, faster than 21.57% of Java online submissions for Valid Sudoku.
-	- Memory Usage: 43.3 MB, less than 95.65% of
+        for (int r = 0; r < 9; r++) {
+            for (int c = 0; c < 9; c++) {
+                if (board[r][c] == '.') {
+                    continue;
+                }
 
-public boolean isValidSudoku(char[][] board) {
-    Set seen = new HashSet();
-    for (int i=0; i<9; ++i) {
-        for (int j=0; j<9; ++j) {
-            char number = board[i][j];
-            if (number != '.')
-                if (!seen.add(number + " in row " + i) ||
-                    !seen.add(number + " in column " + j) ||
-                    !seen.add(number + " in block " + i/3 + "-" + j/3))
+                int val = board[r][c] - '1'; // Convert '1'-'9' to 0-8
+                int boxIndex = (r / 3) * 3 + (c / 3);
+
+                // Check if the value has been seen in the current row, column, or box
+                if (rows[r][val] || cols[c][val] || boxes[boxIndex][val]) {
                     return false;
+                }
+
+                // Mark the value as seen
+                rows[r][val] = true;
+                cols[c][val] = true;
+                boxes[boxIndex][val] = true;
+            }
         }
+
+        return true;
     }
-    return true;
 }
-
-
 
 =======================================================================================================
 method 4:

@@ -520,6 +520,89 @@ class Graph
                 DFSUtil(i, visited); 
     } 
 ```
+
+
+
+## BFS & DFS 优化（optimization）
+
+### 1. The "Reverse Engineering" Framework (Backward vs. Forward)
+
+When a problem asks for all paths from A to B, ask yourself: "Is the fan-out smaller from the end?"
+
+The Logic: In Word Ladder, many words can branch out from the start, but **fewer "parent" words** successfully lead into the target.
+
+Interview Trigger: If you find yourself building a graph but your DFS is still exploring "dead ends," switch to a Parent Map instead of a Child Map and traverse from the target back to the source.
+
+Ex. lc 126 word ladder 2
+
+```java
+        Map<String, List<String>> parents = new HashMap<>();
+
+
+        // found a new valid next word
+        parents.computeIfAbsent(next, k -> new ArrayList<>()).add(word);
+
+        // Another word at same level can also reach next
+        parents.get(next).add(word);
+
+        dfs(beginWord, endWord, parents, path, result);//call下面的dfs func
+
+
+        private void dfs(String beginWord, String word,
+                         Map<String, List<String>> parents,
+                         Deque<String> path, List<List<String>> result) {
+
+            if (word.equals(beginWord)) {
+                result.add(new ArrayList<>(path));
+                return;
+            }
+
+            for (String parent : parents.getOrDefault(word, List.of())) {
+                path.addFirst(parent);
+                dfs(beginWord, parent, parents, path, result);
+                path.removeFirst();
+            }
+        }
+
+```
+
+### 2. The "Level-Sync" Framework (Strict Layering)
+
+In shortest-path problems (especially BFS), distance is your best filter.
+
+The Logic: Never let a search move "sideways" (same level) or "backward" (previous level).
+
+Interview Trigger: If you see "Shortest Path" and "All Results," immediately think: **Map<Node, Integer> distance**. Use this map during your search to enforce a strict rule: Only process neighbor V if dist(V) == dist(Current)+1. 
+
+This prunes the search space exponentially.
+
+### 3. The "Meet-in-the-Middle" Framework (Bidirectional)
+
+This is the ultimate optimization for state-space searches (like Word Ladder or Sudoku solvers).
+
+The Logic: Searching from both the start and end simultaneously creates two smaller "cones" that meet in the middle, rather than one giant "cone" that grows wider and wider.
+
+Math: Instead of O(b^d), you get O(2 x b^(d/2))
+
+Interview Trigger: If the search depth could be large, mention: "To optimize, I could use Bidirectional BFS to reduce the search radius."
+
+
+### 4. The "Work-Once" Framework (State Memoization)
+Trees and Graphs often revisit the same "sub-problem."
+
+The Logic: In Tree problems (like Constructing from Preorder/Inorder), searching an array for an index repeatedly is O(N^2). Pre-calculating indices into a HashMap makes it O(N)
+
+Interview Trigger: Anytime you see a search inside a loop, ask: "Can I pre-process this into a Map to make this lookup O(1)?
+
+
+ | Problem Type   | Common Bottleneck      | Optimization Strategy                  |
+|----------------|------------------------|----------------------------------------|
+| All Paths      | Exploring dead ends    | Parent Map + Backward DFS              |
+| Shortest Path  | Redundant explorations | Distance Map as a strict guard         |
+| Tree Traversal | Searching for values   | HashMap pre-processing                 |
+| Connectivity   | Re-calculating groups  | Union-Find with Path Compression       |
+| State Search   | Large branching factor | Bidirectional BFS (Meet-in-the-middle) |
+
 ## Topological Sorting
 
 - key: in-degrees, dfs, stack
