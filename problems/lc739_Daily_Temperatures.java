@@ -90,3 +90,26 @@ public int[] dailyTemperatures(int[] temperatures) {
     return ret;
 }
 
+
+temps = [73,74,75,71,69,72,76,73]
+stack = []  (stores indices)
+result = [0,0,0,0,0,0,0,0]
+
+i=0: stack=[] → push 0 → stack=[0]
+i=1: temps[1]=74 > temps[0]=73 → pop 0, result[0]=1-0=1
+     stack=[] → push 1 → stack=[1]
+i=2: temps[2]=75 > temps[1]=74 → pop 1, result[1]=2-1=1
+     stack=[] → push 2 → stack=[2]
+i=3: temps[3]=71 < temps[2]=75 → push 3 → stack=[2,3]
+i=4: temps[4]=69 < temps[3]=71 → push 4 → stack=[2,3,4]
+i=5: temps[5]=72 > temps[4]=69 → pop 4, result[4]=5-4=1
+               72 > temps[3]=71 → pop 3, result[3]=5-3=2
+               72 < temps[2]=75 → stop → push 5 → stack=[2,5]
+i=6: temps[6]=76 > temps[5]=72 → pop 5, result[5]=6-5=1
+               76 > temps[2]=75 → pop 2, result[2]=6-2=4
+     stack=[] → push 6 → stack=[6]
+i=7: temps[7]=73 < temps[6]=76 → push 7 → stack=[6,7]
+
+Remaining in stack: [6,7] → result stays 0 (no warmer day)
+
+result = [1,1,4,2,1,1,0,0] ✅

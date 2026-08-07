@@ -67,6 +67,9 @@ class MinStack {
     
 }
 
+Key insight: the minimum can only change when we push or pop. And crucially — when we pop the current minimum, the new minimum is whatever was the minimum before that push. That's historical information we need to preserve.
+
+
 =======================================================================================================
 method 1:
 

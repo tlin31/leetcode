@@ -620,28 +620,33 @@ class Solution {
 		Deque<TreeNode> stack = new ArrayDeque<>(); 
 		Deque<TreeNode> stack = new LinkedList<>(); 
 ```
-插入元素: 使用 push()，将元素压入栈顶。
-移除元素: 使用 pop()，从栈顶弹出元素。
-查看元素: 使用 peek()，查看栈顶元素而不弹出。 
 
-isEmpty(): 检查 Deque 是否为空。
-size(): 返回 Deque 中的元素数量。
-contains(Object o): 检查 Deque 是否包含特定元素。
+- 💡 In Java always use ArrayDeque over LinkedList for deque operations — same O(1) amortized complexity but significantly better cache performance and lower memory overhead since LinkedList allocates a node object per element. This is a detail interviewers notice! 🎯
+- ArrayDeque不是线程安全的，没有同步锁的开销。
+- ArrayDeque 不支持 null 元素。
+
+Array Deque:
+- 插入元素: 使用 push()，将元素压入栈顶。
+- 移除元素: 使用 pop()，从栈顶弹出元素。
+- 查看元素: 使用 peek()，查看栈顶元素而不弹出。 
+
+- isEmpty(): 检查 Deque 是否为空。
+- size(): 返回 Deque 中的元素数量。
+- contains(Object o): 检查 Deque 是否包含特定元素。
 
 
 作为双端队列 (两端都可操作)
+- 注：没有后缀的简写方法（如 add、poll、peek）默认等同于对尾部或头部的操作，遵循标准 FIFO 队列的行为。
+- 第二个是返回特殊值（推荐方法）
 
-从头部插入: addFirst() 或 offerFirst()
-从尾部插入: addLast() 或 offerLast()
-从头部移除: removeFirst() 或 pollFirst()
-从尾部移除: removeLast() 或 pollLast()
-查看头部元素: peekFirst()
-查看尾部元素: peekLast()
+- 从头部插入: addFirst() 或 offerFirst()
+- 从尾部插入: addLast() 或 offerLast()
+- 从头部移除: removeFirst() 或 pollFirst()
+- 从尾部移除: removeLast() 或 pollLast()
+- 查看头部元素: peekFirst()
+- 查看尾部元素: peekLast()
 
-常用实现类
-在大多数情况下，应优先使用 ArrayDeque。 
-ArrayDeque: 基于可变大小的数组实现，高效且内存占用少。不支持存储 null 值。
-LinkedList: 基于双向链表实现，支持 null 值，但在性能上通常不如 ArrayDeque。 
+
 
 ## 单调栈 Monotonic Stack
 

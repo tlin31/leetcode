@@ -125,10 +125,11 @@ After inserting the new node as a **red** node, we might encounter several cases
 
 ### Traversals:
 
+```
 		 1
 	 2		3
   4	   5	    
-
+```
 
 Depth First Traversals:
 (a) Inorder (Left, Root, Right) : 4 2 5 1 3 
@@ -143,7 +144,8 @@ Inorder Traversal:
 
 Algorithm Inorder(tree)
 
- 			if (node == null)
+```java
+ 		if (node == null)
             return;
       
         // Recur on the left subtree
@@ -155,6 +157,7 @@ Algorithm Inorder(tree)
         // Recur on the right subtree
         inorderTraversal(node.right);
   
+```
 
 Uses of Inorder
 - In case of binary search trees (BST), Inorder traversal gives nodes in non-decreasing order.
@@ -166,9 +169,10 @@ Algorithm Preorder(tree)
    1. Visit the root.
    2. Traverse the left subtree, i.e., call Preorder(left-subtree)
    3. Traverse the right subtree, i.e., call Preorder(right-subtree) 
+
 Uses of Preorder
-Preorder traversal is used to create a copy of the tree. Preorder traversal is also used to get prefix expression on of an expression tree. Please see http://en.wikipedia.org/wiki/Polish_notation to know why prefix expressions are useful.
-Example: Preorder traversal for the above given figure is 1 2 4 5 3.
+- Preorder traversal is used to create a copy of the tree. Preorder traversal is also used to get prefix expression on of an expression tree. Please see http://en.wikipedia.org/wiki/Polish_notation to know why prefix expressions are useful.
+- Example: Preorder traversal for the above given figure is 1 2 4 5 3.
 
 
 Postorder Traversal (Practice):
@@ -177,8 +181,9 @@ Algorithm Postorder(tree)
    1. Traverse the left subtree, i.e., call Postorder(left-subtree)
    2. Traverse the right subtree, i.e., call Postorder(right-subtree)
    3. Visit the root.
+
 Uses of Postorder
-Postorder traversal is used to delete the tree. Please see the question for deletion of tree for details. Postorder traversal is also useful to get the postfix expression of an expression tree. Please see http://en.wikipedia.org/wiki/Reverse_Polish_notation to for the usage of postfix expression.
+- Postorder traversal is used to delete the tree. Please see the question for deletion of tree for details. Postorder traversal is also useful to get the postfix expression of an expression tree. Please see http://en.wikipedia.org/wiki/Reverse_Polish_notation to for the usage of postfix expression.
 
 ### Level related questions
 - use queue/bfs

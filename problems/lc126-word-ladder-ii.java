@@ -59,18 +59,17 @@ method 1:
 
 method:
 
-	- 1). Use BFS to find the shortest distance between start and end, tracing the distance of 
+	- 1. Use BFS to find the shortest distance between start and end, tracing the distance of 
 	      crossing nodes from start node to end node, and store node next level neighbors to HashMap;
-	- 2). Use DFS to output paths with the same distance as the shortest distance from distance 
+	- 2. Use DFS to output paths with the same distance as the shortest distance from distance 
           HashMap: compare if the distance of the next level node equals the distance of the 
           current node + 1.
 
 
 stats:
+Time Complexity: O(N*L^2 + path), where N is the number of words and L is word length. L^2 comes from generating neighbors for every word.
 
-	- Runtime: 82 ms, faster than 69.64% of Java online submissions for Word Ladder II.
-	- Memory Usage: 46 MB, less than 82.69% 
-
+Space Complexity: O(N*L) to store the parents map, dist map, and wordSet
 
 
 
@@ -151,6 +150,7 @@ class Solution {
             return;
         }
         for (String parent : parents.getOrDefault(word, List.of())) {
+            // addFirst: 从头开始加，本质上是从end word一步一步到start word
             path.addFirst(parent);
             dfs(beginWord, parent, parents, path, result);
             path.removeFirst();

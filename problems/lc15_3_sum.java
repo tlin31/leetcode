@@ -16,6 +16,36 @@ A solution set is:
   [-1, -1, 2]
 ]
 
+
+public List<List<Integer>> threeSum(int[] nums) {
+    Arrays.sort(nums);
+    List<List<Integer>> result = new ArrayList<>();
+    
+    for (int i = 0; i < nums.length - 2; i++) {
+        // Skip duplicates for i
+        if (i > 0 && nums[i] == nums[i - 1]) continue;
+        // Early exit optimization
+        if (nums[i] > 0) break;
+        
+        int L = i + 1, R = nums.length - 1;
+        while (L < R) {
+            int total = nums[i] + nums[L] + nums[R];
+            if (total == 0) {
+                result.add(Arrays.asList(nums[i], nums[L], nums[R]));
+                while (L < R && nums[L] == nums[L + 1]) L++;
+                while (L < R && nums[R] == nums[R - 1]) R--;
+                L++; R--;
+            } else if (total < 0) {
+                L++;
+            } else {
+                R--;
+            }
+        }
+    }
+    return result;
+}
+
+
 =========================================================================================================================================================
 method 1:
 

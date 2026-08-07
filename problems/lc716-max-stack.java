@@ -58,7 +58,7 @@ key:
 
 
 面试问题：
-2. 为什么选 TreeMap？
+1. 为什么选 TreeMap？
 
 	自动排序 → O(log n) 找 max 
 	可以按 value 聚合多个 Node 
@@ -66,7 +66,7 @@ key:
 
 	像 Redis ZSet（skiplist + hash）有类似结构。
 
-3. 为什么用双向链表？
+2. 为什么用双向链表？
 
 	可以 O(1) 删除任意节点（知道 Node 引用）
 
@@ -74,7 +74,7 @@ key:
 
 	双向链表 + Map = 常见工程结构（例如 LRU Cache）。
 
-4. 工程中的应用场景是什么？
+3. 工程中的应用场景是什么？
 
 	实时任务调度：快速删除最大优先级任务
 
@@ -147,7 +147,8 @@ class MaxStack {
         int max = peekMax();
         List<Node> nodes = map.get(max);
         Node n = nodes.remove(nodes.size() - 1);
-        if (nodes.isEmpty()) map.remove(max);
+        if (nodes.isEmpty()) 
+            map.remove(max);
 
         removeNode(n);
         return max;

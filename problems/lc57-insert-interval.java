@@ -35,34 +35,49 @@ method:
 
 stats:
 
-	
-	public List<Interval> insert(List<Interval> intervals, Interval newInterval) {    
-		List<Interval> result = new ArrayList<>();
-		int i = 0;
-		int start = newInterval.start;
-		int end = newInterval.end;
-		    
-        // add first half: add all the non-overlap intervals smaller than new interval, just add it to the result
-		while (i < intervals.size() && intervals.get(i).end < start) {
-		    result.add(intervals.get(i++));
-		}
+import java.util.*;
 
-        // there's an overlap, [[1,2],[3,5],[6,7],[8,10],[12,16]], new= [4,8] -->[[1,2],[3,10],[12,16]]
-		while (i < intervals.size() && intervals.get(i).start <= end) {
-		    start = Math.min(start, intervals.get(i).start);
-		    end = Math.max(end, intervals.get(i).end);
-		    i++;
-		}
+class Solution {
+    public int[][] insert(int[][] intervals, int[] newInterval) {
+        List<int[]> result = new ArrayList<>();
+        int i = 0;
+        int n = intervals.length;
 
-		result.add(new Interval(start,end)); 
+        // 1. Add all intervals that end before the new interval starts
+        while (i < n && intervals[i][1] < newInterval[0]) {
+            result.add(intervals[i]);
+            i++;
+        }
 
-        // add the later half
-		while (i < intervals.size()) 
-            result.add(intervals.get(i++)); 
+        // 2. Merge all overlapping intervals
+        // An overlap exists if the current interval starts before or at the newInterval's end
+        while (i < n && intervals[i][0] <= newInterval[1]) {
+            newInterval[0] = Math.min(newInterval[0], intervals[i][0]);
+            newInterval[1] = Math.max(newInterval[1], intervals[i][1]);
+            i++;
+        }
+        // Add the single merged interval
+        result.add(newInterval);
 
-		return result;
-	}
+        // 3. Add the remaining intervals
+        while (i < n) {
+            result.add(intervals[i]);
+            i++;
+        }
 
+        return result.toArray(new int[result.size()][]);
+    }
+}
+
+/**
+Binary Search or Linear Scan: Find where the newInterval fits.
+Left Part: Add all intervals that end before newInterval starts.
+Merge Part: For all intervals that overlap with newInterval (i.e., they start before or at the newInterval.end), update the newInterval boundaries:
+    newStart = min(newStart, currentStart)
+    newEnd = max(newEnd, currentEnd)
+Right Part: Add the final merged newInterval, then add all remaining intervals.
+
+ */
 --------
 
 

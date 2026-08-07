@@ -86,31 +86,37 @@ class Solution {
     }
 }
 
+Monotonic Deque ✅ O(n)
+Key insight: if element nums[i] is in the window and nums[j] > nums[i] where j > i, then nums[i] can never be the window maximum for any future window — it's both smaller and will leave the window before nums[j]. So we can safely discard it.
+We maintain a deque of indices (not values) in decreasing order of their values:
 
-ex. [1,3,-1,-3,5,3,6,7]， k=3
+Back: before adding nums[R], pop all indices from the back whose values are ≤ nums[R] — they're useless
+Front: pop indices that are outside the current window (index <= R - k)
+Answer: front of deque is always the max of current window
 
-i=0: [1]
-i=1: [3]       // 1 < 3, so 1 removed
-i=2: [3, -1]
-max = 3
+nums=[1,3,-1,-3,5,3,6,7], k=3
+deque stores indices, shown as [idx(val)]
 
-i=3: [3, -1, -3]
-max = 3
-
-i=4: [5]       // 3,-1,-3 都比 5 小
-max = 5
-
-i=5: [5, 3]
-max = 5
-
-i=6: [6]       // 5,3 都比 6 小
-max = 6
-
-i=7: [7]
-max = 7
-
-输出：
-[3,3,5,5,6,7]
+R=0: deque=[] → add 0 → [0(1)]
+R=1: nums[1]=3 > nums[0]=1 → pop 0 → add 1 → [1(3)]
+R=2: nums[2]=-1 < nums[1]=3 → add 2 → [1(3),2(-1)]
+     window full! front=1 → max=3 ✅ result=[3]
+R=3: nums[3]=-3 < nums[2]=-1 → add 3 → [1(3),2(-1),3(-3)]
+     front=1, still in window [1,3] → max=3 ✅ result=[3,3]
+R=4: nums[4]=5 > nums[3]=-3 → pop 3
+               > nums[2]=-1 → pop 2
+               > nums[1]=3  → pop 1
+     → add 4 → [4(5)]
+     front=4, in window → max=5 ✅ result=[3,3,5]
+R=5: nums[5]=3 < nums[4]=5 → add 5 → [4(5),5(3)]
+     front=4, in window → max=5 ✅ result=[3,3,5,5]
+R=6: nums[6]=6 > nums[5]=3 → pop 5
+               > nums[4]=5 → pop 4
+     → add 6 → [6(6)]
+     front=6, in window → max=6 ✅ result=[3,3,5,5,6]
+R=7: nums[7]=7 > nums[6]=6 → pop 6
+     → add 7 → [7(7)]
+     front=7, in window → max=7 ✅ result=[3,3,5,5,6,7]
 
 
 为什么不能排序？

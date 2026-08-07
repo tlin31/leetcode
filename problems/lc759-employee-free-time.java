@@ -35,12 +35,90 @@ Constraints:
 
 ******************************************************
 key:
-	- line sweep or priority queue~ 
+	- 
 	- edge case:
 		1) empty string, return empty
 		2)
 
 ******************************************************
+
+
+Instead of sorting all intervals (which could be many), we use a Min-Heap to efficiently merge k sorted lists (one per employee).
+
+1. Flatten and Sort: 
+    - Collect every "busy" interval from all employees into a single list and sort them by start time.
+
+2. Merge Intervals: 
+    - Iterate through the sorted busy intervals. If the current interval overlaps with the previous "merged" interval, merge them by updating the end time to max(prev_end, curr_end).
+
+3. Identify Gaps: 
+    - Any space between two merged busy intervals represents a time when all employees are free.
+    - If merged_prev_end < curr_start, the gap is [merged_prev_end, curr_start]
+
+Time Complexity:
+• Flatten/Sort: O(Nlog N) where N is the total number of intervals.
+• Priority Queue: 0(Nlog K) where K is the number of employees. This is better if K
+< N.
+• Space Complexity: O(N) to store flattened intervals (or O(K) for the heap).
+
+Note: 
+其实可以不用k-way merge，也就是不管这个interval是哪个employee的，直接全部flatten & sort
+因为一个人busy就代表这个时间段不是free的
+
+
+
+/*
+// Definition for an Interval.
+class Interval {
+    public int start;
+    public int end;
+
+    public Interval() {}
+
+    public Interval(int _start, int _end) {
+        start = _start;
+        end = _end;
+    }
+};
+*/
+
+class Solution {
+    public List<Interval> employeeFreeTime(List<List<Interval>> schedule) {
+        List<Interval> result = new ArrayList<>();
+        // PriorityQueue stores: {start, employee_index, interval_index}
+        PriorityQueue<int[]> pq = new PriorityQueue<>((a, b) -> a[0] - b[0]);
+        
+        // add first interval of each employee
+        for (int i = 0; i < schedule.size(); i++) {
+            pq.add(new int[]{schedule.get(i).get(0).start, i, 0});
+        }
+        
+        int prevEnd = pq.peek()[0]; // Initialize with the earliest start
+        
+        while (!pq.isEmpty()) {
+            int[] top = pq.poll();
+            int empIdx = top[1];
+            int intervalIdx = top[2];
+            Interval curr = schedule.get(empIdx).get(intervalIdx);
+            
+            // If there's a gap between the previous busy end and current start
+            if (curr.start > prevEnd) {
+                result.add(new Interval(prevEnd, curr.start));
+            }
+            
+            prevEnd = Math.max(prevEnd, curr.end);
+            
+            // Add the next interval from the same employee to the heap
+            if (intervalIdx + 1 < schedule.get(empIdx).size()) {
+                pq.add(new int[]{schedule.get(empIdx).get(intervalIdx + 1).start, empIdx, intervalIdx + 1});
+            }
+        }
+        
+        return result;
+    }
+}
+
+
 
 
 
