@@ -12,6 +12,7 @@
 8. Graph
 9. Treemap
 10. Hashmap
+11. Set
 
 
 ## Summary of complexity
@@ -2099,3 +2100,130 @@ Like Chaining, the performance of hashing can be evaluated under the assumption 
 
 
 ## Linked List
+
+
+
+---
+
+## HashSet
+
+### 1. `HashSet` — Default choice ✅
+```java
+Set<Integer> set = new HashSet<>();
+```
+- **Backed by**: HashMap
+- **Order**: none (random)
+- **Performance**: O(1) add/remove/contains
+- **Use when**: you just need fast membership checking, order doesn't matter
+- **Interview default**: yes, 90% of the time
+
+---
+
+### 2. `LinkedHashSet` — Insertion order preserved
+```java
+Set<Integer> set = new LinkedHashSet<>();
+```
+- **Backed by**: HashMap + doubly linked list
+- **Order**: insertion order preserved
+- **Performance**: O(1) add/remove/contains, slightly slower than HashSet
+- **Use when**: you need fast lookup AND need to iterate in insertion order
+- **Example**: building a result set where order of discovery matters
+
+```java
+// Example: finding unique elements in order they appeared
+Set<Integer> seen = new LinkedHashSet<>();
+for (int n : nums)
+    seen.add(n);
+// iterates in original insertion order ✅
+```
+
+---
+
+### 3. `TreeSet` — Sorted order
+```java
+Set<Integer> set = new TreeSet<>();
+```
+- **Backed by**: Red-Black tree (self-balancing BST)
+- **Order**: natural sorted order (or custom Comparator)
+- **Performance**: O(log n) add/remove/contains
+- **Use when**: you need sorted iteration OR need `first()`, `last()`, `floor()`, `ceiling()` operations
+- **Example**: LC 220 Contains Duplicate III, sliding window problems needing sorted order
+
+```java
+TreeSet<Integer> set = new TreeSet<>();
+set.add(3); set.add(1); set.add(2);
+
+set.first();          // 1 — minimum element
+set.last();           // 3 — maximum element
+set.floor(2);         // 2 — largest element ≤ 2
+set.ceiling(2);       // 2 — smallest element ≥ 2
+set.higher(2);        // 3 — strictly greater than 2
+set.lower(2);         // 1 — strictly less than 2
+set.headSet(2);       // [1] — elements < 2
+set.tailSet(2);       // [2,3] — elements ≥ 2
+```
+
+> 💡 `TreeSet` is essentially Java's sorted set — it's what you reach for when you need the "sorted sliding window" trick in problems like Find Median from Data Stream or Contain Duplicate III. It's the Set equivalent of `TreeMap`! 🎯
+
+---
+
+### 4. `EnumSet` — For enum types only
+```java
+EnumSet<Direction> set = EnumSet.of(Direction.LEFT, Direction.RIGHT);
+```
+- **Use when**: your elements are enums
+- **Performance**: extremely fast, bit-vector backed
+- **Interview relevance**: rarely needed
+
+---
+
+## Quick Decision Guide
+
+```
+Do you need sorted order or floor/ceiling queries?
+  → TreeSet
+
+Do you need insertion order preserved?
+  → LinkedHashSet
+
+Do you just need fast O(1) membership check?
+  → HashSet  ← default for 90% of interview problems
+```
+
+---
+
+## How This Applies to Our Problems
+
+Looking back at what we've done:
+
+| Problem | Set used | Why |
+|---------|---------|-----|
+| Contains Duplicate | `HashSet` | Just membership check |
+| Valid Sudoku | `HashSet[]` | Fast duplicate detection |
+| LC 2385 Infection | `HashSet` for visited | Fast O(1) visited check |
+| LC 749 Contain Virus | `HashSet` for frontier | Deduplication |
+| Max Stack (LC 716) | `TreeMap` (map version) | Needed max key in O(log n) |
+
+**The one time you'd switch from HashSet in tree/graph problems:**
+If you need to process nodes in sorted order during BFS/DFS — for example finding the k-th smallest node by value — reach for `TreeSet` instead.
+
+---
+
+## The HashMap Parallel
+
+Every Set has a Map counterpart — useful to know together:
+
+| Set | Map | Characteristic |
+|-----|-----|---------------|
+| `HashSet` | `HashMap` | O(1), unordered |
+| `LinkedHashSet` | `LinkedHashMap` | O(1), insertion ordered |
+| `TreeSet` | `TreeMap` | O(log n), sorted |
+| `EnumSet` | `EnumMap` | Enum keys only |
+
+Same underlying data structures, same performance guarantees — Set is just Map where you only care about keys, not values. 🎯
+
+---
+
+Solid question to ask now — `TreeSet` specifically shows up in Topic 9 (Heap/Priority Queue) and Topic 16 (Intervals) where sorted order matters. You'll be glad you know the distinction when we get there! 💪
+
+Say **"next"** for **LC 108 · Convert Sorted Array to BST** 🟢 🤖!

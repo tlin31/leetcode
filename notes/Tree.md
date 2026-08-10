@@ -94,21 +94,30 @@ Most of the BST operations (e.g., search, max, min, insert, delete.. etc) take O
 
 #### 2) Insertion of Red-Black Tree
 
-Insertion Steps
-1) BST Insert: Insert the new node like in a standard BST.
-2) Fix Violations:
-- If the parent of the new node is black, no properties are violated.
-- If the parent is red, the tree might violate the Red Property, requiring fixes.
+1) 插入步骤按二叉搜索树查找：从根节点开始比较，找到目标空位置并插入新节点。
+2) 设置节点颜色为红色：新节点默认设为红色，因为这不会破坏“每条路径黑节点数相同”的规则。
+3) 检查并调整平衡：检查父节点颜色，若父节点为红色则违反“不能有两个连续红色节点”的规则，需进行修正。
 
-Fixing Violations During Insertion
+调整场景（针对父节点为红色的情况）
+- 设新节点为 N，父节点为 P，祖父节点为 G，叔叔节点为 U（P 的兄弟）。
+- 1) 场景一：叔叔节点 U 是红色
+    - 条件：父节点P 为红，叔叔节点 U 为红。
+    - 对策：
+        - 将 父节点 P 改为黑色。
+        - 将 叔叔节点 U 改为黑色。
+        - 将 祖父节点 G 改为红色。
+        - 将 祖父节点 G 设为当前新节点，向上回溯调整。
 
-After inserting the new node as a **red** node, we might encounter several cases depending on the colors of the node’s parent and uncle (the sibling of the parent):
+- 2) 场景二：叔叔节点 U 是黑色（或为空），且 新节点 N 是 父节点P 的右/左外侧子节点
+    - 条件：P 为红，U 为黑，新节点为父节点左subtree中最小的或者右subtree中最大的 --> 也就是N 和 P 处于同侧（都是左-左 或 右-右）。
+    - 对策：
+        - 对 G 进行单旋转（N 在左做右旋，在右做左旋）。
+        - 交换 P 和 G 的颜色（P 变黑，G 变红）。
 
-- Case 1: Uncle is Red: Recolor the parent and uncle to black, and the grandparent to red. Then move up the tree to check for further violations.
+- 3) 场景三：叔叔节点 U 是黑色（或为空），且 N 是 P 的内侧子节点
+    - 条件：P 为红，U 为黑，N 和 P 处于异侧（左-右 或 右-左）。
+    - 对策：先对 P 进行单旋转（转为外侧场景二）。再按场景二对 G 进行旋转和变色处理。
 
-- Case 2: Uncle is Black:
-- 2.1: Node is a right child: Perform a left rotation on the parent.
-- 2.2: Node is a left child: Perform a right rotation on the grandparent and recolor appropriately.
 
 ## Tree Problems/tricks
 

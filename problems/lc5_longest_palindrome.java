@@ -1,4 +1,4 @@
-5. Longest Palindromic Substring - Medium
+l5. Longest Palindromic Substring - Medium
 
 Given a string s, find the longest palindromic substring in s. You may assume that the maximum length 
 of s is 1000.
@@ -172,6 +172,47 @@ method 2:
 时间复杂度：O(N^2)。虽然也是双重循环，但由于回文串通常不会特别长，在实际测试中（LeetCode 提交）
 它往往比动态规划快得多。
 空间复杂度：O(1)。我们只使用了几个变量来记录位置，不需要额外的矩阵存储状态。
+
+
+public String longestPalindrome(String s) {
+    // Defensive: null or empty string
+    if (s == null || s.isEmpty()) return "";
+
+    int start = 0, maxLen = 1;
+
+    for (int i = 0; i < s.length(); i++) {
+        // Odd-length palindromes (single char center)
+        int len1 = expand(s, i, i);
+        // Even-length palindromes (gap center)
+        int len2 = expand(s, i, i + 1);
+
+        int len = Math.max(len1, len2);
+
+        // Update best if longer palindrome found
+        if (len > maxLen) {
+            maxLen = len;
+            // Derive start index from center and length
+            start = i - (len - 1) / 2;
+        }
+    }
+
+    return s.substring(start, start + maxLen);
+}
+
+private int expand(String s, int left, int right) {
+    while (left >= 0 && right < s.length()
+           && s.charAt(left) == s.charAt(right)) {
+        left--;
+        right++;
+    }
+    // Length of palindrome: right-left-1
+    // (left and right overshot by 1 each)
+    return right - left - 1;
+}
+
+
+
+
 
 
 class Solution {
